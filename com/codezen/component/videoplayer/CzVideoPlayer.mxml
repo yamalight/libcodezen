@@ -398,6 +398,8 @@
 						break;
 					default:
 						/* If not in full screen mode, switch to full screen mode. */
+						//stage.fullScreenSourceRect = FlexGlobals.topLevelApplication.screen;
+						stage.nativeWindow.activate();
 						stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 						
 						player_controls.bottom = "135";
