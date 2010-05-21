@@ -164,6 +164,12 @@
 				vid.attachNetStream(ns);
 				ns.play(videoURL);	
 				
+				// set volume
+				if(volumeLevel >= 0){
+					player_volume.value = volumeLevel;
+					ns.soundTransform = new SoundTransform(player_volume.value/100);
+				}
+				
 				// init gui timer
 				hideTimer = new Timer(4000, 1);
 				hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onHideTimer);
@@ -506,8 +512,9 @@
 			 * Set volume 
 			 * 
 			 */
-			private function setVolume():void{
+			private function setVolume():void{				
 				ns.soundTransform = new SoundTransform(player_volume.value/100);
+				volumeLevel = player_volume.value;
 				video_player.setFocus();
 			}
 			
@@ -625,12 +632,14 @@
 						if(player_volume.value < 100){
 							player_volume.value += 5;
 						}
+						volumeLevel = player_volume.value;
 						ns.soundTransform = new SoundTransform(player_volume.value/100);
 						break;
 					case Keyboard.DOWN:
 						if(player_volume.value > 5){
 							player_volume.value -= 5;
 						}
+						volumeLevel = player_volume.value;
 						ns.soundTransform = new SoundTransform(player_volume.value/100);
 						break;
 					case Keyboard.LEFT:
