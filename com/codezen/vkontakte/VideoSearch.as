@@ -11,9 +11,11 @@ package com.codezen.vkontakte
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	import flash.system.System;
+	import flash.utils.unescapeMultiByte;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ObjectUtil;
+	import mx.utils.object_proxy;
 
 	/**
 	 * 
@@ -32,22 +34,25 @@ package com.codezen.vkontakte
 	public class VideoSearch extends Worker
 	{
 		// login and passwork for auth
-		protected var login_mail:String;
-		protected var login_pass:String;
+		private var login_mail:String;
+		private var login_pass:String;
 		
 		// result of search
-		protected var result:String;
-		protected var results:ArrayCollection;
+		private var results:ArrayCollection;
+		
+		// hd def array
+		private var hdDef:Array = [
+			["1", "360"],
+			["2", "480"],
+			["3", "720"]
+		];
 		
 		// loader and request
-		protected var urlRequest:URLRequest;
-		protected var myLoader:URLLoader;
-		
-		// limit of search
-		protected var limit:int;
+		private var urlRequest:URLRequest;
+		private var myLoader:URLLoader;
 		
 		// limit of duration
-		protected var finddur:int;
+		private var finddur:int;
 		
 		public var data:String;
 		
@@ -71,15 +76,6 @@ package com.codezen.vkontakte
 			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/";
 			myLoader.dataFormat = URLLoaderDataFormat.TEXT;
 			myLoader.addEventListener(IOErrorEvent.IO_ERROR, onError);
-		}
-		
-		/**
-		 * 
-		 * @return (String) result of search 
-		 * 
-		 */
-		public function get resultString():String{
-			return result;
 		}
 		
 		/**
@@ -179,15 +175,12 @@ package com.codezen.vkontakte
 		 * 
 		 * Searches vkontakte.ru for mp3 for given query
 		 */
-		public function findData(query:String, limit:int = 1, finddur:int = 0):void{
+		public function findData(query:String, hd:int = 0, finddur:int = 0):void{
 			// http://vkontakte.ru/gsearch.php?q=%20Sonic%20Youth&section=audio&ajax=1&auto=1&c%5Bq%5D=Naoki%20Kenji&c%5Bsection%5D=audio
 			// http://vkontakte.ru/gsearch.php?q="+query+"&section=audio
 			urlRequest.url = "http://vkontakte.ru/gsearch.php?q="+CUtils.urlEncode(query)+"&section=video&ajax=1";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSearchLoad);
-			
-			// set limit
-			this.limit = limit;
 			
 			// set duration
 			this.finddur = finddur;
@@ -197,12 +190,15 @@ package com.codezen.vkontakte
 			
 			var vars:URLVariables = new URLVariables();
 			vars['c[q]'] = query;
-			vars['c[hd]'] = '1';
+			vars['c[hd]'] = "1";
+			if(hd > 0){
+				vars['c[quality]'] = hd.toString();
+			}
 			vars['c[section]'] = "video";
 			//vars.offset = 0;
 			vars.auto = 1;
 			vars.preload = 1;
-			
+
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/gsearch.php?q="+CUtils.urlEncode(query)+"&section=video";
@@ -241,18 +237,36 @@ package com.codezen.vkontakte
 			var res:Array;
 			
 			// form regexp
-			re = new RegExp(/{"host":"(.+?)","vtag":"(.+?)".+?"uid":"(.+?)".+?}/gs);
+			re = new RegExp(/div id="video.+?".+?{"host":"(.+?)","vtag":"(.+?)".+?"md_title":"(.+?)".+?"uid":"(.+?)","hd":(.+?),.+?}.+?class="ainfo".+?style='color.+?'>(.+?)<\/b>/gs);
 			// execute regexp on data
 			res = re.exec(data);
 			
-			if(res != null){
-				result = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[3]+'/video/'+res[2]+'.360.mp4';
-			}else{
-				result = null;
-			}
+			//trace(data);
+			//trace(ObjectUtil.toString(res));
+			
+			var url:String;
+			var desc:String;
+			var len:String;
+			results = new ArrayCollection();
+			
+			System.useCodePage = false;
+			
+			while(res != null){				
+				len = res[6];
+				desc = CUtils.convertHTMLEntities(unescapeMultiByte(res[3])).replace(/\+/gs, " ");
+				desc += " ["+hdDef[int(res[5])-1][1]+"p] - "+len;
+				url = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[4]+'/video/'+res[2]+'.'+hdDef[int(res[5])-1][1]+'.mp4';
 				
+				results.addItem({desc: desc, url: url});
+				
+				res = re.exec(data);
+			}
+			
+			System.useCodePage = true;
 			
 			// erase vars
+			url = null;
+			desc = null;
 			data = null;
 			re = null;
 			res = null;
@@ -269,7 +283,7 @@ package com.codezen.vkontakte
 		 */
 		protected function onTrackError(e:IOErrorEvent):void{
 			// set result
-			result = null;
+			results = null;
 			
 			// init end
 			end();

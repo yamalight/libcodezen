@@ -11,8 +11,6 @@ package com.codezen.util
 	import flash.utils.ByteArray;
 	
 	import mx.collections.ArrayCollection;
-	
-	import utils.serials.Episode;
 
 	/**
 	 * Helper to read a file from a server and save it on user's local
