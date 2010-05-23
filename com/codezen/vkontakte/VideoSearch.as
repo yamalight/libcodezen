@@ -106,7 +106,7 @@ package com.codezen.vkontakte
 		 * 
 		 * On recieve index page of vkontakte.ru
 		 */
-		protected function onCheckLogin(e:Event):void{
+		private function onCheckLogin(e:Event):void{
 			// remove event litener
 			myLoader.removeEventListener(Event.COMPLETE, onCheckLogin);
 			// close loader
@@ -128,7 +128,7 @@ package com.codezen.vkontakte
 		/**
 		 * Function that does log in to vkontakte.ru 
 		 */
-		protected function doLogin():void{
+		private function doLogin():void{
 			// create urlrequester and urlloader
 			urlRequest.url = "http://vkontakte.ru/login.php?email="+login_mail+"&pass="+login_pass+"&expire=1";
 			// add event listener and load url
@@ -139,7 +139,7 @@ package com.codezen.vkontakte
 		/**
 		 * Error parser
 		 **/
-		protected function onError(e:IOErrorEvent):void{
+		private function onError(e:IOErrorEvent):void{
 			dispatchError(e.text, "IO Error happened in MusicSearch class");
 			//trace('io-error: '+e.text);
 		}
@@ -147,7 +147,7 @@ package com.codezen.vkontakte
 		/**
 		 * Result parser on reciev
 		 **/
-		protected function onSiteLoad(evt:Event):void{
+		private function onSiteLoad(evt:Event):void{
 			// add event listener and load url
 			myLoader.removeEventListener(Event.COMPLETE, onSiteLoad);
 			// close loader
@@ -186,7 +186,7 @@ package com.codezen.vkontakte
 			this.finddur = finddur;
 			
 			// enable cyrilic
-			System.useCodePage = true;
+			//System.useCodePage = true;
 			
 			var vars:URLVariables = new URLVariables();
 			vars['c[q]'] = query;
@@ -217,7 +217,7 @@ package com.codezen.vkontakte
 		 * @param evt
 		 * Result parser on recieve
 		 */
-		protected function onSearchLoad(evt:Event):void{
+		private function onSearchLoad(evt:Event):void{
 			// add event listener and load url
 			myLoader.removeEventListener(Event.COMPLETE, onSearchLoad);
 			// close 
@@ -249,7 +249,7 @@ package com.codezen.vkontakte
 			var len:String;
 			results = new ArrayCollection();
 			
-			System.useCodePage = false;
+			//System.useCodePage = false;
 			
 			while(res != null){				
 				len = res[6];
@@ -262,7 +262,7 @@ package com.codezen.vkontakte
 				res = re.exec(data);
 			}
 			
-			System.useCodePage = true;
+			//System.useCodePage = true;
 			
 			// erase vars
 			url = null;
@@ -281,7 +281,7 @@ package com.codezen.vkontakte
 		 * 
 		 * Catches load error for track search 
 		 */
-		protected function onTrackError(e:IOErrorEvent):void{
+		private function onTrackError(e:IOErrorEvent):void{
 			// set result
 			results = null;
 			
@@ -289,9 +289,9 @@ package com.codezen.vkontakte
 			end();
 		}
 		
-		protected function end():void{			
+		private function end():void{			
 			// turn off cyrilic
-			System.useCodePage = false;
+			//System.useCodePage = false;
 			
 			// call event
 			dispatchEvent(new Event(Worker.COMPLETE));

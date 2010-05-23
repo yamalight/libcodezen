@@ -122,7 +122,7 @@
 				
 				// parse subs
 				video_sub.text = "";
-				if(subtitles.length > 0){
+				if(subtitles != null && subtitles.length > 0){
 					isSub = true;
 					parseSubtitiles(subtitles);
 				}else{
