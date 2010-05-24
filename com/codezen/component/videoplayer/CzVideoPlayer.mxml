@@ -32,6 +32,7 @@
 	<fx:Script>
 		<![CDATA[
 			import com.codezen.component.videoplayer.subs.SubtitleParser;
+			import com.codezen.util.CUtils;
 			
 			import flash.display.StageDisplayState;
 			import flash.events.Event;
@@ -220,8 +221,8 @@
 				var i:int;
 				for (i = 0; i < subs.length; i++) {
 					if ( Math.abs(subs[i].start - time) <= 0.1) {
-						//video_sub.text = subs[i].text;
-						video_sub.textFlow = TextFlowUtil.importFromString(subs[i].text);
+						video_sub.text = CUtils.stripTags(subs[i].text);
+						//video_sub.textFlow = TextFlowUtil.importFromString(subs[i].text);
 						subEnd = subs[i].end;
 						//subs.splice(i,i);
 						break;
@@ -375,6 +376,7 @@
 					seekOffset = video_seek.value;
 					ns.play(videoURL+"?start="+video_seek.value);
 				}
+				video_sub.text = "";
 				hideTimer.start();
 				video_player.setFocus();
 			}
