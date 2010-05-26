@@ -114,6 +114,7 @@
 			// init functions
 			private function playerState():void{
 				//loadVideoAndPlay("http://serials.tulavideo.net/MER/MER-01-01.mp4");
+				this.invalidateDisplayList();
 			}
 			
 			// load video to play
@@ -217,18 +218,23 @@
 			}
 			
 			private function setSubtitles(time:Number):void{
-				if(time <= subEnd) return;
+				//if(time <= subEnd) return;
 				var i:int;
+				//if(time >= subEnd) video_sub.text = '';
 				for (i = 0; i < subs.length; i++) {
-					if ( Math.abs(subs[i].start - time) <= 0.1) {
-						video_sub.text = CUtils.stripTags(subs[i].text);
+					if( Math.abs(subs[i].start - time) > 30 ) continue;
+					if ( (Math.abs(subs[i].start - time) <= 0.1) && 
+						(video_sub.text.indexOf(CUtils.stripTags(subs[i].text)) == -1 )) {
+						video_sub.text += CUtils.stripTags(subs[i].text);
 						//video_sub.textFlow = TextFlowUtil.importFromString(subs[i].text);
-						subEnd = subs[i].end;
+						//subEnd = subs[i].end;
+						//subs[i].viewed;
 						//subs.splice(i,i);
-						break;
-					}else{
-						video_sub.text = "";
 					}
+					if( ( Math.abs(subs[i].end - time) <= 0.1 ) ){
+						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[i].text), "");
+					}
+					if( subs[i].start > time ) break;
 				}
 			}
 			
@@ -376,7 +382,7 @@
 					seekOffset = video_seek.value;
 					ns.play(videoURL+"?start="+video_seek.value);
 				}
-				video_sub.text = "";
+				video_sub.text = '';
 				hideTimer.start();
 				video_player.setFocus();
 			}
@@ -402,7 +408,7 @@
 						/* If already in full screen mode, switch to normal mode. */
 						stage.displayState = StageDisplayState.NORMAL;
 						
-						player_controls.bottom = "50";
+						//player_controls.bottom = "50";
 						break;
 					default:
 						/* If not in full screen mode, switch to full screen mode. */
@@ -410,9 +416,10 @@
 						stage.nativeWindow.activate();
 						stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 						
-						player_controls.bottom = "135";
+						//player_controls.bottom = "135";
 						break;
 				}
+				video_sub.text = '';
 				video_player.setFocus();
 			}
 			
@@ -646,10 +653,12 @@
 						break;
 					case Keyboard.LEFT:
 						if(ns.time < 5) break;
+						video_sub.text = '';
 						ns.seek(ns.time - 5);
 						break;
 					case Keyboard.RIGHT:
 						if(ns.time > totalDuration) break;
+						video_sub.text = '';
 						ns.seek(ns.time + 5);
 						break;
 					case Keyboard.M:
@@ -766,8 +775,8 @@
 	<s:Label horizontalCenter="0" verticalCenter="0" text="Загрузка..." verticalAlign="middle" textAlign="center" fontFamily="Gothic" fontSize="20" fontWeight="bold" color="#FFFFFF"/>
 	<mx:UIComponent id="video_player" left="0" right="0" top="0" bottom="0" creationComplete="{playerState()}"
 					resize="{onVideoResize()}"/>
-	<s:TextArea verticalAlign="bottom" textAlign="center" fontFamily="Verdana" color="#FFFF00" selectable="false" 
-			 id="video_sub" fontSize="16" left="10" right="10" bottom="20" visible="{isSub}" top="280" contentBackgroundAlpha="0.0" borderVisible="false" editable="false">
+	<s:TextArea verticalAlign="bottom" textAlign="center" fontFamily="Verdana" color="#FFFF00" selectable="false" text=""
+			 id="video_sub" fontSize="16" left="10" right="10" bottom="45" visible="{isSub}" top="180" contentBackgroundAlpha="0.0" borderVisible="false" editable="false">
 		<s:filters>
 			<s:DropShadowFilter alpha="1" angle="45" blurX="0.1" blurY="0.1" distance="3" strength="1" />
 			<s:GlowFilter color="#000000" blurX="0.1" blurY="0.1" alpha="1" strength="1" />
@@ -797,7 +806,7 @@
 			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 	</s:BorderContainer>
-	<s:BorderContainer id="player_controls" width="485" height="71" cornerRadius="8" backgroundColor="#494949" bottom="50" horizontalCenter="0" backgroundAlpha="0.0" borderVisible="false">
+	<s:BorderContainer id="player_controls" width="485" height="71" cornerRadius="8" backgroundColor="#494949" bottom="0" horizontalCenter="0" backgroundAlpha="0.0" borderVisible="false">
 		<ui:ToggleImage onImage="{playBtn}" offImage="{pauseBtn}" 
 						id="playpause" x="1" click="{togglePlayPause()}" width="64" height="43" bottom="0"/>
 		
