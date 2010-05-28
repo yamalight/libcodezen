@@ -225,7 +225,7 @@ package com.codezen.vkontakte
 			
 			// get result data
 			var data:String = String(evt.target.data);
-			
+
 			data = data.replace(/\n/gs, "").replace(/\t/gs, "").replace(/\r/gs, "");
 			data = data.replace(/\\n/gs, "").replace(/\\t/gs, "").replace(/\\r/gs, "");
 			data = data.replace(/\\"/gs, '"');
@@ -237,7 +237,7 @@ package com.codezen.vkontakte
 			var res:Array;
 			
 			// form regexp
-			re = new RegExp(/div id="video.+?".+?{"host":"(.+?)","vtag":"(.+?)".+?"md_title":"(.+?)".+?"uid":"(.+?)","hd":(.+?),.+?}.+?class="ainfo".+?style='color.+?'>(.+?)<\/b>/gs);
+			re = new RegExp(/div id="video.+?".+?{"host":"(.+?)","vtag":"(.+?)".+?"md_title":"(.+?)".+?"ltag":"(.+?)".+?"uid":"(.+?)","hd":(.+?),.+?}.+?class="ainfo".+?style='color.+?'>(.+?)<\/b>/gs);
 			// execute regexp on data
 			res = re.exec(data);
 			
@@ -245,6 +245,7 @@ package com.codezen.vkontakte
 			//trace(ObjectUtil.toString(res));
 			
 			var url:String;
+			var thumb:String;
 			var desc:String;
 			var len:String;
 			results = new ArrayCollection();
@@ -252,12 +253,13 @@ package com.codezen.vkontakte
 			//System.useCodePage = false;
 			
 			while(res != null){				
-				len = res[6];
+				len = res[7];
 				desc = CUtils.convertHTMLEntities(unescapeMultiByte(res[3])).replace(/\+/gs, " ");
-				desc += " ["+hdDef[int(res[5])-1][1]+"p] - "+len;
-				url = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[4]+'/video/'+res[2]+'.'+hdDef[int(res[5])-1][1]+'.mp4';
+				desc += " ["+hdDef[int(res[6])-1][1]+"p] - "+len;
+				url = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[5]+'/video/'+res[2]+'.'+hdDef[int(res[6])-1][1]+'.mp4';
+				thumb = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[5]+'/video/'+res[4]+'.jpg';
 				
-				results.addItem({desc: desc, url: url});
+				results.addItem({desc: desc, url: url, pic:thumb});
 				
 				res = re.exec(data);
 			}
@@ -267,6 +269,7 @@ package com.codezen.vkontakte
 			// erase vars
 			url = null;
 			desc = null;
+			thumb = null;
 			data = null;
 			re = null;
 			res = null;
