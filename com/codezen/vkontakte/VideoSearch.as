@@ -165,7 +165,6 @@ package com.codezen.vkontakte
 			}else{
 				dispatchEvent(new Event(Worker.INITIALIZED));
 			}
-			
 			data = null;
 		}
 		
