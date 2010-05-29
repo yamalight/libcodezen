@@ -412,7 +412,7 @@
 						break;
 					default:
 						/* If not in full screen mode, switch to full screen mode. */
-						//stage.fullScreenSourceRect = FlexGlobals.topLevelApplication.screen;
+						//stage.fullScreenSourceRect = new Rectangle(0,0,stage.width,stage.height);
 						stage.nativeWindow.activate();
 						stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 						
@@ -769,6 +769,13 @@
 				loadSubtitles(subArray[event.index]);
 			}
 
+
+			protected function player_data_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				FlexGlobals.topLevelApplication.nativeWindow.startMove();
+			}
+
 		]]>
 	</fx:Script>
 	
@@ -782,7 +789,8 @@
 			<s:GlowFilter color="#000000" blurX="0.1" blurY="0.1" alpha="1" strength="1" />
 		</s:filters>
 	</s:TextArea>
-	<s:BorderContainer id="player_data" left="0" top="0" right="0" backgroundAlpha="0" borderAlpha="0" bottom="190">
+	<s:BorderContainer id="player_data" left="0" top="0" right="0" backgroundAlpha="0" borderAlpha="0" bottom="190"
+					   mouseDown="player_data_mouseDownHandler(event)">
 		<s:BorderContainer left="0" top="0" right="0" height="40" backgroundColor="#1B1B1B" 
 						   cornerRadius="2" borderColor="#494949" alpha="0.8">
 			<s:Label text=""  textAlign="left" verticalAlign="top"
