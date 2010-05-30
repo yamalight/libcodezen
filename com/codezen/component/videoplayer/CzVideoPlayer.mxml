@@ -376,7 +376,7 @@
 			 */
 			private function onSeek(e:Event):void{
 				var bufferedTime:Number = (ns.bytesLoaded/ns.bytesTotal) * totalDuration; 
-				if(video_seek.value < (bufferedTime + seekOffset) && video_seek.value > seekOffset ){
+				if(video_seek.value < (bufferedTime + seekOffset) && video_seek.value >= seekOffset ){
 					ns.seek(video_seek.value - seekOffset);
 				}else{
 					seekOffset = video_seek.value;
@@ -589,7 +589,7 @@
 					/* If already in full screen mode, switch to normal mode. */
 					stage.displayState = StageDisplayState.NORMAL;
 					
-					player_controls.bottom = "75";
+					//player_controls.bottom = "75";
 				}
 				
 				// reset on top
