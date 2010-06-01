@@ -220,21 +220,23 @@
 			private function setSubtitles(time:Number):void{
 				//if(time <= subEnd) return;
 				var i:int;
+				var e:int;
 				//if(time >= subEnd) video_sub.text = '';
+				// check for add subtitles
 				for (i = 0; i < subs.length; i++) {
-					if( Math.abs(subs[i].start - time) > 30 ) continue;
+					if( Math.abs(subs[i].start - time) > 1 ) continue;
 					if ( (Math.abs(subs[i].start - time) <= 0.1) && 
 						(video_sub.text.indexOf(CUtils.stripTags(subs[i].text)) == -1 )) {
 						video_sub.text += CUtils.stripTags(subs[i].text);
-						//video_sub.textFlow = TextFlowUtil.importFromString(subs[i].text);
-						//subEnd = subs[i].end;
-						//subs[i].viewed;
-						//subs.splice(i,i);
 					}
-					if( ( Math.abs(subs[i].end - time) <= 0.1 ) ){
-						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[i].text), "");
+					if( subs[i].start > time ) break;
+				}
+				
+				// check for delete subtitles
+				for (e = 0; e < i; e++) {
+					if( ( Math.abs(subs[e].end - time) <= 0.1 ) || ( int(subs[e].end) < time ) ){
+						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[e].text), "");
 					}
-					if( subs[i].start > time + 5 ) break;
 				}
 			}
 			
@@ -443,6 +445,7 @@
 				}
 				video_sub.setStyle("fontSize", (video_player.width*0.025));
 				//vid.scaleY = vid.scaleX;
+				//setSubtitles(ns.time);
 			}
 			
 			/**
@@ -669,14 +672,14 @@
 						ns.soundTransform = new SoundTransform(player_volume.value/100);
 						break;
 					case Keyboard.LEFT:
-						if(ns.time < 5) break;
+						if(ns.time < 10) break;
 						video_sub.text = '';
-						ns.seek(ns.time - 5);
+						ns.seek(ns.time - 10);
 						break;
 					case Keyboard.RIGHT:
 						if(ns.time > totalDuration) break;
 						video_sub.text = '';
-						ns.seek(ns.time + 5);
+						ns.seek(ns.time + 10);
 						break;
 					case Keyboard.M:
 						if(player_volume.value != 0){
