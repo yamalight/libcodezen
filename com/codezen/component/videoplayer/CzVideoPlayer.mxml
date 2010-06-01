@@ -5,6 +5,13 @@
 		 width="710" height="490" xmlns:videoplayer="com.codezen.component.videoplayer.*" xmlns:ui="com.codezen.component.videoplayer.ui.*" contentBackgroundColor="#000000">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:Parallel id="showEff">
+			<s:Fade alphaFrom="0.0" alphaTo="1.0" duration="200" />
+		</s:Parallel>
+		
+		<s:Parallel id="hideEff">
+			<s:Fade alphaFrom="1.0" alphaTo="0.0" duration="200" />
+		</s:Parallel>
 	</fx:Declarations>
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
@@ -285,10 +292,21 @@
 			 */
 			private function onHideTimer(e:Event):void{
 				if(video_seek.getFocus() != video_seek){
-					player_controls.visible = false;
-					player_data.visible = false;
+					//player_controls.visible = false;
+					//player_data.visible = false;
 					player_volume.visible = false;
 					Mouse.hide();
+				}
+				
+				if( player_data_bg.mouseY > player_data_bg.height ){
+					player_data.visible = false;
+				}
+				
+				if(
+					(player_controls.mouseX < 0) || (player_controls.mouseX > player_controls.width) ||  
+					(player_controls.mouseY < 0) || (player_controls.mouseY > player_controls.height)
+				){
+					player_controls.visible = false;
 				}
 			}
 			
@@ -298,16 +316,22 @@
 			 * 
 			 */
 			private function onMouseMove(e:Event):void{
-				player_controls.visible = true;
-				player_data.visible = true;
+				//player_controls.visible = true;
+				//player_data.visible = true;
 				Mouse.show();
 				
 				// if mouse is over controls
 				if(
-					(player_controls.mouseX > 0) && (player_controls.mouseX < player_controls.width ) &&  
-					(player_controls.mouseY > 0) && (player_controls.mouseY < player_controls.height )
+					(player_controls.mouseX >= 0) && (player_controls.mouseX <= player_controls.width ) &&  
+					(player_controls.mouseY >= 0) && (player_controls.mouseY < (player_controls.height - 40) )
 				){ // do not hide
-					hideTimer.stop();
+					player_controls.visible = true;
+					//hideTimer.stop();
+				}else if(
+					(player_data_bg.mouseX >= 0) && (player_data_bg.mouseX <= player_data_bg.width) &&
+					(player_data_bg.mouseY >= 0) && (player_data_bg.mouseY <= player_data_bg.height)
+				){
+					player_data.visible = true;
 				}else{ // otherwise hide
 					if( int(seekOffset+ns.time) != int(totalDuration) ){
 						hideTimer.start();
@@ -810,9 +834,9 @@
 		</s:filters>
 	</s:TextArea>
 	<s:BorderContainer id="player_data" left="0" top="0" right="0" backgroundAlpha="0" borderAlpha="0" bottom="190"
-					   mouseDown="player_data_mouseDownHandler(event)">
+					   mouseDown="player_data_mouseDownHandler(event)" showEffect="{showEff}" hideEffect="{hideEff}">
 		<s:BorderContainer left="0" top="0" right="0" height="40" backgroundColor="#1B1B1B" 
-						   cornerRadius="2" borderColor="#494949" alpha="0.8">
+						   cornerRadius="2" borderColor="#494949" alpha="0.8" id="player_data_bg">
 			<s:Label text=""  textAlign="left" verticalAlign="top"
 				 	id="video_title" left="55" right="163" color="#FFFFFF" bottom="5" top="5" styleName="playerControl"/>
 			<ui:ToggleImage onImage="{onTopLock}" offImage="{onTopNormal}" 
@@ -834,7 +858,9 @@
 			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 	</s:BorderContainer>
-	<s:BorderContainer id="player_controls" width="485" height="71" cornerRadius="8" backgroundColor="#494949" bottom="0" horizontalCenter="0" backgroundAlpha="0.0" borderVisible="false">
+	<s:BorderContainer id="player_controls" width="485" height="71" cornerRadius="8" backgroundColor="#494949" bottom="0" 
+					   horizontalCenter="0" backgroundAlpha="0.0" borderVisible="false"
+					   showEffect="{showEff}" hideEffect="{hideEff}">
 		<ui:ToggleImage onImage="{playBtn}" offImage="{pauseBtn}" 
 						id="playpause" x="1" click="{togglePlayPause()}" width="64" height="43" bottom="0"/>
 		
