@@ -234,7 +234,7 @@
 					if( ( Math.abs(subs[i].end - time) <= 0.1 ) ){
 						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[i].text), "");
 					}
-					if( subs[i].start > time ) break;
+					if( subs[i].start > time + 5 ) break;
 				}
 			}
 			
@@ -453,7 +453,7 @@
 			private function setTime(duration:Number):void{
 				duration += seekOffset;
 				
-				var mins:String = String( int(duration/60) );
+				/*var mins:String = String( int(duration/60) );
 				var min:int = duration/60;
 				var secs:String = String( int(duration - min*60) );
 				var hours:String = String( int(duration/(60*60)) );
@@ -461,9 +461,25 @@
 				if(mins.length == 1) mins = "0"+mins;
 				if(secs.length == 1) secs = "0"+secs;
 				
+				var dur:String = hours + ":" + mins + ":" + secs;*/
+				
+				var min:int = duration/60;
+				var secs:String = String( int(duration - min*60) );
+				var hour:int = int(duration/(60*60));
+				
+				if(hour > 0){
+					min -= hour*60;		
+				}
+				
+				var mins:String = String( min );
+				var hours:String = String( hour );
+				
+				if(mins.length == 1) mins = "0"+mins;
+				if(secs.length == 1) secs = "0"+secs;
+				
 				var dur:String = hours + ":" + mins + ":" + secs;
 				
-				video_time_end.text = maxDur;
+				//video_time_end.text = maxDur;
 				video_time.text = dur;
 			}
 			
@@ -492,6 +508,7 @@
 				if(secs.length == 1) secs = "0"+secs;
 				
 				maxDur = hours + ":" + mins + ":" + secs;
+				video_time_end.text = maxDur;
 			}
 			
 			/**
@@ -680,7 +697,7 @@
 				// reset ontop
 				FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = false;
 				// reset player
-				resetPlayer(false);
+				resetPlayer();
 				// event
 				dispatchEvent(new Event("returnView"));
 			}
