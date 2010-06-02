@@ -227,7 +227,7 @@
 			private function setSubtitles(time:Number):void{
 				//if(time <= subEnd) return;
 				var i:int;
-				var e:int;
+				//var e:int;
 				//if(time >= subEnd) video_sub.text = '';
 				// check for add subtitles
 				for (i = 0; i < subs.length; i++) {
@@ -240,10 +240,22 @@
 				}
 				
 				// check for delete subtitles
-				for (e = 0; e < i; e++) {
+				/*for (e = 0; e < i; e++) {
 					if( ( Math.abs(subs[e].end - time) <= 0.1 ) || ( int(subs[e].end) < time ) ){
 						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[e].text), "");
 					}
+				}*/
+			}
+			
+			private function removeSubtitles(time:Number):void{
+				var i:int;
+				// check for add subtitles
+				for (i = 0; i < subs.length; i++) {
+					if( Math.abs(subs[i].end - time) > 5 ) continue;
+					if( ( Math.abs(subs[i].end - time) <= 0.1 ) || ( Number(subs[i].end) < time ) ){
+						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[i].text), "");
+					}
+					if( subs[i].end > (time + 5) ) break;
 				}
 			}
 			
@@ -360,7 +372,10 @@
 					video_seek.value = seekOffset + ns.time;
 				}
 				// set subs
-				if(isSub) setSubtitles(seekOffset+ns.time);
+				if(isSub){
+					removeSubtitles(seekOffset+ns.time);
+					setSubtitles(seekOffset+ns.time);
+				}
 				// set episode watched
 				if( int(seekOffset+ns.time) >= int(totalDuration*0.8) && !watchedReport ){
 					// set ep watched
