@@ -87,6 +87,8 @@
 			private var isSub:Boolean;
 			[Bindable]
 			private var isSubSwitch:Boolean;
+			[Bindable]
+			private var subText:String;
 			private var subs:Array;
 			[Bindable]
 			private var subNames:Array;
@@ -130,7 +132,7 @@
 				videoURL = link;
 				
 				// parse subs
-				video_sub.text = "";
+				subText = "";
 				if(subtitles != null && subtitles.length > 0){
 					isSub = true;
 					parseSubtitiles(subtitles);
@@ -190,7 +192,7 @@
 			
 			private function parseSubtitiles(subtitiles:Array):void{
 				//trace(ObjectUtil.toString(subtitiles));
-				
+				subText = new String();
 				subArray = subtitiles;
 				subNames = new Array();
 				var i:int = 0;
@@ -225,37 +227,32 @@
 			}
 			
 			private function setSubtitles(time:Number):void{
-				//if(time <= subEnd) return;
 				var i:int;
-				//var e:int;
-				//if(time >= subEnd) video_sub.text = '';
+				var text:String;
 				// check for add subtitles
 				for (i = 0; i < subs.length; i++) {
 					if( Math.abs(subs[i].start - time) > 1 ) continue;
-					if ( (Math.abs(subs[i].start - time) <= 0.1) && 
-						(video_sub.text.indexOf(CUtils.stripTags(subs[i].text)) == -1 )) {
-						video_sub.text += CUtils.stripTags(subs[i].text);
+					if (Math.abs(subs[i].start - time) <= 0.05) {
+						text = "\n"+CUtils.stripTags(subs[i].text).slice(0,-1);
+						if(subText.indexOf(text) == -1 ){
+							subText += text;
+						}
 					}
 					if( subs[i].start > time ) break;
 				}
-				
-				// check for delete subtitles
-				/*for (e = 0; e < i; e++) {
-					if( ( Math.abs(subs[e].end - time) <= 0.1 ) || ( int(subs[e].end) < time ) ){
-						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[e].text), "");
-					}
-				}*/
 			}
 			
 			private function removeSubtitles(time:Number):void{
 				var i:int;
+				var text:String;
 				// check for add subtitles
 				for (i = 0; i < subs.length; i++) {
-					if( Math.abs(subs[i].end - time) > 5 ) continue;
-					if( ( Math.abs(subs[i].end - time) <= 0.1 ) || ( Number(subs[i].end) < time ) ){
-						video_sub.text = video_sub.text.replace(CUtils.stripTags(subs[i].text), "");
+					if( Math.abs(subs[i].end - time) > 2 ) continue;
+					if( Math.abs(subs[i].end - time) <= 0.05 ){
+						text = "\n"+CUtils.stripTags(subs[i].text).slice(0,-1);
+						subText = subText.replace(text, "");
 					}
-					if( subs[i].end > (time + 5) ) break;
+					if( subs[i].end > (time + 2) ) break;
 				}
 			}
 			
@@ -423,7 +420,7 @@
 					seekOffset = video_seek.value;
 					ns.play(videoURL+"?start="+video_seek.value);
 				}
-				video_sub.text = '';
+				subText = '';
 				hideTimer.start();
 				video_player.setFocus();
 			}
@@ -460,7 +457,7 @@
 						//player_controls.bottom = "135";
 						break;
 				}
-				video_sub.text = '';
+				subText = '';
 				video_player.setFocus();
 			}
 			
@@ -494,16 +491,6 @@
 			 */
 			private function setTime(duration:Number):void{
 				duration += seekOffset;
-				
-				/*var mins:String = String( int(duration/60) );
-				var min:int = duration/60;
-				var secs:String = String( int(duration - min*60) );
-				var hours:String = String( int(duration/(60*60)) );
-				
-				if(mins.length == 1) mins = "0"+mins;
-				if(secs.length == 1) secs = "0"+secs;
-				
-				var dur:String = hours + ":" + mins + ":" + secs;*/
 				
 				var min:int = duration/60;
 				var secs:String = String( int(duration - min*60) );
@@ -626,7 +613,7 @@
 				video_seek.value = 0;
 				video_time_end.text = "0:00:00";
 				video_time.text = "0:00:00";
-				video_sub.text = "";
+				subText = "";
 				
 				// reset buttons
 				playpause.resetState();
@@ -712,12 +699,12 @@
 						break;
 					case Keyboard.LEFT:
 						if(ns.time < 10) break;
-						video_sub.text = '';
+						subText = '';
 						ns.seek(ns.time - 10);
 						break;
 					case Keyboard.RIGHT:
 						if(ns.time > totalDuration) break;
-						video_sub.text = '';
+						subText = '';
 						ns.seek(ns.time + 10);
 						break;
 					case Keyboard.M:
@@ -841,11 +828,13 @@
 	<s:Label horizontalCenter="0" verticalCenter="0" text="Загрузка..." verticalAlign="middle" textAlign="center" fontFamily="Gothic" fontSize="20" fontWeight="bold" color="#FFFFFF"/>
 	<mx:UIComponent id="video_player" left="0" right="0" top="0" bottom="0" creationComplete="{playerState()}"
 					resize="{onVideoResize()}"/>
-	<s:TextArea verticalAlign="bottom" textAlign="center" fontFamily="Verdana" color="#FFFF00" selectable="false" text=""
-			 id="video_sub" fontSize="16" left="10" right="10" bottom="45" visible="{isSub}" top="180" contentBackgroundAlpha="0.0" borderVisible="false" editable="false">
+	<s:TextArea verticalAlign="bottom" textAlign="center" fontFamily="Verdana" color="#FFFF00" selectable="false"
+			 id="video_sub" fontSize="16" left="10" right="10" bottom="45" visible="{isSub}" top="180" 
+			 contentBackgroundAlpha="0.0" borderVisible="false" editable="false"
+			 text="{subText}">
 		<s:filters>
-			<s:DropShadowFilter alpha="1" angle="45" blurX="0.1" blurY="0.1" distance="3" strength="1" />
-			<s:GlowFilter color="#000000" blurX="0.1" blurY="0.1" alpha="1" strength="1" />
+			<s:DropShadowFilter alpha="1" angle="45" blurX="0.2" blurY="0.2" distance="2" strength="1" />
+			<s:GlowFilter color="#000000" blurX="0.2" blurY="0.2" alpha="1" strength="1" />
 		</s:filters>
 	</s:TextArea>
 	<s:BorderContainer id="player_data" left="0" top="0" right="0" backgroundAlpha="0" borderAlpha="0" bottom="190"
