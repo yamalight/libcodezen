@@ -54,10 +54,6 @@ package com.codezen.helper
 			var node:XML;
 			for(obj in settings){
 				prefsXML.appendChild(<{obj}>{settings[obj]}</{obj}>);
-				trace(obj);
-				trace(settings[obj]);
-				trace(prefsXML);
-				trace('-----------------------');
 			}
 			// create xml strign 
 			var outputString:String = '<?xml version="1.0" encoding="utf-8"?>\n';
