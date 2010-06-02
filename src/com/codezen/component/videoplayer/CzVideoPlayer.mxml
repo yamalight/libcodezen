@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" 
+		 width="710" height="490" xmlns:videoplayer="com.codezen.component.videoplayer.*" xmlns:ui="com.codezen.component.videoplayer.ui.*" contentBackgroundColor="#000000">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<s:Parallel id="showEff">
+			<s:Fade alphaFrom="0.0" alphaTo="1.0" duration="200" />
+		</s:Parallel>
+		
+		<s:Parallel id="hideEff">
+			<s:Fade alphaFrom="1.0" alphaTo="0.0" duration="200" />
+		</s:Parallel>
+	</fx:Declarations>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@namespace videoplayer "com.codezen.component.videoplayer.*";
+		@namespace ui "com.codezen.component.videoplayer.ui.*";
+		
+		@font-face{
+			src: url("assets/GOTHIC.TTF");
+			fontFamily: Gothic;
+			advancedAntiAliasing: true;
+		}
+		
+		.playerControl{
+			font-family: Gothic;
+			font-size: 12;
+		}
+	</fx:Style>
+	<fx:Metadata>
+		[Event(name="episodeWatched", type="flash.events.Event")]
+		[Event(name="playPrev", type="flash.events.Event")]
+		[Event(name="playNext", type="flash.events.Event")]
+		[Event(name="returnView", type="flash.events.Event")]
+	</fx:Metadata>
+	<fx:Script>
+		<![CDATA[
+			import com.codezen.component.videoplayer.subs.SubtitleParser;
+			import com.codezen.util.CUtils;
+			
+			import flash.display.StageDisplayState;
+			import flash.events.Event;
+			import flash.events.KeyboardEvent;
+			import flash.events.MouseEvent;
+			import flash.events.NetStatusEvent;
+			import flash.events.StatusEvent;
+			import flash.events.TimerEvent;
+			import flash.media.SoundTransform;
+			import flash.media.Video;
+			import flash.net.NetConnection;
+			import flash.net.NetStream;
+			import flash.ui.Keyboard;
+			import flash.ui.Mouse;
+			import flash.utils.Timer;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.ItemClickEvent;
+			import mx.utils.ObjectUtil;
+			
+			import spark.components.Application;
+			import spark.utils.TextFlowUtil;
+			
+			// stream and video
+			private var ns:NetStream;
+			private var vid:Video;
+			// seek offset
+			private var seekOffset:Number;
+			// url
+			private var videoURL:String;
+			// gui timer
+			private var hideTimer:Timer;
+			// file durations - text
+			private var maxDur:String;
+			// num
+			private var totalDuration:Number;
+			// video sizes
+			private var origWidth:Number;
+			private var origHeight:Number;
+			// player state
+			private var playState:Boolean;
+			// subs
+			[Bindable]
+			private var isSub:Boolean;
+			[Bindable]
+			private var isSubSwitch:Boolean;
+			[Bindable]
+			private var subText:String;
+			private var subs:Array;
+			[Bindable]
+			private var subNames:Array;
+			private var subArray:Array;
+			private var subEnd:Number;
+			// watched control
+			private var watchedReport:Boolean;
+			// old volume 
+			private var volumeLevel:Number;
+			
+			// EMBED ASSETS STUFF
+			[Embed(source="com/codezen/component/videoplayer/assets/player/ontop_lock.png")]
+			[Bindable]
+			public var onTopLock:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/ontop_norm.png")]
+			[Bindable]
+			public var onTopNormal:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/play_loop_selected.png")]
+			[Bindable]
+			public var loopSel:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/play_loop.png")]
+			[Bindable]
+			public var loopOff:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/play.png")]
+			[Bindable]
+			public var playBtn:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/pause.png")]
+			[Bindable]
+			public var pauseBtn:Class;
+			
+			
+			// init functions
+			private function playerState():void{
+				//loadVideoAndPlay("http://serials.tulavideo.net/MER/MER-01-01.mp4");
+				this.invalidateDisplayList();
+			}
+			
+			// load video to play
+			public function loadVideoAndPlay(link:String, subtitles:Array = null):void{
+				// save link for seeking
+				videoURL = link;
+				
+				// parse subs
+				subText = "";
+				if(subtitles != null && subtitles.length > 0){
+					isSub = true;
+					parseSubtitiles(subtitles);
+				}else{
+					isSub = false;
+					isSubSwitch = false;
+				}
+				
+				// reset durations and offset
+				maxDur = "0:00:00";
+				totalDuration = 0;
+				seekOffset = 0;
+				
+				// set play state
+				watchedReport = false;
+				playState = true;
+				
+				// create new client
+				var customClient:Object = new Object();
+				customClient.onMetaData = metaDataHandler;
+				
+				// establish new connection
+				var nc:NetConnection = new NetConnection();
+				nc.connect(null);
+				
+				// attach stream to connection
+				ns = new NetStream(nc);
+				// assign client
+				ns.client = customClient;
+				// create new video
+				vid = new Video(video_player.width, video_player.height);
+				// max quality
+				vid.smoothing = true;
+				vid.deblocking = 0;
+				
+				// add video to stage
+				video_player.addChild(vid);
+				
+				// attach stream to video and play
+				vid.attachNetStream(ns);
+				ns.play(videoURL);	
+				
+				// set volume
+				if(volumeLevel >= 0){
+					player_volume.value = volumeLevel;
+					ns.soundTransform = new SoundTransform(player_volume.value/100);
+				}
+				
+				// init gui timer
+				hideTimer = new Timer(4000, 1);
+				hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onHideTimer);
+				hideTimer.start();
+				
+				// set focus
+				video_player.setFocus();
+			}
+			
+			private function parseSubtitiles(subtitiles:Array):void{
+				//trace(ObjectUtil.toString(subtitiles));
+				subText = new String();
+				subArray = subtitiles;
+				subNames = new Array();
+				var i:int = 0;
+				for(i = 0; i < subtitiles.length; i++){
+					if(String(subtitiles[i]).indexOf("_1.srt") > 0){
+						subNames.push("ru");
+					}
+					if(String(subtitiles[i]).indexOf("_2.srt") > 0){
+						subNames.push("en");
+					}
+				}
+				
+				if(subNames.length == 2) isSubSwitch = true;
+				
+				loadSubtitles(subtitiles[0]);
+			}
+			
+			private function loadSubtitles(subURL:String):void{
+				// init array
+				subs = new Array();
+				// load subs
+				var req:URLRequest = new URLRequest(subURL);
+				var srtLoader:URLLoader = new URLLoader();
+				srtLoader.addEventListener(IOErrorEvent.IO_ERROR, function():void{
+					Alert.show("Неудалось загрузить субтитры, файл отсутствует! Сообщите, пожалуйста, администратору сайта.", "Ошибка загрузки субтитров!");
+				});
+				srtLoader.addEventListener(Event.COMPLETE, function():void{
+					subs = SubtitleParser.parseSRT(srtLoader.data);
+					subEnd = 0;
+				});
+				srtLoader.load(req);
+			}
+			
+			private function setSubtitles(time:Number):void{
+				var i:int;
+				var text:String;
+				// check for add subtitles
+				for (i = 0; i < subs.length; i++) {
+					if( Math.abs(subs[i].start - time) > 1 ) continue;
+					if (Math.abs(subs[i].start - time) <= 0.05) {
+						text = "\n"+CUtils.stripTags(subs[i].text).slice(0,-1);
+						if(subText.indexOf(text) == -1 ){
+							subText += text;
+						}
+					}
+					if( subs[i].start > time ) break;
+				}
+			}
+			
+			private function removeSubtitles(time:Number):void{
+				var i:int;
+				var text:String;
+				// check for add subtitles
+				for (i = 0; i < subs.length; i++) {
+					if( Math.abs(subs[i].end - time) > 2 ) continue;
+					if( Math.abs(subs[i].end - time) <= 0.05 ){
+						text = "\n"+CUtils.stripTags(subs[i].text).slice(0,-1);
+						subText = subText.replace(text, "");
+					}
+					if( subs[i].end > (time + 2) ) break;
+				}
+			}
+			
+			/**
+			 * Setup listeners 
+			 * 
+			 */
+			private function setupListeners():void{
+				// assign event listeners
+				this.addEventListener(Event.ENTER_FRAME, onPlayerEnterFrame);
+				this.addEventListener(MouseEvent.CLICK, onMouseClick);
+				this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+				video_player.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
+				ns.addEventListener(NetStatusEvent.NET_STATUS, onVideoEnd);
+			}
+			
+			/**
+			 * On video view end 
+			 * @param e
+			 * 
+			 */
+			private function onVideoEnd(e:NetStatusEvent):void{
+				if(e.info["code"] == "NetStream.Play.Stop" && int(seekOffset+ns.time) == int(totalDuration)){
+					if(play_nonstop.selected){
+						nextEpisode();
+					}else{
+						// toggle next episode wnd
+						if(player_next_ep_txt.text != "null")
+							player_episodes_wnd_1.visible = true;
+						// toggle prev episode wnd
+						if(player_prev_ep_txt.text != "null")
+							player_episodes_wnd.visible = true;
+						// toggle video controls
+						hideTimer.stop();
+						player_controls.visible = true;
+						player_data.visible = true;
+						Mouse.show();
+					}
+				}
+			}
+			
+			/**
+			 * GUI hide timer event 
+			 * @param e
+			 * 
+			 */
+			private function onHideTimer(e:Event):void{
+				if(video_seek.getFocus() != video_seek){
+					//player_controls.visible = false;
+					//player_data.visible = false;
+					player_volume.visible = false;
+					Mouse.hide();
+				}
+				
+				if( player_data_bg.mouseY > player_data_bg.height ){
+					player_data.visible = false;
+				}
+				
+				if(
+					(player_controls.mouseX < 0) || (player_controls.mouseX > player_controls.width) ||  
+					(player_controls.mouseY < 0) || (player_controls.mouseY > player_controls.height)
+				){
+					player_controls.visible = false;
+				}
+			}
+			
+			/**
+			 * GUI show on mouse move
+			 * @param e
+			 * 
+			 */
+			private function onMouseMove(e:Event):void{
+				//player_controls.visible = true;
+				//player_data.visible = true;
+				Mouse.show();
+				
+				// if mouse is over controls
+				if(
+					(player_controls.mouseX >= 0) && (player_controls.mouseX <= player_controls.width ) &&  
+					(player_controls.mouseY >= 0) && (player_controls.mouseY < (player_controls.height - 40) )
+				){ // do not hide
+					player_controls.visible = true;
+					//hideTimer.stop();
+				}else if(
+					(player_data_bg.mouseX >= 0) && (player_data_bg.mouseX <= player_data_bg.width) &&
+					(player_data_bg.mouseY >= 0) && (player_data_bg.mouseY <= player_data_bg.height)
+				){
+					player_data.visible = true;
+				}else{ // otherwise hide
+					if( int(seekOffset+ns.time) != int(totalDuration) ){
+						hideTimer.start();
+					}
+				}
+			}
+			
+			/**
+			 * On click
+			 * @param e
+			 * 
+			 */
+			private function onMouseClick(e:Event):void{
+				video_player.setFocus();
+			}
+			
+			/**
+			 * Report play progress on enter frame 
+			 * @param e
+			 * 
+			 */
+			private function onPlayerEnterFrame(e:Event):void{
+				setTime(ns.time);
+				setProgress(ns.bytesLoaded/ns.bytesTotal * 100);
+				if(video_seek.getFocus() != video_seek){
+					video_seek.value = seekOffset + ns.time;
+				}
+				// set subs
+				if(isSub){
+					removeSubtitles(seekOffset+ns.time);
+					setSubtitles(seekOffset+ns.time);
+				}
+				// set episode watched
+				if( int(seekOffset+ns.time) >= int(totalDuration*0.8) && !watchedReport ){
+					// set ep watched
+					//setEpisodeWatched(currentEpisode);
+					watchedReport = true;
+					dispatchEvent(new Event("episodeWatched"));
+				}
+			}
+			
+			/**
+			 * Handle metadata from file 
+			 * @param infoObject
+			 * 
+			 */
+			private function metaDataHandler(infoObject:Object):void {
+				if(totalDuration == 0){
+					setupListeners();
+					setMaximumDur(infoObject["duration"]);
+					// save sizes
+					origWidth = infoObject["width"];
+					origHeight = infoObject["height"];
+					// set size
+					vid.width = origWidth;
+					vid.height = origHeight;
+					onVideoResize();
+				}else{
+					seekOffset = totalDuration - Number(infoObject["duration"]);
+					rescaleProgress();
+				}
+				/*for (var prop:String in infoObject){
+				trace(prop+" : "+infoObject[prop]);
+				}*/
+			}
+			
+			/**
+			 * Seeking 
+			 * @param e
+			 * 
+			 */
+			private function onSeek(e:Event):void{
+				var bufferedTime:Number = (ns.bytesLoaded/ns.bytesTotal) * totalDuration; 
+				if(video_seek.value < (bufferedTime + seekOffset) && video_seek.value >= seekOffset ){
+					ns.seek(video_seek.value - seekOffset);
+				}else{
+					seekOffset = video_seek.value;
+					ns.play(videoURL+"?start="+video_seek.value);
+				}
+				subText = '';
+				hideTimer.start();
+				video_player.setFocus();
+			}
+			
+			/**
+			 * Toggle play/pause 
+			 * 
+			 */
+			private function togglePlayPause():void{
+				playpause.select = playState;
+				playState = !playState;
+				ns.togglePause();
+				video_player.setFocus();
+			}
+			
+			/**
+			 * Toggle fullscreen 
+			 * 
+			 */
+			private function toggleFullScreen():void{
+				switch (stage.displayState) {
+					case StageDisplayState.FULL_SCREEN_INTERACTIVE:
+						/* If already in full screen mode, switch to normal mode. */
+						stage.displayState = StageDisplayState.NORMAL;
+						
+						//player_controls.bottom = "50";
+						break;
+					default:
+						/* If not in full screen mode, switch to full screen mode. */
+						//stage.fullScreenSourceRect = new Rectangle(0,0,stage.width,stage.height);
+						stage.nativeWindow.activate();
+						stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+						
+						//player_controls.bottom = "135";
+						break;
+				}
+				subText = '';
+				video_player.setFocus();
+			}
+			
+			/**
+			 * Resize video 
+			 * 
+			 */
+			private function onVideoResize():void{
+				if(vid == null) return;
+				// rescale saving proportions
+				if(height > (origHeight*(video_player.width/origWidth)) ){
+					vid.width = video_player.width;
+					vid.height = origHeight*(video_player.width/origWidth);
+					vid.y = (video_player.height - vid.height)/2;
+					vid.x = 0;
+				}else{
+					vid.height = video_player.height;
+					vid.width = origWidth*(video_player.height/origHeight);
+					vid.x = (video_player.width - vid.width)/2;
+					vid.y = 0;
+				}
+				video_sub.setStyle("fontSize", (video_player.width*0.025));
+				//vid.scaleY = vid.scaleX;
+				//setSubtitles(ns.time);
+			}
+			
+			/**
+			 * Set play time for GUI
+			 * @param duration
+			 * 
+			 */
+			private function setTime(duration:Number):void{
+				duration += seekOffset;
+				
+				var min:int = duration/60;
+				var secs:String = String( int(duration - min*60) );
+				var hour:int = int(duration/(60*60));
+				
+				if(hour > 0){
+					min -= hour*60;		
+				}
+				
+				var mins:String = String( min );
+				var hours:String = String( hour );
+				
+				if(mins.length == 1) mins = "0"+mins;
+				if(secs.length == 1) secs = "0"+secs;
+				
+				var dur:String = hours + ":" + mins + ":" + secs;
+				
+				//video_time_end.text = maxDur;
+				video_time.text = dur;
+			}
+			
+			/**
+			 * Set video length string 
+			 * @param duration
+			 * 
+			 */
+			private function setMaximumDur(duration:Number):void{
+				video_seek.minimum = 0;
+				video_seek.maximum = duration;
+				totalDuration = duration;
+				
+				var min:int = duration/60;
+				var secs:String = String( int(duration - min*60) );
+				var hour:int = int(duration/(60*60));
+				
+				if(hour > 0){
+					min -= hour*60;		
+				}
+				
+				var mins:String = String( min );
+				var hours:String = String( hour );
+				
+				if(mins.length == 1) mins = "0"+mins;
+				if(secs.length == 1) secs = "0"+secs;
+				
+				maxDur = hours + ":" + mins + ":" + secs;
+				video_time_end.text = maxDur;
+			}
+			
+			/**
+			 * Rescale progressbar on seek 
+			 * 
+			 */
+			private function rescaleProgress():void{
+				var x:Number = video_progress.x;
+				var wi:Number = video_progress.width;
+				var newx:Number = video_seek.thumb.x + video_seek.x;
+				var newwid:Number = (x+wi)-newx;
+				
+				video_progress.x = newx;
+				video_progress.width = newwid;	
+			}
+			
+			/**
+			 * Set progress 
+			 * @param progress
+			 * 
+			 */
+			private function setProgress(progress:Number):void{
+				video_progress.setProgress(progress, 100);
+			}
+			
+			/**
+			 * Set volume 
+			 * 
+			 */
+			private function setVolume():void{				
+				ns.soundTransform = new SoundTransform(player_volume.value/100);
+				volumeLevel = player_volume.value;
+				video_player.setFocus();
+			}
+			
+			/**
+			 * Data tip for time slider 
+			 * @param val
+			 * @return 
+			 * 
+			 */
+			private function timeDataTip(val:String):String{
+				var duration:Number = Number(val);
+				
+				//var mins:String = String( int(duration/60) );
+				var min:int = duration/60;
+				var secs:String = String( int(duration - min*60) );
+				//var hours:String = String( int(duration/(60*60)) );
+				var hour:int = int(duration/(60*60));
+				
+				if(hour > 0){
+					min -= hour*60;		
+				}
+				
+				var mins:String = String( min );
+				var hours:String = String( hour );
+				
+				if(mins.length == 1) mins = "0"+mins;
+				if(secs.length == 1) secs = "0"+secs;
+				
+				return hours + ":" + mins + ":" + secs;
+			}
+			
+			/**
+			 * Player cleanup 
+			 * 
+			 */
+			private function resetPlayer(nofullscreen:Boolean = true):void{
+				// reset controls
+				video_progress.x = 54;
+				video_progress.width = 215;
+				video_progress.setProgress(0, 100);
+				video_seek.value = 0;
+				video_time_end.text = "0:00:00";
+				video_time.text = "0:00:00";
+				subText = "";
+				
+				// reset buttons
+				playpause.resetState();
+				play_nonstop.resetState();
+				above_all.resetState();
+				hideVolume();
+				
+				// reset watch
+				watchedReport = false;
+				
+				// reset next and prev windows
+				player_episodes_wnd.visible = false;
+				player_episodes_wnd_1.visible = false;
+				player_next_ep_txt.text = "null";
+				player_prev_ep_txt.text = "null";
+				
+				// reset fullscreen
+				if (nofullscreen && stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE){
+					/* If already in full screen mode, switch to normal mode. */
+					stage.displayState = StageDisplayState.NORMAL;
+					
+					//player_controls.bottom = "75";
+				}
+				
+				// reset on top
+				if(nofullscreen && FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront){
+					FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = !FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront;
+					//above_all.text = "'";
+				}
+				
+				// clean listeners
+				ns.removeEventListener(NetStatusEvent.NET_STATUS, onVideoEnd);
+				video_player.removeEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
+				this.removeEventListener(MouseEvent.CLICK, onMouseClick);
+				this.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+				this.removeEventListener(Event.ENTER_FRAME, onPlayerEnterFrame);
+				
+				// remove timer
+				hideTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, onHideTimer);
+				hideTimer = null;
+				
+				// clear video
+				vid.clear();
+				ns.close();
+				while(video_player.numChildren > 0){
+					video_player.removeChildAt(0);
+				}
+				
+				// clean vars
+				ns = null;
+				vid = null;
+				
+				// force GC
+				startGCCycle();
+			}
+			
+			/**
+			 * On key press callback 
+			 * @param event
+			 * 
+			 */
+			private function onPlayerKey(event:KeyboardEvent):void{
+				switch(event.keyCode){
+					case Keyboard.SPACE:
+						togglePlayPause();
+						break;
+					case Keyboard.F:
+						toggleFullScreen();
+						break;
+					case Keyboard.UP:
+						if(player_volume.value < 100){
+							player_volume.value += 5;
+						}
+						volumeLevel = player_volume.value;
+						ns.soundTransform = new SoundTransform(player_volume.value/100);
+						break;
+					case Keyboard.DOWN:
+						if(player_volume.value > 5){
+							player_volume.value -= 5;
+						}
+						volumeLevel = player_volume.value;
+						ns.soundTransform = new SoundTransform(player_volume.value/100);
+						break;
+					case Keyboard.LEFT:
+						if(ns.time < 10) break;
+						subText = '';
+						ns.seek(ns.time - 10);
+						break;
+					case Keyboard.RIGHT:
+						if(ns.time > totalDuration) break;
+						subText = '';
+						ns.seek(ns.time + 10);
+						break;
+					case Keyboard.M:
+						if(player_volume.value != 0){
+							volumeLevel = player_volume.value;
+							player_volume.value = 0;
+						}else{
+							player_volume.value = volumeLevel;
+						}
+						ns.soundTransform = new SoundTransform(player_volume.value/100);
+						break;
+					case Keyboard.Q:
+						returnView();
+						break;
+				}
+			}
+			
+			private function returnView():void{
+				// reset ontop
+				FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = false;
+				// reset player
+				resetPlayer();
+				// event
+				dispatchEvent(new Event("returnView"));
+			}
+			
+			private function prevEpisode():void{
+				// reset player
+				resetPlayer(false);
+				
+				// play prev
+				//series_video_list.selectedIndex += 1;
+				//series_video_list.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				dispatchEvent(new Event("playPrev"));
+			}
+			
+			private function nextEpisode():void{
+				// reset player
+				resetPlayer(false);
+				
+				// play prev
+				//series_video_list.selectedIndex -= 1;
+				//series_video_list.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
+				dispatchEvent(new Event("playNext"));
+			}
+			
+			/**
+			 * Shows volume control 
+			 */
+			private function showVolume():void{
+				player_volume.visible = true; 
+			}
+			
+			/**
+			 * Shows volume control 
+			 */
+			private function hideVolume():void{
+				player_volume.visible = false; 
+			}
+			
+			private function aboveAll():void{
+				FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = !FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront;
+				//if(nativeWindow.alwaysInFront){
+				//above_all.text = ';';
+				//}else{
+				//above_all.text = "'";
+				//}
+			}
+			
+			// advanced garbage collection
+			// ---------------------------
+			/**
+			 * GC counter 
+			 */
+			private var gcCount:int;
+			
+			/**
+			 * Starts GC
+			 */
+			private function startGCCycle():void{
+				gcCount = 0;
+				addEventListener(Event.ENTER_FRAME, doGC);
+			}
+			
+			/**
+			 * GC Timer proc, does the collection
+			 * @param evt
+			 * 
+			 */
+			private function doGC(evt:Event):void{
+				flash.system.System.gc();
+				if(++gcCount > 1){
+					removeEventListener(Event.ENTER_FRAME, doGC);
+					setTimeout(lastGC, 40);
+				}
+			}
+			
+			/**
+			 * Last GC, to be sure 
+			 */
+			private function lastGC():void{
+				flash.system.System.gc();
+			}
+			
+
+			protected function subBar_itemClickHandler(event:ItemClickEvent):void
+			{
+				loadSubtitles(subArray[event.index]);
+			}
+
+
+			protected function player_data_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				FlexGlobals.topLevelApplication.nativeWindow.startMove();
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:Label horizontalCenter="0" verticalCenter="0" text="Загрузка..." verticalAlign="middle" textAlign="center" fontFamily="Gothic" fontSize="20" fontWeight="bold" color="#FFFFFF"/>
+	<mx:UIComponent id="video_player" left="0" right="0" top="0" bottom="0" creationComplete="{playerState()}"
+					resize="{onVideoResize()}"/>
+	<s:TextArea verticalAlign="bottom" textAlign="center" fontFamily="Verdana" color="#FFFF00" selectable="false"
+			 id="video_sub" fontSize="16" left="10" right="10" bottom="45" visible="{isSub}" top="180" 
+			 contentBackgroundAlpha="0.0" borderVisible="false" editable="false"
+			 text="{subText}">
+		<s:filters>
+			<s:DropShadowFilter alpha="1" angle="45" blurX="0.2" blurY="0.2" distance="2" strength="1" />
+			<s:GlowFilter color="#000000" blurX="0.2" blurY="0.2" alpha="1" strength="1" />
+		</s:filters>
+	</s:TextArea>
+	<s:BorderContainer id="player_data" left="0" top="0" right="0" backgroundAlpha="0" borderAlpha="0" bottom="190"
+					   mouseDown="player_data_mouseDownHandler(event)" showEffect="{showEff}" hideEffect="{hideEff}">
+		<s:BorderContainer left="0" top="0" right="0" height="40" backgroundColor="#1B1B1B" 
+						   cornerRadius="2" borderColor="#494949" alpha="0.8" id="player_data_bg">
+			<s:Label text=""  textAlign="left" verticalAlign="top"
+				 	id="video_title" left="55" right="163" color="#FFFFFF" bottom="5" top="5" styleName="playerControl"/>
+			<ui:ToggleImage onImage="{onTopLock}" offImage="{onTopNormal}" 
+							id="above_all" right="35" verticalCenter="0" click="{aboveAll()}" toolTip="Поверх всех"
+							width="20" height="20"/>
+			<ui:ToggleImage onImage="{loopSel}" offImage="{loopOff}" 
+							id="play_nonstop" right="65" verticalCenter="0" toolTip="Играть подряд" 
+							width="20" height="20"/>
+			<mx:Image right="5" verticalCenter="0" useHandCursor="true" buttonMode="true" source="@Embed('assets/player/close_normal.png')"
+					  click="returnView()" toolTip="К сериям" width="20" height="20"/>
+			<mx:Image left="5" top="4" height="30" width="40" id="video_pic" source=""/>
+		</s:BorderContainer>
+		<s:BorderContainer verticalCenter="80" right="0" backgroundColor="#1B1B1B" 
+						   visible="{isSubSwitch}"
+						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="64" height="50">
+			<mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+						id="subBar" itemClick="subBar_itemClickHandler(event)">
+			</mx:LinkBar>
+			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
+		</s:BorderContainer>
+	</s:BorderContainer>
+	<s:BorderContainer id="player_controls" width="485" height="71" cornerRadius="8" backgroundColor="#494949" bottom="0" 
+					   horizontalCenter="0" backgroundAlpha="0.0" borderVisible="false"
+					   showEffect="{showEff}" hideEffect="{hideEff}">
+		<ui:ToggleImage onImage="{playBtn}" offImage="{pauseBtn}" 
+						id="playpause" x="1" click="{togglePlayPause()}" width="64" height="43" bottom="0"/>
+		
+		<s:BorderContainer right="0" backgroundColor="#1B1B1B" cornerRadius="8" width="410" height="43" borderColor="#1B1B1B" bottom="0">
+			<!-- PROGRESS BAR -->
+			<mx:Canvas x="54" width="215" borderColor="#AAB3B3" borderStyle="solid"  backgroundColor="#E6EEEE" height="20" verticalCenter="0">
+				<s:BorderContainer top="0" left="0" right="0" borderStyle="solid" height="18"/>
+			</mx:Canvas>
+			<mx:ProgressBar id="video_progress" labelPlacement="center" label=" " x="54" width="215"
+							minimum="0" maximum="100" mode="manual" height="20" verticalCenter="0"
+							color="#d3d3d3" chromeColor="#D3D3D3"/>
+			<s:HSlider id="video_seek" x="54" width="215" change="{onSeek(event)}" skinClass="com.codezen.component.videoplayer.ui.SuareEmptySlider"
+					   dataTipFormatFunction="{timeDataTip}" liveDragging="false" height="20" verticalCenter="0"
+					   />
+			<!-- fullscreen button -->
+			<mx:Image source="@Embed('assets/player/fullscreen.png')" id="fullscreen_btn" right="1" verticalCenter="0" click="{toggleFullScreen()}" 
+					  width="40" height="43" useHandCursor="true" buttonMode="true" alpha="0.5" />
+			<mx:Image source="@Embed('assets/player/volume.png')" id="volume_btn" right="40" verticalCenter="0" click="{showVolume()}" 
+					  width="40" height="43" useHandCursor="true" buttonMode="true" alpha="0.5" />
+			<!-- duration -->
+			<s:Label x="278" text="0:00:00" color="#FFFFFF" id="video_time_end" fontFamily="Gothic" verticalCenter="0"/>
+			<s:Label x="7" text="0:00:00" color="#FFFFFF" id="video_time" fontFamily="Gothic" verticalCenter="0"/>
+			<!-- volume -->
+		</s:BorderContainer>
+		<s:HSlider id="player_volume" minimum="0" maximum="100" value="100" change="{setVolume()}" skinClass="com.codezen.component.videoplayer.ui.VolumeSlider" 
+				   width="100" right="11" top="7" visible="false"/>
+	</s:BorderContainer>	
+	<s:BorderContainer height="127" verticalCenter="0" backgroundColor="#494949" cornerRadius="12" id="player_episodes_wnd" width="140" left="100" color="#FFFFFF"
+					   click="{prevEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
+		<mx:Image y="20" width="120" height="66" id="player_prev_ep_img" x="10" source=""/>
+		<s:Label y="94" width="120" fontFamily="Verdana" textAlign="center" id="player_prev_ep_txt" x="10" color="#FFFFFF"
+				 text="null"/>
+		<s:Label x="10" y="5" text="Предыдущий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
+	</s:BorderContainer>
+	<s:BorderContainer height="127" verticalCenter="0" backgroundColor="#494949" cornerRadius="12" id="player_episodes_wnd_1" width="140" right="100"
+					   click="{nextEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
+		<mx:Image y="20" width="120" height="66" id="player_next_ep_img" x="10" source=""/>
+		<s:Label y="94" text="null" width="120" fontFamily="Verdana" id="player_next_ep_txt" textAlign="center" x="10" color="#FFFFFF"/>
+		<s:Label x="10" y="5" text="Следующий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
+	</s:BorderContainer>
+</s:Group>
