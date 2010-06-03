@@ -103,7 +103,8 @@ package com.codezen.kinobaza
 					name:item.@name,
 					original_name:item.@original_name,
 					year:item.@year,
-					poster:item.@poster
+					poster:item.@poster,
+					type:item.@type
 				});
 			}
 			
@@ -118,9 +119,9 @@ package com.codezen.kinobaza
 		/**
 		 * Function that does log in to vkontakte.ru 
 		 */
-		public function getInfo(url:String):void{
+		public function getInfo(id:String):void{
 			// create urlrequester and urlloader
-			urlRequest.url = url;
+			urlRequest.url = "http://qa.kinobaza.tv/series/info?id="+id+"&format=xml";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onEpisodesLoad);
 			myLoader.load(urlRequest);
@@ -134,7 +135,52 @@ package com.codezen.kinobaza
 			myLoader.removeEventListener(Event.COMPLETE, onEpisodesLoad);
 			
 			// get result data
-			var data:String = evt.target.data;
+			var data:XML = new XML(evt.target.data);
+
+			seriesInfo = new Object();
+			seriesInfo.id = data.@id;
+			seriesInfo.name = data.@name;
+			seriesInfo.original_name = data.@original_name;
+			seriesInfo.year = data.@year;
+			seriesInfo.poster = data.@poster;
+			seriesInfo.tvrage_id = data.@tvrage_id;
+			seriesInfo.kinopoisk_id = data.@kinopoisk_id;
+			seriesInfo.kinopoisk_rating = data.@kinopoisk_rating;
+			seriesInfo.kinopoisk_rating_voted = data.@kinopoisk_rating_voted;
+			seriesInfo.imdb_id = data.@imdb_id;
+			seriesInfo.imdb_rating = data.@imdb_rating;
+			seriesInfo.imdb_rating_voted = data.@imdb_rating_voted;
+			seriesInfo.tvcom_rating = data.@tvcom_rating;
+			seriesInfo.tvcom_rating_voted = data.@tvcom_rating_voted;
+			seriesInfo.description = data.@description;
+			seriesInfo.countries = data.@countries;
+			seriesInfo.genres = data.@genres;
+			
+			trace(ObjectUtil.toString(seriesInfo));
+			
+			// parse seasons
+			if(data.children().length() > 0){
+				episodes = new ArrayCollection();
+				var season:XML;
+				var episode:XML;
+				var snum:String;
+				for each(season in data.children()){
+					snum = season.@number;
+					for each(episode in season.children()){
+						episodes.addItem({
+							id:episode.@id,
+							number:episode.@number,
+							season:snum,
+							name:episode.@name,
+							original_name:episode.@original_name,
+							tvrage_id:episode.@tvrage_id,
+							description:episode.@description
+						});
+					}
+				}
+				
+				trace(ObjectUtil.toString(episodes));
+			}
 			
 			endLoad();
 		}

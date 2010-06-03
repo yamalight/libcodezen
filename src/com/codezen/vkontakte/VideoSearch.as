@@ -236,29 +236,31 @@ package com.codezen.vkontakte
 			var res:Array;
 			
 			// form regexp
-			re = new RegExp(/div id="video.+?".+?{"host":"(.+?)","vtag":"(.+?)".+?"md_title":"(.+?)".+?"ltag":"(.+?)".+?"uid":"(.+?)","hd":(.+?),.+?}.+?class="ainfo".+?style='color.+?'>(.+?)<\/b>/gs);
+			//re = new RegExp(/div id="video.+?".+?{"host":"(.+?)","vtag":"(.+?)".+?"md_title":"(.+?)".+?"ltag":"(.+?)".+?"uid":"(.+?)","hd":(.+?),.+?}.+?class="ainfo".+?style='color.+?'>(.+?)<\/b>/gs);
+			re = new RegExp(/{"uid":"(.+?)".+?"host":"(.+?)","vtag":"(.+?)","ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)"}.+?<div class="ainfo"><b style='color:#000'>(.+?)<\/b>/gs);
 			// execute regexp on data
 			res = re.exec(data);
 			
 			//trace(data);
 			//trace(ObjectUtil.toString(res));
 			
-			var url:String;
-			var thumb:String;
-			var desc:String;
-			var len:String;
+			var info:Object;
 			results = new ArrayCollection();
 			
-			//System.useCodePage = false;
-			
-			while(res != null){				
-				len = res[7];
-				desc = CUtils.convertHTMLEntities(unescapeMultiByte(res[3])).replace(/\+/gs, " ");
-				desc += " ["+hdDef[int(res[6])-1][1]+"p] - "+len;
-				url = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[5]+'/video/'+res[2]+'.'+hdDef[int(res[6])-1][1]+'.mp4';
-				thumb = 'http://cs'+res[1]+'.vkontakte.ru/u'+res[5]+'/video/'+res[4]+'.jpg';
+			while(res != null){
+				info = new Object();
+				info.uid = res[1];
+				info.host = res[2];
+				info.vtag = res[3];
+				info.ltag = res[4];
+				info.title = CUtils.convertHTMLEntities(unescapeMultiByte(res[5])).replace(/\+/gs, " ");
+				info.hd = res[6];
+				info.thumb = String(res[7]).replace("\\\\/", "\\");
+				info.len = res[8];
+				info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+					info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
 				
-				results.addItem({desc: desc, url: url, pic:thumb});
+				results.addItem(info);
 				
 				res = re.exec(data);
 			}
@@ -266,9 +268,7 @@ package com.codezen.vkontakte
 			//System.useCodePage = true;
 			
 			// erase vars
-			url = null;
-			desc = null;
-			thumb = null;
+			info = null;
 			data = null;
 			re = null;
 			res = null;
