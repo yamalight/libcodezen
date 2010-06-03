@@ -73,6 +73,8 @@ package com.codezen.kinobaza
 		 * Function that does log in to vkontakte.ru 
 		 */
 		public function searchBase(query:String):void{
+			// reset old vars
+			resetVars();
 			// create urlrequester and urlloader
 			urlRequest.url = "http://qa.kinobaza.tv/search?query=" + query + "&search_type=films&" +
 				"format=xml&per_page=15&wildcard=1";
@@ -156,8 +158,6 @@ package com.codezen.kinobaza
 			seriesInfo.countries = data.@countries;
 			seriesInfo.genres = data.@genres;
 			
-			trace(ObjectUtil.toString(seriesInfo));
-			
 			// parse seasons
 			if(data.children().length() > 0){
 				episodes = new ArrayCollection();
@@ -178,11 +178,15 @@ package com.codezen.kinobaza
 						});
 					}
 				}
-				
-				trace(ObjectUtil.toString(episodes));
 			}
 			
 			endLoad();
+		}
+		
+		private function resetVars():void{
+			seasonCount = -1;
+			series = null;
+			episodes = null;
 		}
 		
 		/**

@@ -255,7 +255,7 @@ package com.codezen.vkontakte
 				info.ltag = res[4];
 				info.title = CUtils.convertHTMLEntities(unescapeMultiByte(res[5])).replace(/\+/gs, " ");
 				info.hd = res[6];
-				info.thumb = String(res[7]).replace("\\\\/", "\\");
+				info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
 				info.len = res[8];
 				info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
 					info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
