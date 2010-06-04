@@ -114,6 +114,49 @@ package com.codezen.util
 		}
 		
 		/**
+		 * Removes whitespaces from start of string
+		 * 
+		 * @param string
+		 * @return string with no whitespaces at start 
+		 * 
+		 */
+		public static function TrimStart(string:String):String{
+			if (string.charAt(0)==" " && string.length>0){
+				return TrimStart(string.slice(1));
+			}else{
+				return string;
+			}
+		}
+		
+		/**
+		 * Removes whitespaces from end of string
+		 * 
+		 * @param string
+		 * @return string with no whitespaces at end 
+		 * 
+		 */
+		public static function TrimEnd(string:String):String{
+			if (string.charAt(string.length-1)==" " && string.length>0){
+				return TrimEnd(string.slice(0,string.length-1));
+			}else{
+				return string;
+			}
+		}
+		
+		/**
+		 * Removes whitespaces from start and end of string
+		 * 
+		 * @param string
+		 * @return string with no whitespaces at start and end 
+		 * 
+		 */
+		public static function Trim(string:String):String{
+			string = TrimStart(string);
+			string = TrimEnd(string);
+			return string;
+		}
+		
+		/**
 		 * Converts all HTML entities in string to normal text chars 
 		 * @param str
 		 * @return str with entities changed to symbols

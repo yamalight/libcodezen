@@ -54,7 +54,7 @@ package com.codezen.vkontakte
 		// limit of duration
 		private var finddur:int;
 		
-		public var data:String;
+		private var data:String;
 		
 		/**
 		 * 
@@ -245,6 +245,7 @@ package com.codezen.vkontakte
 			//trace(ObjectUtil.toString(res));
 			
 			var info:Object;
+			var index:int;
 			results = new ArrayCollection();
 			
 			while(res != null){
@@ -260,6 +261,7 @@ package com.codezen.vkontakte
 				info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
 					info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
 				
+				// look for dupes
 				results.addItem(info);
 				
 				res = re.exec(data);
