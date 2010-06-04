@@ -189,9 +189,9 @@ package com.codezen.vkontakte
 			
 			var vars:URLVariables = new URLVariables();
 			vars['c[q]'] = query;
-			vars['c[hd]'] = "1";
 			if(hd > 0){
-				vars['c[quality]'] = hd.toString();
+				vars['c[hd]'] = "1";
+				//vars['c[quality]'] = hd.toString();
 			}
 			vars['c[section]'] = "video";
 			//vars.offset = 0;
@@ -245,24 +245,36 @@ package com.codezen.vkontakte
 			//trace(ObjectUtil.toString(res));
 			
 			var info:Object;
-			var index:int;
+			var dupes:Array = new Array();
 			results = new ArrayCollection();
 			
 			while(res != null){
+				if(String(res[1]).length < 3){
+					res = re.exec(data);
+					continue;
+				}
 				info = new Object();
 				info.uid = res[1];
 				info.host = res[2];
 				info.vtag = res[3];
 				info.ltag = res[4];
-				info.title = CUtils.convertHTMLEntities(unescapeMultiByte(res[5])).replace(/\+/gs, " ");
+				info.title = CUtils.prepareVkVideoTitle(res[5]);
 				info.hd = res[6];
 				info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
 				info.len = res[8];
-				info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
-					info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
+				if(int(info.hd) == 0){
+					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+						info.vtag+'.flv';
+				}else{
+					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+						info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
+				}
 				
-				// look for dupes
-				results.addItem(info);
+				if(dupes.indexOf(info.title+info.hd+info.len) == -1){
+					dupes.push(info.title+info.hd+info.len);
+					// look for dupes
+					results.addItem(info);
+				}
 				
 				res = re.exec(data);
 			}
@@ -270,6 +282,7 @@ package com.codezen.vkontakte
 			//System.useCodePage = true;
 			
 			// erase vars
+			dupes = null;
 			info = null;
 			data = null;
 			re = null;

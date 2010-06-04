@@ -1,9 +1,12 @@
 package com.codezen.util
 {
+	import flash.utils.ByteArray;
+	import flash.utils.unescapeMultiByte;
+	
 	import mx.collections.ArrayCollection;
 	
 	public final class CUtils
-	{
+	{		
 		/**
 		 * Does the URL encoding
 		 */
@@ -285,6 +288,15 @@ package com.codezen.util
 			
 			return str;
 			
+		}
+		
+		/**
+		 * Prepares Vkontakte Video title 
+		 * @param title
+		 * 
+		 */
+		public static function prepareVkVideoTitle(title:String):String{
+			return Trim( convertHTMLEntities(unescapeMultiByte(title)).replace(/\+/gs, " ").replace("\s\s+", "\s") );
 		}
 	}
 }

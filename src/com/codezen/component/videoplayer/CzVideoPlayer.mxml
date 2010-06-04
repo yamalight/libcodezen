@@ -317,6 +317,12 @@
 				){
 					player_controls.visible = false;
 				}
+				
+				if(
+					resizer.mouseX < 0 || resizer.mouseY < 0
+				){
+					resizer.visible = false;
+				}
 			}
 			
 			/**
@@ -345,6 +351,13 @@
 					if( int(seekOffset+ns.time) != int(totalDuration) ){
 						hideTimer.start();
 					}
+				}
+				
+				if(
+					(resizer.mouseX > 0 && resizer.mouseY > 0) &&
+					stage.displayState != StageDisplayState.FULL_SCREEN_INTERACTIVE
+				){
+					resizer.visible = true;
 				}
 			}
 			
@@ -453,7 +466,7 @@
 						//stage.fullScreenSourceRect = new Rectangle(0,0,stage.width,stage.height);
 						stage.nativeWindow.activate();
 						stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
-						
+						resizer.visible = false;
 						//player_controls.bottom = "135";
 						break;
 				}
@@ -645,19 +658,23 @@
 				}
 				
 				// clean listeners
-				ns.removeEventListener(NetStatusEvent.NET_STATUS, onVideoEnd);
+				if(ns)
+					ns.removeEventListener(NetStatusEvent.NET_STATUS, onVideoEnd);
 				video_player.removeEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
 				this.removeEventListener(MouseEvent.CLICK, onMouseClick);
 				this.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 				this.removeEventListener(Event.ENTER_FRAME, onPlayerEnterFrame);
 				
 				// remove timer
-				hideTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, onHideTimer);
+				if(hideTimer)
+					hideTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, onHideTimer);
 				hideTimer = null;
 				
 				// clear video
-				vid.clear();
-				ns.close();
+				if(vid)
+					vid.clear();
+				if(ns)
+					ns.close();
 				while(video_player.numChildren > 0){
 					video_player.removeChildAt(0);
 				}
@@ -727,6 +744,8 @@
 				FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = false;
 				// reset player
 				resetPlayer();
+				//
+				Mouse.show();
 				// event
 				dispatchEvent(new Event("returnView"));
 			}
@@ -822,6 +841,13 @@
 				FlexGlobals.topLevelApplication.nativeWindow.startMove();
 			}
 
+
+			protected function resizer_mouseDownHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				FlexGlobals.topLevelApplication.nativeWindow.startResize();
+			}
+
 		]]>
 	</fx:Script>
 	
@@ -905,4 +931,5 @@
 		<s:Label y="94" text="null" width="120" fontFamily="Verdana" id="player_next_ep_txt" textAlign="center" x="10" color="#FFFFFF"/>
 		<s:Label x="10" y="5" text="Следующий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
 	</s:BorderContainer>
+	<mx:Image id="resizer" right="0" bottom="0" source="@Embed('assets/corner.png')" mouseDown="resizer_mouseDownHandler(event)" />
 </s:Group>

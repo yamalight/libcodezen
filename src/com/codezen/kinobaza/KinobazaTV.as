@@ -17,6 +17,7 @@ package com.codezen.kinobaza
 		private var series:ArrayCollection;
 		private var seriesInfo:Object;
 		private var episodes:ArrayCollection;
+		private var news:ArrayCollection;
 		private var seasonCount:int;
 		
 		// loader and request
@@ -65,8 +66,120 @@ package com.codezen.kinobaza
 		 * @return (Array) results of search 
 		 * 
 		 */
+		public function get newSeries():ArrayCollection{
+			return news;
+		}
+		
+		/**
+		 * 
+		 * @return (Array) results of search 
+		 * 
+		 */
 		public function get seriesSeasons():int{
 			return seasonCount;
+		}
+		
+		/**
+		 * Loads top series 
+		 * 
+		 */
+		public function loadTopSeries():void{
+			// create urlrequester and urlloader
+			urlRequest.url = "http://qa.kinobaza.tv/series/popular?format=xml&only_top_rating=15";
+			// add event listener and load url
+			myLoader.addEventListener(Event.COMPLETE, onNewSeriesLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Result parser on reciev
+		 **/
+		private function onNewSeriesLoad(evt:Event):void{
+			// add event listener and load url
+			myLoader.removeEventListener(Event.COMPLETE, onNewSeriesLoad);
+			
+			// get result data
+			var data:XMLList = new XML(evt.target.data).rubric.children();
+			
+			// create new results arr
+			news = new ArrayCollection();
+			
+			// parse
+			var item:XML;
+			var series:Object;
+			for each(item in data){
+				series = new Object();
+				series.id = item.@id;
+				series.name = item.@name;
+				series.original_name = item.@original_name;
+				series.year = item.@year;
+				series.poster = item.@poster;
+				
+				news.addItem(series);
+			}
+			
+			// clean
+			item = null;
+			series = null;
+			data = null;
+			
+			// finish
+			endLoad();
+		}
+		
+		/**
+		 * Loads new Movies 
+		 * 
+		 */
+		public function loadNewMovies():void{
+			// create urlrequester and urlloader
+			urlRequest.url = "http://qa.kinobaza.tv/films/popular?format=xml";
+			// add event listener and load url
+			myLoader.addEventListener(Event.COMPLETE, onNewMoviesLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Result parser on reciev
+		 **/
+		private function onNewMoviesLoad(evt:Event):void{
+			// add event listener and load url
+			myLoader.removeEventListener(Event.COMPLETE, onNewMoviesLoad);
+			
+			// get result data
+			var data:XMLList = new XML(evt.target.data).children();
+			
+			// create new results arr
+			news = new ArrayCollection();
+			
+			// parse
+			var genere:XML;
+			var item:XML;
+			var movie:Object;
+			var genereName:String;
+			for each(genere in data){
+				genereName = genere.@name;
+				for each(item in genere.children()){
+					movie = new Object();
+					movie.id = item.@id;
+					movie.genere = genereName;
+					movie.name = item.@name;
+					movie.original_name = item.@original_name;
+					movie.year = item.@year;
+					movie.poster = item.@poster;
+					
+					news.addItem(movie);
+				}
+			}
+			
+			// clean
+			item = null;
+			genere = null;
+			movie = null;
+			data = null;
+			
+			// finish
+			endLoad();
 		}
 		
 		/**
@@ -123,7 +236,7 @@ package com.codezen.kinobaza
 		 */
 		public function getInfo(id:String):void{
 			// create urlrequester and urlloader
-			urlRequest.url = "http://qa.kinobaza.tv/series/info?id="+id+"&format=xml";
+			urlRequest.url = "http://qa.kinobaza.tv/film/"+id+"?format=xml";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onEpisodesLoad);
 			myLoader.load(urlRequest);
@@ -164,9 +277,15 @@ package com.codezen.kinobaza
 				var season:XML;
 				var episode:XML;
 				var snum:String;
+				var thumb:String;
 				for each(season in data.children()){
 					snum = season.@number;
 					for each(episode in season.children()){
+						thumb = 'http://images.tvrage.com/screencaps/';
+						thumb += Math.ceil(int(seriesInfo.tvrage_id)/200);
+						thumb += "/" + seriesInfo.tvrage_id + "/" ;
+						thumb += episode.@tvrage_id + ".jpg";
+						
 						episodes.addItem({
 							id:episode.@id,
 							number:episode.@number,
@@ -174,6 +293,7 @@ package com.codezen.kinobaza
 							name:episode.@name,
 							original_name:episode.@original_name,
 							tvrage_id:episode.@tvrage_id,
+							thumb:thumb,
 							description:episode.@description
 						});
 					}
