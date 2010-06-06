@@ -12,6 +12,7 @@
 		<s:Parallel id="hideEff">
 			<s:Fade alphaFrom="1.0" alphaTo="0.0" duration="200" />
 		</s:Parallel>
+		<fx:Boolean id="isLoopVisible">true</fx:Boolean> 
 	</fx:Declarations>
 	<fx:Style>
 		@namespace s "library://ns.adobe.com/flex/spark";
@@ -874,9 +875,9 @@
 							width="20" height="20"/>
 			<ui:ToggleImage onImage="{loopSel}" offImage="{loopOff}" 
 							id="play_nonstop" right="65" verticalCenter="0" toolTip="Играть подряд" 
-							width="20" height="20"/>
+							width="20" height="20" visible="{isLoopVisible}"/>
 			<mx:Image right="5" verticalCenter="0" useHandCursor="true" buttonMode="true" source="@Embed('assets/player/close_normal.png')"
-					  click="returnView()" toolTip="К сериям" width="20" height="20"/>
+					  click="returnView()" toolTip="Закрыть" width="20" height="20"/>
 			<mx:Image left="5" top="4" height="30" width="40" id="video_pic" source=""/>
 		</s:BorderContainer>
 		<s:BorderContainer verticalCenter="80" right="0" backgroundColor="#1B1B1B" 
