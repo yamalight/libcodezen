@@ -11,7 +11,10 @@ package com.codezen.vkontakte
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	import flash.system.System;
+	import flash.utils.escapeMultiByte;
 	import flash.utils.unescapeMultiByte;
+	
+	import flashx.textLayout.utils.CharacterUtil;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ObjectUtil;
@@ -130,7 +133,10 @@ package com.codezen.vkontakte
 		 */
 		private function doLogin():void{
 			// create urlrequester and urlloader
-			urlRequest.url = "http://vkontakte.ru/login.php?email="+login_mail+"&pass="+login_pass+"&expire=1";
+			urlRequest.url = ("http://vkontakte.ru/login.php?email="+
+				login_mail+"&pass="+
+				escapeMultiByte(login_pass)+"&expire=1");
+			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSiteLoad);
 			myLoader.load(urlRequest);
