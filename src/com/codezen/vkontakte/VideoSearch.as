@@ -16,6 +16,7 @@ package com.codezen.vkontakte
 	
 	import flashx.textLayout.utils.CharacterUtil;
 	
+	import mx.charts.DateTimeAxis;
 	import mx.collections.ArrayCollection;
 	import mx.utils.ObjectUtil;
 	import mx.utils.object_proxy;
@@ -57,7 +58,7 @@ package com.codezen.vkontakte
 		// limit of duration
 		private var finddur:int;
 		
-		private var data:String;
+		//private var data:String;
 		
 		/**
 		 * 
@@ -112,8 +113,6 @@ package com.codezen.vkontakte
 		private function onCheckLogin(e:Event):void{
 			// remove event litener
 			myLoader.removeEventListener(Event.COMPLETE, onCheckLogin);
-			// close loader
-			//myLoader.close();
 			
 			// get data
 			var data:String = myLoader.data;
@@ -156,13 +155,9 @@ package com.codezen.vkontakte
 		private function onSiteLoad(evt:Event):void{
 			// add event listener and load url
 			myLoader.removeEventListener(Event.COMPLETE, onSiteLoad);
-			// close loader
-			//myLoader.close();
 			
 			// get result data
 			var data:String = evt.target.data;
-			
-			this.data = data;
 			
 			// dispatch error
 			if(data.match('id="myprofile"') == null){
@@ -181,17 +176,12 @@ package com.codezen.vkontakte
 		 * Searches vkontakte.ru for mp3 for given query
 		 */
 		public function findData(query:String, hd:int = 0, finddur:int = 0):void{
-			// http://vkontakte.ru/gsearch.php?q=%20Sonic%20Youth&section=audio&ajax=1&auto=1&c%5Bq%5D=Naoki%20Kenji&c%5Bsection%5D=audio
-			// http://vkontakte.ru/gsearch.php?q="+query+"&section=audio
 			urlRequest.url = "http://vkontakte.ru/gsearch.php?q="+escapeMultiByte(query)+"&section=video&ajax=1";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSearchLoad);
 			
 			// set duration
 			this.finddur = finddur;
-			
-			// enable cyrilic
-			//System.useCodePage = true;
 			
 			var vars:URLVariables = new URLVariables();
 			vars['c[q]'] = query;
@@ -206,7 +196,7 @@ package com.codezen.vkontakte
 
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
-			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/gsearch.php?q="+CUtils.urlEncode(query)+"&section=video";
+			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/gsearch.php?q="+escapeMultiByte(query)+"&section=video";
 			
 			// remove default error cathcer
 			myLoader.removeEventListener(IOErrorEvent.IO_ERROR, onError);
@@ -230,7 +220,7 @@ package com.codezen.vkontakte
 			
 			// get result data
 			var data:String = String(evt.target.data);
-
+			
 			data = data.replace(/\n/gs, "").replace(/\t/gs, "").replace(/\r/gs, "");
 			data = data.replace(/\\n/gs, "").replace(/\\t/gs, "").replace(/\\r/gs, "");
 			data = data.replace(/\\"/gs, '"');
@@ -242,8 +232,7 @@ package com.codezen.vkontakte
 			var res:Array;
 			
 			// form regexp
-			//re = new RegExp(/div id="video.+?".+?{"host":"(.+?)","vtag":"(.+?)".+?"md_title":"(.+?)".+?"ltag":"(.+?)".+?"uid":"(.+?)","hd":(.+?),.+?}.+?class="ainfo".+?style='color.+?'>(.+?)<\/b>/gs);
-			re = new RegExp(/{"uid":"(.+?)".+?"host":"(.+?)","vtag":"(.+?)","ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)"}.+?<div class="ainfo"><b style='color:#000'>(.+?)<\/b>/gs);
+			re = new RegExp(/{"uid":"(.+?)".+?"host":"(.+?)","vtag":"(.+?)","ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)"}.+?(<div class="ainfo"><b style='color:#000'>(.+?)<\/b>|<\/td>.<\/tr><\/table>)/gs);
 			// execute regexp on data
 			res = re.exec(data);
 			
@@ -251,14 +240,15 @@ package com.codezen.vkontakte
 			//trace(ObjectUtil.toString(res));
 			
 			var info:Object;
-			var dupes:Array = new Array();
 			results = new ArrayCollection();
 			
-			while(res != null){
+			while(res != null){				
+				// if really old flv from old srv - skip
 				if(String(res[1]).length < 3){
 					res = re.exec(data);
 					continue;
 				}
+				// create new object
 				info = new Object();
 				info.uid = res[1];
 				info.host = res[2];
@@ -267,8 +257,8 @@ package com.codezen.vkontakte
 				info.title = CUtils.prepareVkVideoTitle(res[5]);
 				info.hd = res[6];
 				info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
-				info.len = res[8];
-				if(int(info.hd) == 0){
+				info.len = (res[9]==null)?"?:??":res[9];
+				if(info.hd == 0){
 					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
 						info.vtag+'.flv';
 					info.hd_text = "260p";
@@ -277,20 +267,15 @@ package com.codezen.vkontakte
 						info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
 					info.hd_text = hdDef[int(info.hd)-1][1]+"p";
 				}
-				
-				if(dupes.indexOf(info.title+info.hd+info.len) == -1){
-					dupes.push(info.title+info.hd+info.len);
-					// look for dupes
-					results.addItem(info);
-				}
-				
+
+				// add res
+				results.addItem(info);
+
 				res = re.exec(data);
 			}
-			
-			//System.useCodePage = true;
-			
+
 			// erase vars
-			dupes = null;
+			//dupes = null;
 			info = null;
 			data = null;
 			re = null;
@@ -315,9 +300,6 @@ package com.codezen.vkontakte
 		}
 		
 		private function end():void{			
-			// turn off cyrilic
-			//System.useCodePage = false;
-			
 			// call event
 			dispatchEvent(new Event(Worker.COMPLETE));
 		}
