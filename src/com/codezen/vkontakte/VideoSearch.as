@@ -133,9 +133,9 @@ package com.codezen.vkontakte
 		 */
 		private function doLogin():void{
 			// create urlrequester and urlloader
-			urlRequest.url = ("http://vkontakte.ru/login.php?email="+
-				login_mail+"&pass="+
-				escapeMultiByte(login_pass)+"&expire=1");
+			urlRequest.url = "http://vkontakte.ru/login.php?email="+
+				escapeMultiByte(login_mail)+"&pass="+
+				escapeMultiByte(login_pass)+"&expire=1";
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSiteLoad);
@@ -165,9 +165,9 @@ package com.codezen.vkontakte
 			this.data = data;
 			
 			// dispatch error
-			if(data.match("id='error'") != null){
+			if(data.match('id="myprofile"') == null){
 				// call event
-				dispatchError("Vkontakter login or password wrong!");	
+				dispatchError("Неверный логин или пароль вконтакте!");	
 			}else{
 				dispatchEvent(new Event(Worker.INITIALIZED));
 			}
@@ -183,7 +183,7 @@ package com.codezen.vkontakte
 		public function findData(query:String, hd:int = 0, finddur:int = 0):void{
 			// http://vkontakte.ru/gsearch.php?q=%20Sonic%20Youth&section=audio&ajax=1&auto=1&c%5Bq%5D=Naoki%20Kenji&c%5Bsection%5D=audio
 			// http://vkontakte.ru/gsearch.php?q="+query+"&section=audio
-			urlRequest.url = "http://vkontakte.ru/gsearch.php?q="+CUtils.urlEncode(query)+"&section=video&ajax=1";
+			urlRequest.url = "http://vkontakte.ru/gsearch.php?q="+escapeMultiByte(query)+"&section=video&ajax=1";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSearchLoad);
 			
@@ -271,9 +271,11 @@ package com.codezen.vkontakte
 				if(int(info.hd) == 0){
 					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
 						info.vtag+'.flv';
+					info.hd_text = "260p";
 				}else{
 					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
 						info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
+					info.hd_text = hdDef[int(info.hd)-1][1]+"p";
 				}
 				
 				if(dupes.indexOf(info.title+info.hd+info.len) == -1){

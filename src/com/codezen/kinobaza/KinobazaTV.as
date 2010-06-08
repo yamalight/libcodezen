@@ -7,6 +7,7 @@ package com.codezen.kinobaza
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
+	import flash.utils.escapeMultiByte;
 	
 	import mx.collections.ArrayCollection;
 	import mx.utils.ObjectUtil;
@@ -85,7 +86,7 @@ package com.codezen.kinobaza
 		 */
 		public function loadTopSeries():void{
 			// create urlrequester and urlloader
-			urlRequest.url = "http://qa.kinobaza.tv/series/popular?format=xml&only_top_rating=15";
+			urlRequest.url = "http://kinobaza.tv/series/popular?format=xml&only_top_rating=15";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onNewSeriesLoad);
 			myLoader.load(urlRequest);
@@ -133,7 +134,7 @@ package com.codezen.kinobaza
 		 */
 		public function loadNewMovies():void{
 			// create urlrequester and urlloader
-			urlRequest.url = "http://qa.kinobaza.tv/films/popular?format=xml";
+			urlRequest.url = "http://kinobaza.tv/films/popular?format=xml";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onNewMoviesLoad);
 			myLoader.load(urlRequest);
@@ -189,7 +190,7 @@ package com.codezen.kinobaza
 			// reset old vars
 			resetVars();
 			// create urlrequester and urlloader
-			urlRequest.url = "http://qa.kinobaza.tv/search?query=" + query + "&search_type=films&" +
+			urlRequest.url = "http://kinobaza.tv/search?query=" + escapeMultiByte(query) + "&search_type=films&" +
 				"format=xml&per_page=15&wildcard=1";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSeriesLoad);
@@ -236,7 +237,7 @@ package com.codezen.kinobaza
 		 */
 		public function getInfo(id:String):void{
 			// create urlrequester and urlloader
-			urlRequest.url = "http://qa.kinobaza.tv/film/"+id+"?format=xml";
+			urlRequest.url = "http://kinobaza.tv/film/"+id+"?format=xml";
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onEpisodesLoad);
 			myLoader.load(urlRequest);
@@ -272,8 +273,8 @@ package com.codezen.kinobaza
 			seriesInfo.genres = data.@genres;
 			
 			// parse seasons
+			episodes = new ArrayCollection();
 			if(data.children().length() > 0){
-				episodes = new ArrayCollection();
 				var season:XML;
 				var episode:XML;
 				var snum:String;

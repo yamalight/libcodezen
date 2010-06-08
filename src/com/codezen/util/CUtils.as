@@ -296,7 +296,7 @@ package com.codezen.util
 		 * 
 		 */
 		public static function prepareVkVideoTitle(title:String):String{
-			return Trim( convertHTMLEntities(unescapeMultiByte(title)).replace(/\+/gs, " ").replace("\s\s+", "\s") );
+			return Trim( convertHTMLEntities(unescapeMultiByte(title)).replace(/\+/gs, " ").replace(/\s\s+/gs, " ") );
 		}
 	}
 }
