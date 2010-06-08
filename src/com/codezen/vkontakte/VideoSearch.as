@@ -249,27 +249,29 @@ package com.codezen.vkontakte
 					continue;
 				}
 				// create new object
-				info = new Object();
-				info.uid = res[1];
-				info.host = res[2];
-				info.vtag = res[3];
-				info.ltag = res[4];
-				info.title = CUtils.prepareVkVideoTitle(res[5]);
-				info.hd = res[6];
-				info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
-				info.len = (res[9]==null)?"?:??":res[9];
-				if(info.hd == 0){
-					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
-						info.vtag+'.flv';
-					info.hd_text = "260p";
-				}else{
-					info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
-						info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
-					info.hd_text = hdDef[int(info.hd)-1][1]+"p";
+				if(res[9] != null && int( String(res[9]).split(":")[0] ) > finddur){
+					info = new Object();
+					info.uid = res[1];
+					info.host = res[2];
+					info.vtag = res[3];
+					info.ltag = res[4];
+					info.title = CUtils.prepareVkVideoTitle(res[5]);
+					info.hd = res[6];
+					info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
+					info.len = (res[9]==null)?"?:??":res[9];
+					if(info.hd == 0){
+						info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+							info.vtag+'.flv';
+						info.hd_text = "260p";
+					}else{
+						info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+							info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
+						info.hd_text = hdDef[int(info.hd)-1][1]+"p";
+					}
+	
+					// add res
+					results.addItem(info);
 				}
-
-				// add res
-				results.addItem(info);
 
 				res = re.exec(data);
 			}
