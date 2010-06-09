@@ -63,6 +63,7 @@
 			import mx.utils.ObjectUtil;
 			
 			import spark.components.Application;
+			import spark.events.DropDownEvent;
 			import spark.utils.TextFlowUtil;
 			
 			// stream and video
@@ -368,7 +369,9 @@
 			 * 
 			 */
 			private function onMouseClick(e:Event):void{
-				video_player.setFocus();
+				if(e.target != ratio_list.openButton){
+					video_player.setFocus();
+				}
 			}
 			
 			/**
@@ -482,17 +485,34 @@
 			private function onVideoResize():void{
 				if(vid == null) return;
 				// rescale saving proportions
-				if(height > (origHeight*(video_player.width/origWidth)) ){
-					vid.width = video_player.width;
-					vid.height = origHeight*(video_player.width/origWidth);
-					vid.y = (video_player.height - vid.height)/2;
-					vid.x = 0;
-				}else{
-					vid.height = video_player.height;
-					vid.width = origWidth*(video_player.height/origHeight);
-					vid.x = (video_player.width - vid.width)/2;
-					vid.y = 0;
-				}
+				switch(ratio_list.selectedItem.data){
+					default:
+					case "orig":
+						if(height > (origHeight*(video_player.width/origWidth)) ){
+							vid.width = video_player.width;
+							vid.height = origHeight*(video_player.width/origWidth);
+							vid.y = (video_player.height - vid.height)/2;
+							vid.x = 0;
+						}else{
+							vid.height = video_player.height;
+							vid.width = origWidth*(video_player.height/origHeight);
+							vid.x = (video_player.width - vid.width)/2;
+							vid.y = 0;
+						}
+						break;
+					case "horizontal":
+						vid.width = video_player.width;
+						vid.height = origHeight*(video_player.width/origWidth);
+						vid.y = (video_player.height - vid.height)/2;
+						vid.x = 0;
+						break;
+					case "vertical":
+						vid.height = video_player.height;
+						vid.width = origWidth*(video_player.height/origHeight);
+						vid.x = (video_player.width - vid.width)/2;
+						vid.y = 0;
+						break;
+				}	
 				video_sub.setStyle("fontSize", (video_player.width*0.025));
 				//vid.scaleY = vid.scaleX;
 				//setSubtitles(ns.time);
@@ -839,7 +859,9 @@
 			protected function player_data_mouseDownHandler(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-				FlexGlobals.topLevelApplication.nativeWindow.startMove();
+				if(stage.displayState != StageDisplayState.FULL_SCREEN_INTERACTIVE && event.target != ratio_list.openButton){
+					FlexGlobals.topLevelApplication.nativeWindow.startMove();
+				}
 			}
 
 
@@ -847,6 +869,21 @@
 			{
 				// TODO Auto-generated method stub
 				FlexGlobals.topLevelApplication.nativeWindow.startResize();
+			}
+
+
+			protected function ratio_list_openHandler(event:DropDownEvent):void
+			{
+				// TODO Auto-generated method stub
+				hideTimer.stop();
+			}
+
+
+			protected function ratio_list_closeHandler(event:DropDownEvent):void
+			{
+				// TODO Auto-generated method stub
+				hideTimer.start();
+				video_player.setFocus();
 			}
 
 		]]>
@@ -869,7 +906,7 @@
 		<s:BorderContainer left="0" top="0" right="0" height="40" backgroundColor="#1B1B1B" 
 						   cornerRadius="2" borderColor="#494949" alpha="0.8" id="player_data_bg">
 			<s:Label text=""  textAlign="left" verticalAlign="top"
-				 	id="video_title" left="55" right="163" color="#FFFFFF" bottom="5" top="5" styleName="playerControl"/>
+				 	id="video_title" left="55" right="258" color="#FFFFFF" bottom="5" top="5" styleName="playerControl"/>
 			<ui:ToggleImage onImage="{onTopLock}" offImage="{onTopNormal}" 
 							id="above_all" right="35" verticalCenter="0" click="{aboveAll()}" toolTip="Поверх всех"
 							width="20" height="20"/>
@@ -879,6 +916,16 @@
 			<mx:Image right="5" verticalCenter="0" useHandCursor="true" buttonMode="true" source="@Embed('assets/player/close_normal.png')"
 					  click="returnView()" toolTip="Закрыть" width="20" height="20"/>
 			<mx:Image left="5" top="4" height="30" width="40" id="video_pic" source=""/>
+			<s:DropDownList id="ratio_list" verticalCenter="0" width="165" right="92" color="#E9E9E9" selectedIndex="0"
+							change="{onVideoResize()}" open="ratio_list_openHandler(event)" close="ratio_list_closeHandler(event)" chromeColor="#353535" dropShadowVisible="false">
+				<s:dataProvider>
+					<s:ArrayCollection>
+						<fx:Object label="Сохранять пропорции" data="orig" />
+						<fx:Object label="Растянуть горизонтально" data="horizontal" />
+						<fx:Object label="Растянуть вертикально" data="vertical" />
+					</s:ArrayCollection>
+				</s:dataProvider>
+			</s:DropDownList>
 		</s:BorderContainer>
 		<s:BorderContainer verticalCenter="80" right="0" backgroundColor="#1B1B1B" 
 						   visible="{isSubSwitch}"
