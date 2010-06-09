@@ -27,6 +27,8 @@
 			import com.codezen.helper.Worker;
 			import com.codezen.util.DownloadHelper;
 			
+			import flash.filesystem.File;
+			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			
@@ -168,20 +170,21 @@
 			private function start_down_clickHandler(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-				if(!isDownloading){
+				if(!isDownloading && downloadQueue.length > 0){
 					// set gui
 					start_down.text = '3';
 					start_down.toolTip = 'Отменить загрузку';
 					// start
 					startDownload();
+					isDownloading = true;
 				}else{
 					// set gui
 					start_down.text = '1';
 					start_down.toolTip = 'Начать запланированные загрузки';
-					// vancel
+					// cancel
 					cancelDownload();
+					isDownloading = false;
 				}
-				isDownloading = !isDownloading;
 			}
 
 
@@ -191,6 +194,32 @@
 				cancelDownload();
 				// init queue
 				downloadQueue = new ArrayCollection();
+			}
+			
+			/**
+			 * Draw download list menu
+			 * 
+			 * @param e
+			 * 
+			 */
+			private function popUpMenuDownloadList(e:MouseEvent):void{
+				// new menu
+				var root:NativeMenu = new NativeMenu();
+				
+				var delSelected:NativeMenuItem = new NativeMenuItem("Удалить");
+				delSelected.addEventListener(Event.SELECT, function(e:Event):void{
+					// get song index
+					if (download_list.selectedIndex < 0){
+						Alert.show("Нечего удалять! Сначала выдели запись.", "Ничего не выделено!");
+						return;
+					}
+					
+					downloadQueue.removeItemAt(download_list.selectedIndex);
+				});
+				root.addItem(delSelected);
+				
+				// assign native menu
+				root.display(stage,e.stageX - 75,e.stageY);
 			}
 
 		]]>
@@ -209,7 +238,8 @@
 			 mouseOut="{clear_down.setStyle('color','#000000')}"
 			 mouseDown="{clear_down.setStyle('color','#000000')}"
 			 click="clear_down_clickHandler(event)"/>
-	<s:List right="10" left="10" bottom="10" top="32" id="download_list" dataProvider="{downloadQueue}"></s:List>
+	<s:List right="10" left="10" bottom="10" top="32" id="download_list" dataProvider="{downloadQueue}"
+			rightClick="{popUpMenuDownloadList(event)}"></s:List>
 	
 	
 </s:Group>

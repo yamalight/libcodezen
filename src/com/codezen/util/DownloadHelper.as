@@ -38,7 +38,7 @@ package com.codezen.util
 			if(fileLocalLocation != null && fileLocalLocation.length > 1){
 				downloadPath = fileLocalLocation+"/";
 			}else{
-				downloadPath = File.applicationStorageDirectory.resolvePath("download").nativePath+"/";
+				downloadPath = File.desktopDirectory.resolvePath("Downloads").nativePath+"/";
 			}
 			
 			fileStream = new FileStream();
@@ -60,7 +60,7 @@ package com.codezen.util
 		 */		
 		public function downloadFileFromServer(fileName:String, fileURL:String):void
 		{
-			downloadFile = fileName;
+			downloadFile = CUtils.cleanFileName(fileName);
 			
 			file = File.desktopDirectory.resolvePath(downloadPath+downloadFile);	
 			request = new URLRequest(fileURL);
