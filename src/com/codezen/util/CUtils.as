@@ -285,6 +285,7 @@ package com.codezen.util
 			str = str.replace("&lsaquo;", "‹");
 			str = str.replace("&rsaquo;", "›");
 			str = str.replace("&euro;", "€");
+			str = str.replace("&#215;", "×");
 			
 			return str;
 			
@@ -297,6 +298,79 @@ package com.codezen.util
 		 */
 		public static function prepareVkVideoTitle(title:String):String{
 			return Trim( convertHTMLEntities(unescapeMultiByte(title)).replace(/\+/gs, " ").replace(/\s\s+/gs, " ") );
+		}
+		
+		/**
+		 *	Levenshtein distance (editDistance) is a measure of the similarity between two strings,
+		 *	The distance is the number of deletions, insertions, or substitutions required to
+		 *	transform p_source into p_target.
+		 *
+		 *	@param p_source The source string.
+		 *
+		 *	@param p_target The target string.
+		 *
+		 *	@returns uint
+		 *
+		 * 	@langversion ActionScript 3.0
+		 *	@playerversion Flash 9.0
+		 *	@tiptext
+		 * 
+		 *  from String Utilities class by Ryan Matsikas
+		 */
+		public static function editDistance(p_source:String, p_target:String):uint {
+			var i:uint;
+			
+			if (p_source == null) { p_source = ''; }
+			if (p_target == null) { p_target = ''; }
+			
+			if (p_source == p_target) { return 0; }
+			
+			var d:Array = new Array();
+			var cost:uint;
+			var n:uint = p_source.length;
+			var m:uint = p_target.length;
+			var j:uint;
+			
+			if (n == 0) { return m; }
+			if (m == 0) { return n; }
+			
+			for (i=0; i<=n; i++) { d[i] = new Array(); }
+			for (i=0; i<=n; i++) { d[i][0] = i; }
+			for (j=0; j<=m; j++) { d[0][j] = j; }
+			
+			for (i=1; i<=n; i++) {
+				
+				var s_i:String = p_source.charAt(i-1);
+				for (j=1; j<=m; j++) {
+					
+					var t_j:String = p_target.charAt(j-1);
+					
+					if (s_i == t_j) { cost = 0; }
+					else { cost = 1; }
+					
+					d[i][j] = _minimum(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1]+cost);
+				}
+			}
+			return d[n][m];
+		}
+		
+		/**
+		 *	Determines the percentage of similiarity, based on editDistance
+		 *
+		 *	@param source The source string.
+		 *	@param target The target string.
+		 *
+		 *	@returns Number
+		 */
+		public static function compareStrings(source:String, target:String):Number {
+			var ed:uint = editDistance(source, target);
+			var maxLen:uint = Math.max(source.length, target.length);
+			if (maxLen == 0) { return 100; }
+			else { return (1 - ed/maxLen) * 100; }
+		}
+		
+		private static function _minimum(a:uint, b:uint, c:uint):uint {
+			return Math.min(a, Math.min(b, Math.min(c,a)));
 		}
 	}
 }

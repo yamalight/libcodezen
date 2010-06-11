@@ -160,7 +160,7 @@ package com.codezen.vkontakte
 			var data:String = evt.target.data;
 			
 			// dispatch error
-			if(data.match('id="myprofile"') == null){
+			if(data.match('forgotPass') != null){
 				// call event
 				dispatchError("Неверный логин или пароль вконтакте!");	
 			}else{
