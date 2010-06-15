@@ -95,7 +95,8 @@
 			[Bindable]
 			private var subNames:Array;
 			private var subArray:Array;
-			private var subEnd:Number;
+			private var subCurrent:Array;
+			private var subIndex:Number;
 			// watched control
 			private var watchedReport:Boolean;
 			// old volume 
@@ -215,6 +216,7 @@
 			private function loadSubtitles(subURL:String):void{
 				// init array
 				subs = new Array();
+				subCurrent = new Array();
 				// load subs
 				var req:URLRequest = new URLRequest(subURL);
 				var srtLoader:URLLoader = new URLLoader();
@@ -222,39 +224,45 @@
 					Alert.show("Неудалось загрузить субтитры, файл отсутствует! Сообщите, пожалуйста, администратору сайта.", "Ошибка загрузки субтитров!");
 				});
 				srtLoader.addEventListener(Event.COMPLETE, function():void{
-					subs = SubtitleParser.parseSRT(srtLoader.data);
-					subEnd = 0;
+					subs = SubtitleParser.parseSRT(srtLoader.data);					
+					subIndex = 0;
 				});
 				srtLoader.load(req);
 			}
 			
 			private function setSubtitles(time:Number):void{
 				var i:int;
-				var text:String;
-				// check for add subtitles
-				for (i = 0; i < subs.length; i++) {
-					if( Math.abs(subs[i].start - time) > 1 ) continue;
-					if (Math.abs(subs[i].start - time) <= 0.05) {
-						text = "\n"+CUtils.stripTags(subs[i].text).slice(0,-1);
-						if(subText.indexOf(text) == -1 ){
-							subText += text;
-						}
-					}
-					if( subs[i].start > time ) break;
+				
+				// add subs to current
+				while(subs[subIndex].start <= time) {
+					subCurrent.push(subs[subIndex]);
+					subIndex++;
+					/*trace(time);
+					trace(subs[subIndex].start);
+					trace(subIndex);
+					trace(subCurrent.length);
+					trace('------');*/
 				}
-			}
-			
-			private function removeSubtitles(time:Number):void{
-				var i:int;
-				var text:String;
-				// check for add subtitles
-				for (i = 0; i < subs.length; i++) {
-					if( Math.abs(subs[i].end - time) > 2 ) continue;
-					if( Math.abs(subs[i].end - time) <= 0.05 ){
-						text = "\n"+CUtils.stripTags(subs[i].text).slice(0,-1);
-						subText = subText.replace(text, "");
+				
+				// delete subs
+				for (i = 0; i < subCurrent.length; i++) {
+					/*trace(time);
+					trace(subs[i].end);
+					trace('------');*/
+					if(subCurrent[i].end < time){
+						subCurrent.splice(i--,1);
 					}
-					if( subs[i].end > (time + 2) ) break;
+				}
+				//trace('======================');
+				
+				// check for display subtitles
+				var text:String;
+				subText = '';
+				if(subCurrent.length > 0){
+					for (i = 0; i < subCurrent.length; i++) {
+						text = "\n"+CUtils.stripTags(subCurrent[i].text).slice(0,-1);
+						subText += text;
+					}
 				}
 			}
 			
@@ -387,7 +395,7 @@
 				}
 				// set subs
 				if(isSub){
-					removeSubtitles(seekOffset+ns.time);
+					//removeSubtitles(seekOffset+ns.time);
 					setSubtitles(seekOffset+ns.time);
 				}
 				// set episode watched
@@ -437,7 +445,8 @@
 					seekOffset = video_seek.value;
 					ns.play(videoURL+"?start="+video_seek.value);
 				}
-				subText = '';
+				subCurrent = [];
+				subIndex = 0;
 				hideTimer.start();
 				video_player.setFocus();
 			}
@@ -648,6 +657,7 @@
 				video_time_end.text = "0:00:00";
 				video_time.text = "0:00:00";
 				subText = "";
+				subCurrent = [];
 				
 				// reset buttons
 				playpause.resetState();
@@ -737,12 +747,14 @@
 						break;
 					case Keyboard.LEFT:
 						if(ns.time < 10) break;
-						subText = '';
+						subCurrent = [];
+						subIndex = 0;
 						ns.seek(ns.time - 10);
 						break;
 					case Keyboard.RIGHT:
 						if(ns.time > totalDuration) break;
-						subText = '';
+						subCurrent = [];
+						subIndex = 0;
 						ns.seek(ns.time + 10);
 						break;
 					case Keyboard.M:
