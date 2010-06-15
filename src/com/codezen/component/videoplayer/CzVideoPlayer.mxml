@@ -61,12 +61,15 @@
 			import mx.controls.Alert;
 			import mx.core.FlexGlobals;
 			import mx.events.CollectionEvent;
+			import mx.events.FlexEvent;
 			import mx.events.ItemClickEvent;
+			import mx.events.StateChangeEvent;
 			import mx.utils.ObjectProxy;
 			import mx.utils.ObjectUtil;
 			
 			import spark.components.Application;
 			import spark.events.DropDownEvent;
+			import spark.events.TrackBaseEvent;
 			import spark.utils.TextFlowUtil;
 			
 			// stream and video
@@ -127,6 +130,12 @@
 			[Embed(source="com/codezen/component/videoplayer/assets/player/pause.png")]
 			[Bindable]
 			public var pauseBtn:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/soundOn.png")]
+			[Bindable]
+			public var muteBtn:Class;
+			[Embed(source="com/codezen/component/videoplayer/assets/player/soundOff.png")]
+			[Bindable]
+			public var unmuteBtn:Class;
 			
 			
 			// init functions
@@ -222,6 +231,7 @@
 			
 			private function loadSubtitles(subURL:String):void{
 				// init array
+				isSub = false;
 				subs = new Array();
 				subCurrent = new ArrayCollection();
 				subCurrent.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCurrentSubChange);
@@ -230,10 +240,13 @@
 				var srtLoader:URLLoader = new URLLoader();
 				srtLoader.addEventListener(IOErrorEvent.IO_ERROR, function():void{
 					Alert.show("Неудалось загрузить субтитры, файл отсутствует! Сообщите, пожалуйста, администратору сайта.", "Ошибка загрузки субтитров!");
+					subs = null;
+					subCurrent = null;
 				});
 				srtLoader.addEventListener(Event.COMPLETE, function():void{
 					subs = SubtitleParser.parseSRT(srtLoader.data);					
 					subIndex = 0;
+					isSub = true;
 				});
 				srtLoader.load(req);
 			}
@@ -274,6 +287,9 @@
 				this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 				video_player.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
 				ns.addEventListener(NetStatusEvent.NET_STATUS, onVideoEnd);
+				
+				video_progress.slider.addEventListener(FlexEvent.CHANGE_END, onSeek);
+				video_progress.slider.dataTipFormatFunction = timeDataTip;
 			}
 			
 			/**
@@ -307,7 +323,7 @@
 			 * 
 			 */
 			private function onHideTimer(e:Event):void{
-				if(video_seek.getFocus() != video_seek){
+				if(video_progress.getFocus() != video_progress){
 					//player_controls.visible = false;
 					//player_data.visible = false;
 					//player_volume.visible = false;
@@ -315,19 +331,20 @@
 				}
 				
 				if( player_data_bg.mouseY > player_data_bg.height ){
-					player_data.visible = false;
+					player_data_bg.visible = false;
 				}
 				
-				if(
-					(player_controls.mouseX < 0) || (player_controls.mouseX > player_controls.width) ||  
-					(player_controls.mouseY < 0) || (player_controls.mouseY > player_controls.height)
-				){
+				if( mouseY < (parent.height - 40) ){
 					player_controls.visible = false;
 				}
 				
-				if(
-					resizer.mouseX < 0 || resizer.mouseY < 0
-				){
+				if( player_subselect.mouseX < 0 || player_subselect.mouseY < 0 ||
+					player_subselect.mouseX > player_subselect.width ||
+					player_subselect.mouseY > player_subselect.height){
+					player_subselect.visible = false;
+				}
+				
+				if(	resizer.mouseX < 0 || resizer.mouseY < 0 ){
 					resizer.visible = false;
 				}
 			}
@@ -347,7 +364,12 @@
 					player_controls.visible = true;
 					//hideTimer.stop();
 				}else if( mouseY < 40 ){
-					player_data.visible = true;
+					player_data_bg.visible = true;
+				}else if( player_subselect.mouseX >= 0 && player_subselect.mouseY >= 0 && 
+					player_subselect.mouseX <= player_subselect.width &&
+					player_subselect.mouseY <= player_subselect.height &&
+					isSub && subNames.length > 1){
+					player_subselect.visible = true;
 				}else{ // otherwise hide
 					if( int(seekOffset+ns.time) != int(totalDuration) ){
 						hideTimer.start();
@@ -386,8 +408,8 @@
 				// set progress
 				setProgress(ns.bytesLoaded/ns.bytesTotal * 100);
 				// set thumb
-				if(video_seek.getFocus() != video_seek){
-					video_seek.value = seekOffset + ns.time;
+				if(video_progress.getFocus() != video_progress){
+					video_progress.position = seekOffset + ns.time;
 				}
 				// set subs
 				if(isSub){
@@ -435,11 +457,11 @@
 			 */
 			private function onSeek(e:Event):void{
 				var bufferedTime:Number = (ns.bytesLoaded/ns.bytesTotal) * totalDuration; 
-				if(video_seek.value < (bufferedTime + seekOffset) && video_seek.value >= seekOffset ){
-					ns.seek(video_seek.value - seekOffset);
+				if(video_progress.slider.value < (bufferedTime + seekOffset) && video_progress.slider.value >= seekOffset ){
+					ns.seek(video_progress.slider.value - seekOffset);
 				}else{
-					seekOffset = video_seek.value;
-					ns.play(videoURL+"?start="+video_seek.value);
+					seekOffset = video_progress.slider.value;
+					ns.play(videoURL+"?start="+video_progress.slider.value);
 				}
 				// clean subs
 				if(isSub){
@@ -563,8 +585,8 @@
 			 * 
 			 */
 			private function setMaximumDur(duration:Number):void{
-				video_seek.minimum = 0;
-				video_seek.maximum = duration;
+				video_progress.slider.minimum = 0;
+				video_progress.slider.maximum = duration;
 				totalDuration = duration;
 				
 				var min:int = duration/60;
@@ -593,7 +615,7 @@
 				//progLeft = 40+video_seek.thumb.x;
 				//video_progress.setProgress( (seekOffset+ns.time)/totalDuration, totalDuration );
 				//asd
-				progressOffset = (seekOffset/totalDuration)*100;
+				video_progress.offset = (seekOffset+ns.time)/totalDuration;
 			}
 			
 			/**
@@ -602,7 +624,7 @@
 			 * 
 			 */
 			private function setProgress(progress:Number):void{
-				video_progress.setProgress(progressOffset+progress, 100);
+				video_progress.progress = progress/100;
 			}
 			
 			/**
@@ -649,9 +671,8 @@
 			 */
 			private function resetPlayer(nofullscreen:Boolean = true):void{
 				// reset controls
-				video_progress.left = 40;
-				video_progress.setProgress(0, 100);
-				video_seek.value = 0;
+				video_progress.progress = 0;
+				video_progress.slider.value = 0;
 				video_time_end.text = "0:00:00";
 				video_time.text = "0:00:00";
 				subText = "";
@@ -759,18 +780,22 @@
 						ns.seek(ns.time + 10);
 						break;
 					case Keyboard.M:
-						if(player_volume.value != 0){
-							volumeLevel = player_volume.value;
-							player_volume.value = 0;
-						}else{
-							player_volume.value = volumeLevel;
-						}
-						ns.soundTransform = new SoundTransform(player_volume.value/100);
+						toggleMute();
 						break;
 					case Keyboard.Q:
 						returnView();
 						break;
 				}
+			}
+			
+			private function toggleMute():void{
+				if(player_volume.value != 0){
+					volumeLevel = player_volume.value;
+					player_volume.value = 0;
+				}else{
+					player_volume.value = volumeLevel;
+				}
+				ns.soundTransform = new SoundTransform(player_volume.value/100);
 			}
 			
 			private function returnView():void{
@@ -905,20 +930,21 @@
 			<s:GlowFilter color="#000000" blurX="0.2" blurY="0.2" alpha="1" strength="1" />
 		</s:filters>
 	</s:TextArea>
-	<s:BorderContainer id="player_data" left="-1" top="-1" right="-1" backgroundAlpha="0" borderAlpha="0" bottom="190"
-					   mouseDown="player_data_mouseDownHandler(event)" showEffect="{showEff}" hideEffect="{hideEff}">
+	<s:BorderContainer id="player_data" left="-1" top="-1" right="-1" backgroundAlpha="0" borderAlpha="0" bottom="190">
 		<s:BorderContainer left="0" top="0" right="0" height="40" backgroundColor="#151515" 
-						   cornerRadius="2" borderColor="#494949" alpha="0.8" id="player_data_bg">
+						   cornerRadius="2" borderColor="#494949" alpha="0.8" id="player_data_bg"
+						   mouseDown="player_data_mouseDownHandler(event)"
+						   showEffect="{showEff}" hideEffect="{hideEff}">
 			<s:Label text=""  textAlign="left" verticalAlign="top"
 				 	id="video_title" left="55" right="258" color="#FFFFFF" bottom="5" top="5" styleName="playerControl"/>
 			<ui:ToggleImage onImage="{onTopLock}" offImage="{onTopNormal}" 
 							id="above_all" right="35" verticalCenter="0" click="{aboveAll()}" toolTip="Поверх всех"
-							width="20" height="20"/>
+							width="22" height="22"/>
 			<ui:ToggleImage onImage="{loopSel}" offImage="{loopOff}" 
 							id="play_nonstop" right="65" verticalCenter="0" toolTip="Играть подряд" 
-							width="20" height="20" visible="{isLoopVisible}"/>
+							width="22" height="22" visible="{isLoopVisible}"/>
 			<mx:Image right="5" verticalCenter="0" useHandCursor="true" buttonMode="true" source="@Embed('assets/player/close_normal.png')"
-					  click="returnView()" toolTip="Закрыть" width="20" height="20"/>
+					  click="returnView()" toolTip="Закрыть" width="22" height="22"/>
 			<mx:Image left="5" top="4" height="30" width="40" id="video_pic" source=""/>
 			<s:DropDownList id="ratio_list" verticalCenter="0" width="165" right="92" color="#E9E9E9" selectedIndex="0"
 							change="{onVideoResize()}" open="ratio_list_openHandler(event)" close="ratio_list_closeHandler(event)" chromeColor="#353535" dropShadowVisible="false">
@@ -932,8 +958,9 @@
 			</s:DropDownList>
 		</s:BorderContainer>
 		<s:BorderContainer verticalCenter="80" right="0" backgroundColor="#1B1B1B" 
-						   visible="{isSubSwitch}"
-						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="64" height="50">
+						   visible="{isSubSwitch}" id="player_subselect"
+						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="64" height="50"
+						   showEffect="{showEff}" hideEffect="{hideEff}">
 			<mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
 						id="subBar" itemClick="subBar_itemClickHandler(event)">
 			</mx:LinkBar>
@@ -948,20 +975,23 @@
 						id="playpause" x="1" click="{togglePlayPause()}" width="32" height="32" verticalCenter="0"/>
 		
 		<!-- VOLUME -->
+		<ui:ToggleImage onImage="{unmuteBtn}" offImage="{muteBtn}" click="{toggleMute()}" width="20" height="20" 
+				  verticalCenter="0" right="140"/>
 		<s:HSlider id="player_volume" minimum="0" maximum="100" value="100" change="{setVolume()}" 
-				   width="100" visible="true" verticalCenter="-1" right="50"/>
+				   width="90" visible="true" verticalCenter="-1" right="50"/>
 		
 		<!-- PROGRESS -->
-		<mx:ProgressBar id="video_progress" labelPlacement="center" label=" "  
-						minimum="0" maximum="100" mode="manual" height="6" verticalCenter="3" left="40" right="280"/>
-		<s:HSlider id="video_seek" change="{onSeek(event)}"
-				   dataTipFormatFunction="{timeDataTip}" liveDragging="false" verticalCenter="-3" left="40" right="280"/>
+		<ui:AdvancedProgressBar verticalCenter="0" left="40" right="265" id="video_progress" >
+		</ui:AdvancedProgressBar>
 		
-		<s:BorderContainer width="95" height="12" verticalCenter="0" backgroundAlpha="0.0" borderVisible="false" dropShadowVisible="false" right="160">
+		<!-- TIME -->
+		<s:BorderContainer width="90" height="15" verticalCenter="0" backgroundAlpha="0.0" borderVisible="false" dropShadowVisible="false" right="170">
 			<s:Label text="0:00:00" color="#FFFFFF" id="video_time" fontFamily="Gothic" left="0" verticalCenter="0"/>
 			<s:Label text="0:00:00" color="#FFFFFF" id="video_time_end" fontFamily="Gothic" verticalCenter="0" left="50"/>
 			<s:Label text="/" color="#FFFFFF" fontFamily="Gothic" left="42" verticalCenter="0"/>
 		</s:BorderContainer>
+		
+		<!-- FULLSCREEN -->
 		<mx:Image source="@Embed('assets/player/fullscreen.png')" id="fullscreen_btn" click="{toggleFullScreen()}" 
 				  width="24" height="24" useHandCursor="true" buttonMode="true" alpha="0.5" verticalCenter="0" right="15"/>
 	</s:BorderContainer>	
