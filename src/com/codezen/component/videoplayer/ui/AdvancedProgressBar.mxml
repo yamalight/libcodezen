@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:BorderContainer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				   xmlns:s="library://ns.adobe.com/flex/spark" 
+				   xmlns:mx="library://ns.adobe.com/flex/mx" width="200" height="15" backgroundAlpha="0.0" 
+				   contentBackgroundAlpha="1.0" borderVisible="false">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			[Bindable]
+			private var _offset:Number = 0;
+			
+			public function set offset(offset:Number):void{
+				//progress_indicator.x = _offset*(this.width);
+				//progress_indicator.width = this.width - progress_indicator.x - 1;
+				_offset = offset;
+			}
+			
+			public function set progress(percent:Number):void{
+				progress_indicator.width = percent * (this.width - progress_indicator.x -1);
+			}
+			
+			public function set position(pos:Number):void{
+				if(slider.getFocus() != slider){
+					slider.value = pos;
+				}
+			}
+		]]>
+	</fx:Script>
+	<!--- 
+		Progress Filler
+		Default values: 
+			x = 1, 
+			width = parent.width - 2 (198 by default) 
+	-->
+	<s:Rect id="progress_indicator" x="{_offset*this.width}" width="{this.width - progress_indicator.x - 1}" 
+			verticalCenter="0" height="9" radiusX="3" radiusY="3">
+		<s:fill>
+			<s:LinearGradient rotation="90">
+				<s:GradientEntry color="#FF0000" ratio="0.33" />
+				<s:GradientEntry color="#000000" />
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	<s:HSlider verticalCenter="0" left="0" right="0" id="slider" 
+			   skinClass="com.codezen.component.videoplayer.ui.AdvancedProgressSlider" 
+			   minimum="0" maximum="100" value="0"/>
+</s:BorderContainer>
