@@ -97,7 +97,7 @@
 			private var isSubSwitch:Boolean;
 			[Bindable]
 			private var subText:String;
-			private var subs:Array;
+			private var subs:ArrayCollection;
 			[Bindable]
 			private var subNames:Array;
 			private var subArray:Array;
@@ -232,7 +232,7 @@
 			private function loadSubtitles(subURL:String):void{
 				// init array
 				isSub = false;
-				subs = new Array();
+				subs = new ArrayCollection();
 				subCurrent = new ArrayCollection();
 				subCurrent.addEventListener(CollectionEvent.COLLECTION_CHANGE, onCurrentSubChange);
 				// load subs

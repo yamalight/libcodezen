@@ -1,9 +1,15 @@
 package com.codezen.component.videoplayer.subs
 {
+	import mx.collections.ArrayCollection;
+	import mx.collections.Sort;
+	import mx.collections.SortField;
+	import mx.utils.ObjectUtil;
+
 	public class SubtitleParser {
-		public static function parseSRT(data : String) : Array {
-			var result : Array = new Array();
+		public static function parseSRT(data : String) : ArrayCollection {
+			var result : ArrayCollection = new ArrayCollection();
 			
+			var sort : Sort;
 			var lines : Array;
 			var translation : SubTitleData;
 			
@@ -36,8 +42,14 @@ package com.codezen.component.videoplayer.subs
 						}
 					}
 				}
-				result.push(translation);
-			}		
+				result.addItem(translation);
+			}
+			
+			sort = new Sort();
+			sort.fields = [new SortField("start")];
+			result.sort = sort;
+			result.refresh();
+			
 			return result;
 		}
 		
