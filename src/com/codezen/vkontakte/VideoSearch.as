@@ -232,7 +232,7 @@ package com.codezen.vkontakte
 			var res:Array;
 			
 			// form regexp
-			re = new RegExp(/{"uid":"(.+?)".+?"host":"(.+?)","vtag":"(.+?)","ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)"}.+?(<div class="ainfo"><b style='color:#000'>(.+?)<\/b>|<\/td>.<\/tr><\/table>)/gs);
+			re = new RegExp(/{"uid":"(.+?)".+?"host":"(.+?)","vtag":"(.+?)","ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)",.+?}.+?(<div class="ainfo"><b style='color:#000'>(.+?)<\/b>|<\/td>.<\/tr><\/table>)/gs);
 			// execute regexp on data
 			res = re.exec(data);
 			
@@ -252,7 +252,7 @@ package com.codezen.vkontakte
 				if(res[9] != null && int( String(res[9]).split(":")[0] ) > finddur){
 					info = new Object();
 					info.uid = res[1];
-					info.host = res[2];
+					info.host = String(res[2]).replace(/\\\\\//gs, "/");
 					info.vtag = res[3];
 					info.ltag = res[4];
 					info.title = CUtils.prepareVkVideoTitle(res[5]);
@@ -260,14 +260,16 @@ package com.codezen.vkontakte
 					info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
 					info.len = (res[9]==null)?"?:??":res[9];
 					if(info.hd == 0){
-						info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+						info.url = info.host+'u'+info.uid+'/video/'+
 							info.vtag+'.flv';
 						info.hd_text = "260p";
 					}else{
-						info.url = 'http://cs'+info.host+'.vkontakte.ru/u'+info.uid+'/video/'+
+						info.url = info.host+'u'+info.uid+'/video/'+
 							info.vtag+'.'+hdDef[int(info.hd)-1][1]+'.mp4';
 						info.hd_text = hdDef[int(info.hd)-1][1]+"p";
 					}
+					
+					trace(ObjectUtil.toString(info));
 	
 					// add res
 					results.addItem(info);
