@@ -128,7 +128,7 @@ package com.codezen.helper
 		 */
 		private function onInitResult(e:SQLEvent):void{
 			e.target.removeEventListener(SQLEvent.RESULT, onInitResult);
-			dispatchEvent(new Event(Worker.INITIALIZED));
+			dispatchEvent(new Event(Event.INIT));
 		}
 		
 		/**

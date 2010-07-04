@@ -4,6 +4,8 @@
     <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressBar"/>
     <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressSlider"/>
     <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressSliderTrack"/>
+    <classEntry path="com.codezen.vkontakte.service.VkBase"/>
+    <classEntry path="com.codezen.vkontakte.VkNews"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>

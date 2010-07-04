@@ -1,7 +1,10 @@
 package com.codezen.helper
 {
+	import com.adobe.protocols.dict.events.ErrorEvent;
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.events.ProgressEvent;
 	
 	import mx.controls.Alert;
 
@@ -12,13 +15,7 @@ package com.codezen.helper
 	 * Base class for classes utilizing event dispatcher and status reports
 	 */
 	public class Worker extends EventDispatcher
-	{
-		// Event dispatcher states
-		public static var INITIALIZED:String = "Initialized";
-		public static var COMPLETE:String = "Complete";
-		public static var PROGRESS:String = "Progress";
-		public static var ERROR:String = "Error";
-		
+	{		
 		// Status var
 		protected var status:String = 'Init me';
 		protected var errorCode:int;
@@ -35,7 +32,7 @@ package com.codezen.helper
 		protected function setStatus(status:String):void{
 			this.status = status;
 			// Dispatch progress event
-			dispatchEvent(new Event(Worker.PROGRESS));
+			dispatchEvent(new Event(ProgressEvent.PROGRESS));
 		}
 		
 		/**
@@ -52,7 +49,7 @@ package com.codezen.helper
 			// set status
 			this.status = status;
 			// Dispatch error event
-			dispatchEvent(new Event(Worker.ERROR));
+			dispatchEvent(new Event(ErrorEvent.ERROR));
 		}
 		
 		/**
@@ -78,7 +75,7 @@ package com.codezen.helper
 		 */
 		protected function endLoad():void{
 			// Dispatch complete event
-			dispatchEvent(new Event(Worker.COMPLETE));
+			dispatchEvent(new Event(Event.COMPLETE));
 		}
 	}
 }

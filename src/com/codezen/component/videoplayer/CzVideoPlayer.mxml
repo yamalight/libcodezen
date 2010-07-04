@@ -72,9 +72,17 @@
 			import spark.events.TrackBaseEvent;
 			import spark.utils.TextFlowUtil;
 			
+			// Event constants // 
+			private const EPISODE_WATCHED:String = "episodeWatched";
+			private const RETURN_VIEW:String = "returnView" ;
+			private const PLAY_PREV:String = "playPrev" ;
+			private const PLAY_NEXT:String = "playNext";
+			
 			// stream and video
 			private var ns:NetStream;
+			private var nc:NetConnection;
 			private var vid:Video;
+			private var customClient:Object;
 			// seek offset
 			private var seekOffset:Number;
 			// url
@@ -170,11 +178,11 @@
 				playState = true;
 				
 				// create new client
-				var customClient:Object = new Object();
+				customClient = new Object();
 				customClient.onMetaData = metaDataHandler;
 				
 				// establish new connection
-				var nc:NetConnection = new NetConnection();
+				nc = new NetConnection();
 				nc.connect(null);
 				
 				// attach stream to connection
@@ -247,6 +255,9 @@
 					subs = SubtitleParser.parseSRT(srtLoader.data);					
 					subIndex = 0;
 					isSub = true;
+					
+					req = null;
+					srtLoader = null;
 				});
 				srtLoader.load(req);
 			}
@@ -282,6 +293,7 @@
 			 */
 			private function setupListeners():void{
 				// assign event listeners
+				//FlexGlobals.topLevelApplication.
 				this.addEventListener(Event.ENTER_FRAME, onPlayerEnterFrame);
 				this.addEventListener(MouseEvent.CLICK, onMouseClick);
 				this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
@@ -421,7 +433,7 @@
 					// set ep watched
 					//setEpisodeWatched(currentEpisode);
 					watchedReport = true;
-					dispatchEvent(new Event("episodeWatched"));
+					dispatchEvent(new Event(EPISODE_WATCHED));
 				}
 			}
 			
@@ -505,7 +517,7 @@
 						//player_controls.bottom = "135";
 						break;
 				}
-				subText = '';
+				//subText = '';
 				video_player.setFocus();
 			}
 			
@@ -671,8 +683,7 @@
 			 */
 			private function resetPlayer(nofullscreen:Boolean = true):void{
 				// reset controls
-				video_progress.progress = 0;
-				video_progress.slider.value = 0;
+				video_progress.reset();
 				video_time_end.text = "0:00:00";
 				video_time.text = "0:00:00";
 				subText = "";
@@ -691,6 +702,7 @@
 				player_episodes_wnd_1.visible = false;
 				player_next_ep_txt.text = "null";
 				player_prev_ep_txt.text = "null";
+				
 				
 				// reset fullscreen
 				if (nofullscreen && stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE){
@@ -806,7 +818,7 @@
 				//
 				Mouse.show();
 				// event
-				dispatchEvent(new Event("returnView"));
+				dispatchEvent(new Event(RETURN_VIEW)); 
 			}
 			
 			private function prevEpisode():void{
@@ -816,8 +828,8 @@
 				// play prev
 				//series_video_list.selectedIndex += 1;
 				//series_video_list.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
-				dispatchEvent(new Event("playPrev"));
-			}
+				dispatchEvent(new Event(PLAY_PREV)); 
+			} 
 			
 			private function nextEpisode():void{
 				// reset player
@@ -826,7 +838,7 @@
 				// play prev
 				//series_video_list.selectedIndex -= 1;
 				//series_video_list.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
-				dispatchEvent(new Event("playNext"));
+				dispatchEvent(new Event(PLAY_NEXT)); 
 			}
 			
 			private function aboveAll():void{

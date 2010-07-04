@@ -11,6 +11,12 @@
 			[Bindable]
 			private var _offset:Number = 0;
 			
+			public function reset():void{
+				_offset = 0;
+				progress_indicator.width = 0;
+				slider.value = 0;
+			}
+			
 			public function set offset(offset:Number):void{
 				//progress_indicator.x = _offset*(this.width);
 				//progress_indicator.width = this.width - progress_indicator.x - 1;
