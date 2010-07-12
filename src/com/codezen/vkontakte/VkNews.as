@@ -40,6 +40,7 @@ package com.codezen.vkontakte
 		{
 			// init coefs
 			feedFilters = new Dictionary();
+			// friends
 			feedFilters['base'] = 2147024896;
 			feedFilters['photos'] = 2;
 			feedFilters['videos'] = 16;
@@ -54,6 +55,9 @@ package com.codezen.vkontakte
 			feedFilters['marks'] = 8;
 			feedFilters['pd'] = 131072;
 			feedFilters['gift'] = 16384;
+			// groups
+			feedFilters['g_base'] = 2147377132;
+			feedFilters['g_news'] = 65536; 
 			
 			// init selectors
 			feedSelectors = new Dictionary();
@@ -70,20 +74,23 @@ package com.codezen.vkontakte
 			feedSelectors['marks'] = true;
 			feedSelectors['pd'] = true;
 			feedSelectors['gift'] = true;
+			feedSelectors['g_news'] = false;
 			
 			// create class
 			this.createClass(login, pass);
 		}
 		
-		public function getFeed():void{
+		public function getFeed(selectors:Dictionary = null, section:String = ''):void{
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onFeedLoad);
 			
+			if(selectors == null) selectors = feedSelectors;
+			
 			// get filter
-			var filter:Number = feedFilters['base'];
+			var filter:Number = (section == 'groups')?feedFilters['g_base']:feedFilters['base'];
 			var key:Object;
-			for (key in feedSelectors) {
-				if(feedSelectors[key] == true){
+			for (key in selectors) {
+				if(selectors[key] == true){
 					filter += feedFilters[key];
 				}
 			}
@@ -98,7 +105,7 @@ package com.codezen.vkontakte
 			vars.filter = filter;
 			vars.offset = 0; 
 			
-			urlRequest.url = "http://vkontakte.ru/newsfeed.php";
+			urlRequest.url = "http://vkontakte.ru/newsfeed.php?section="+escapeMultiByte(section);
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.requestHeaders.push(new URLRequestHeader('X-Requested-With','XMLHttpRequest'));
 			urlRequest.data = vars;
@@ -121,7 +128,7 @@ package com.codezen.vkontakte
 			var xml:XMLList = new XMLList( parser.HTMLtoXML(res.rows) );
 			
 			var newsItem:Object;
-			var newsArr:Array = new Array();
+			results = new ArrayCollection();
 			
 			var list:XML;
 			var items:XMLList;
@@ -136,7 +143,11 @@ package com.codezen.vkontakte
 						newsItem = new Object();
 						// get feed icon
 						if (item..img.attribute("class")[0] == "feedIcon"){
-							newsItem.img = item..img[0].@src; 
+							if(String(item..img[0].@src).match("http://")){
+								newsItem.img = item..img[0].@src;
+							}else{
+								newsItem.img = "http://vkontakte.ru/"+item..img[0].@src;
+							}
 						}
 						// get feed time
 						if(item..td.attribute("class")[2] == "feedTime"){
@@ -146,32 +157,16 @@ package com.codezen.vkontakte
 							newsItem.user_name = item..a[0].text();
 							newsItem.user_id = item..a[0].@href;
 						}
+						if(item..td.attribute("class")[1] == "feedStory"){
+							newsItem.content = String(item..td[1]).replace(/<td.+?>/, "").replace(/<\/td>/, '').replace(/\n/gs, "").replace(/\s\s+/gs, " ").replace(/href="/gs, "href=\"http://vkontakte.ru/"); 
+						}
 						
 						//@TODO: Parse data somehow
-						
-						trace( ObjectUtil.toString(newsItem) );
+						results.addItem(newsItem);
+						//trace( ObjectUtil.toString(newsItem) );
 					}
 				}
-				trace('--------------------------------------');
 			}
-			
-			/*
-			<table class="feedTable  first" cellpadding="0" cellspacing="0" border="0">
-				<tr>
-					<td class="feedIconWrap">
-						<div>
-							<img class="feedIcon" src="images/icons/people_s.gif?2"/>
-						</div>
-					</td>
-					<td class="feedStory">
-						<a class="memLink" href="/tonygreen">Тони Грин</a> Уехал...
-					</td>
-					<td class="feedTime">
-						<div>19:25</div>
-					</td>
-				</tr>
-			</table>
-			*/
 			
 			
 			end();

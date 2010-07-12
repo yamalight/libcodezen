@@ -1,10 +1,15 @@
 package com.codezen.vkontakte
 {
+	import com.adobe.serialization.json.JSON;
 	import com.codezen.helper.Worker;
 	import com.codezen.util.CUtils;
+	import com.codezen.util.HtmlParser;
+	import com.codezen.vkontakte.service.VkBase;
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.filesystem.File;
+	import flash.filesystem.FileStream;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
@@ -18,7 +23,7 @@ package com.codezen.vkontakte
 	import flashx.textLayout.utils.CharacterUtil;
 	
 	import mx.collections.ArrayCollection;
-	import com.codezen.vkontakte.service.VkBase;
+	import mx.utils.ObjectUtil;
 
 	/**
 	 * 
@@ -68,7 +73,7 @@ package com.codezen.vkontakte
 		 * Searches vkontakte.ru for mp3 for given query
 		 */
 		public function findData(query:String, hd:int = 0, finddur:int = 0):void{
-			urlRequest.url = "http://vkontakte.ru/gsearch.php?q="+escapeMultiByte(query)+"&section=video&ajax=1";
+			urlRequest.url = "http://vkontakte.ru/gsearch.php?ajax=1"; // q="+escapeMultiByte(query)+"&section=video&
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSearchLoad);
 			
@@ -111,12 +116,16 @@ package com.codezen.vkontakte
 			//myLoader.close();
 			
 			// get result data
-			var data:String = String(evt.target.data);
+			var data:String = new String(evt.target.data);
 			
 			data = data.replace(/\n/gs, "").replace(/\t/gs, "").replace(/\r/gs, "");
 			data = data.replace(/\\n/gs, "").replace(/\\t/gs, "").replace(/\\r/gs, "");
 			data = data.replace(/\\"/gs, '"');
 			data = data.replace(/\\\//gs, "/");
+			data = data.replace(/\\\\\//gs, "/");
+			data = CUtils.prepareVkVideoTitle(data);
+			
+			trace(data);
 			
 			// create regex
 			var re:RegExp;
@@ -124,9 +133,11 @@ package com.codezen.vkontakte
 			var res:Array;
 			
 			// form regexp
-			re = new RegExp(/{"uid":"(.+?)".+?"host":"(.+?)","vtag":"(.+?)","ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)",.+?}.+?(<div class="ainfo"><b style='color:#000'>(.+?)<\/b>|<\/td>.<\/tr><\/table>)/gs);
+			re = new RegExp(/"uid":"(.+?)".+?"host":"(.+?)".+?"vtag":"(.+?)".+?"ltag":"(.+?)".+?"md_title":"(.+?)".+?"hd":(.+?),.+?"thumb":"(.+?)".+?(class="ainfo".+?style=.color:#000.>(.+?)<\/b>|<\/td.?+\/tr><\/table>)/gs);
 			// execute regexp on data
 			res = re.exec(data);
+			
+			// http://395.gt2.vkadre.ru/assets/videos/4ab02b6b02fd-70281235.vk.flv
 			
 			//trace(data);
 			//trace(ObjectUtil.toString(res));
@@ -141,15 +152,20 @@ package com.codezen.vkontakte
 					continue;
 				}
 				// create new object
+				
+				res['input'] = '';
+				res[0] = '';
+				trace(ObjectUtil.toString(res));
+				
 				if(res[9] != null && int( String(res[9]).split(":")[0] ) > finddur){
 					info = new Object();
 					info.uid = res[1];
-					info.host = String(res[2]).replace(/\\\\\//gs, "/");
+					info.host = res[2];
 					info.vtag = res[3];
 					info.ltag = res[4];
-					info.title = CUtils.prepareVkVideoTitle(res[5]);
+					info.title = res[5];
 					info.hd = res[6];
-					info.thumb = String(res[7]).replace(/\\\\\//gs, "/");
+					info.thumb = res[7];
 					info.len = (res[9]==null)?"?:??":res[9];
 					if(info.hd == 0){
 						info.url = info.host+'u'+info.uid+'/video/'+
@@ -174,6 +190,8 @@ package com.codezen.vkontakte
 			data = null;
 			re = null;
 			res = null;
+			
+			trace(ObjectUtil.toString(results));
 			
 			// init end
 			end();

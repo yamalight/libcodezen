@@ -7,15 +7,22 @@ package com.codezen.vkontakte.service
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
+	import flash.net.URLRequestHeader;
+	import flash.net.URLRequestMethod;
+	import flash.net.URLVariables;
 	import flash.utils.escapeMultiByte;
 	
 	import mx.collections.ArrayCollection;
+	import mx.utils.ObjectUtil;
 	
 	public class VkBase extends Worker
 	{
 		// login and passwork for auth
 		protected var login_mail:String;
 		protected var login_pass:String;
+		
+		// initialized state
+		protected var initialized:Boolean;
 		
 		// result of search
 		protected var results:ArrayCollection;
@@ -32,6 +39,9 @@ package com.codezen.vkontakte.service
 			login_mail = login;
 			login_pass = pass;
 			
+			// init state
+			initialized = false;
+			
 			// init request and loader
 			urlRequest = new URLRequest();
 			myLoader = new URLLoader();
@@ -39,6 +49,15 @@ package com.codezen.vkontakte.service
 			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/";
 			myLoader.dataFormat = URLLoaderDataFormat.TEXT;
 			myLoader.addEventListener(IOErrorEvent.IO_ERROR, onError);
+		}
+		
+		/**
+		 * If class is initialized 
+		 * @return 
+		 * 
+		 */
+		public function get isInitialized():Boolean{
+			return initialized;
 		}
 		
 		/**
@@ -56,6 +75,7 @@ package com.codezen.vkontakte.service
 		 * Must be executed before search 
 		 */
 		public function init():void{
+			trace('VkBase init start');
 			// init request
 			urlRequest.url = "http://vkontakte.ru/";
 			// add event listener and load url
@@ -73,13 +93,18 @@ package com.codezen.vkontakte.service
 			// remove event litener
 			myLoader.removeEventListener(Event.COMPLETE, onCheckLogin);
 			
+			trace('VkBase onCheckLogin done');
+			
 			// get data
 			var data:String = myLoader.data;
+			
+			//trace('data: '+data);
 			
 			// check if logged in
 			if(data.match('id="myfriends"') == null){
 				doLogin();
 			}else{
+				initialized = true;
 				dispatchEvent(new Event(Event.INIT));
 			}
 			
@@ -90,10 +115,78 @@ package com.codezen.vkontakte.service
 		 * Function that does log in to vkontakte.ru 
 		 */
 		protected function doLogin():void{
+			trace('VkBase doLogin');
+			
+			// create vars
+			var vars:URLVariables = new URLVariables();
+			vars.op = "a_login_attempt";
+			
 			// create urlrequester and urlloader
-			urlRequest.url = "http://vkontakte.ru/login.php?email="+
-				escapeMultiByte(login_mail)+"&pass="+
-				escapeMultiByte(login_pass)+"&expire=1";
+			//urlRequest.url = "http://vkontakte.ru/login.php?email="+
+			//	escapeMultiByte(login_mail)+"&pass="+
+			//	escapeMultiByte(login_pass)+"&expire=1";
+			urlRequest.url = "http://vkontakte.ru/login.php";
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.requestHeaders.push(new URLRequestHeader('X-Requested-With','XMLHttpRequest'));
+			urlRequest.data = vars;
+			
+			// add event listener and load url
+			myLoader.addEventListener(Event.COMPLETE, onFirstLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Result parser on reciev
+		 **/
+		protected function onFirstLoad(evt:Event):void{
+			// add event listener and load url
+			myLoader.removeEventListener(Event.COMPLETE, onFirstLoad);
+			
+			trace('first load data: ' +evt.target.data); 
+			
+			// create vars
+			var vars:URLVariables = new URLVariables();
+			vars.email = login_mail;
+			vars.pass = login_pass;
+			vars.expire = '';
+			vars.vk = '';
+			
+			// create urlrequester and urlloader
+			urlRequest.url = "http://login.vk.com/?act=login";
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.requestHeaders.push(new URLRequestHeader('X-Requested-With','XMLHttpRequest'));
+			urlRequest.data = vars;
+			
+			// add event listener and load url
+			myLoader.addEventListener(Event.COMPLETE, onSecondLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Result parser on reciev
+		 **/
+		protected function onSecondLoad(evt:Event):void{
+			// add event listener and load url
+			myLoader.removeEventListener(Event.COMPLETE, onSecondLoad);
+			
+			var data:String = evt.target.data;
+			
+			trace('second load data: ' +data); 
+			
+			var vars:URLVariables = new URLVariables();
+			
+			var re:RegExp = new RegExp(/<input type='hidden' name='(.+?)' value='(.*?)' \/>/gs);
+			var res:Array = re.exec(data);
+			while(res != null){
+				vars[res[1]] = res[2];
+				res = re.exec(data);
+			}
+			
+			// create urlrequester and urlloader
+			urlRequest.url = "http://vkontakte.ru/login.php";
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.requestHeaders.push(new URLRequestHeader('X-Requested-With','XMLHttpRequest'));
+			urlRequest.data = vars;
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSiteLoad);
@@ -110,11 +203,14 @@ package com.codezen.vkontakte.service
 			// get result data
 			var data:String = evt.target.data;
 			
+			trace("FINAL: "+data);
+			
 			// dispatch error
 			if(data.match('forgotPass') != null){
 				// call event
 				dispatchError("Неверный логин или пароль вконтакте!");	
 			}else{
+				initialized = true;
 				dispatchEvent(new Event(Event.INIT));
 			}
 			data = null;

@@ -268,7 +268,11 @@
 					if(subs[subIndex].end >= time && subs[subIndex].duration > 0.05){
 						subCurrent.addItem(subs[subIndex]);
 					}
-					subIndex++;
+					if(subIndex < subs.length-1){
+						subIndex++;
+					}else{
+						break;
+					}
 				}
 				
 				// delete old subs
@@ -690,9 +694,11 @@
 				subCurrent = null;
 				
 				// reset buttons
-				playpause.resetState();
-				play_nonstop.resetState();
-				above_all.resetState();
+				if(nofullscreen){
+					playpause.resetState();
+					play_nonstop.resetState();
+					above_all.resetState();
+				}
 				
 				// reset watch
 				watchedReport = false;

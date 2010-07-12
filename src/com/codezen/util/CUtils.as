@@ -363,6 +363,7 @@ package com.codezen.util
 		 *	@returns Number
 		 */
 		public static function compareStrings(source:String, target:String):Number {
+			if( source == null || target == null ) return -1;
 			var ed:uint = editDistance(source, target);
 			var maxLen:uint = Math.max(source.length, target.length);
 			if (maxLen == 0) { return 100; }
