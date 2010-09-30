@@ -721,6 +721,7 @@
 				// reset on top
 				if(nofullscreen && FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront){
 					FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = !FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront;
+					above_all.selected = false;
 					//above_all.text = "'";
 				}
 				

@@ -8,6 +8,8 @@ package com.codezen.helper
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
 	
+	import mx.utils.ObjectUtil;
+	
 	/**
 	 * 
 	 * @author yamalight
@@ -38,7 +40,6 @@ package com.codezen.helper
 		 */
 		public function DatabaseAsync()
 		{
-			
 		}
 		
 		protected function doInit():void{
@@ -175,7 +176,7 @@ package com.codezen.helper
 			// remove event listener
 			e.target.removeEventListener(SQLEvent.RESULT, onQueryResult);
 			// set result
-			sqlResult = e.target.getResult();
+			sqlResult = e.target.getResult();			
 			// alert end load
 			endLoad();
 		}
