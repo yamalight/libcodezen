@@ -10,6 +10,7 @@ package com.codezen.vkontakte.service
 	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
+	import flash.utils.ByteArray;
 	import flash.utils.escapeMultiByte;
 	
 	import mx.collections.ArrayCollection;
@@ -46,7 +47,14 @@ package com.codezen.vkontakte.service
 			urlRequest = new URLRequest();
 			myLoader = new URLLoader();
 			// set params and add error event listener
-			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/";
+			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/index.php";
+			urlRequest.userAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; ru; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8";
+			urlRequest.manageCookies = true;
+			urlRequest.useCache = true;
+			urlRequest.followRedirects = true;
+			
+			//urlRequest.requestHeaders.push(new URLRequestHeader('Referer','http://vkontakte.ru/index.php'));
+			
 			myLoader.dataFormat = URLLoaderDataFormat.TEXT;
 			myLoader.addEventListener(IOErrorEvent.IO_ERROR, onError);
 		}
@@ -146,10 +154,12 @@ package com.codezen.vkontakte.service
 			
 			// create vars
 			var vars:URLVariables = new URLVariables();
-			vars.email = login_mail;
+			vars.email = login_mail;//.replace("@", "%40");
 			vars.pass = login_pass;
-			vars.expire = '';
-			vars.vk = '';
+			vars.expire = '1';
+			//vars.vk = '';
+			
+			trace(ObjectUtil.toString(vars));
 			
 			// create urlrequester and urlloader
 			urlRequest.url = "http://login.vk.com/?act=login";
@@ -158,6 +168,7 @@ package com.codezen.vkontakte.service
 			urlRequest.data = vars;
 			
 			// add event listener and load url
+			myLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			myLoader.addEventListener(Event.COMPLETE, onSecondLoad);
 			myLoader.load(urlRequest);
 		}
@@ -169,7 +180,9 @@ package com.codezen.vkontakte.service
 			// add event listener and load url
 			myLoader.removeEventListener(Event.COMPLETE, onSecondLoad);
 			
-			var data:String = evt.target.data;
+			// get result data
+			var ba:ByteArray = evt.target.data as ByteArray;
+			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
 			
 			trace('second load data: ' +data); 
 			
@@ -182,8 +195,10 @@ package com.codezen.vkontakte.service
 				res = re.exec(data);
 			}
 			
+			trace(ObjectUtil.toString(vars));
+			
 			// create urlrequester and urlloader
-			urlRequest.url = "http://vkontakte.ru/login.php";
+			urlRequest.url = "http://login.vk.com/?act=login"//vkontakte.ru/login.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.requestHeaders.push(new URLRequestHeader('X-Requested-With','XMLHttpRequest'));
 			urlRequest.data = vars;
@@ -203,7 +218,7 @@ package com.codezen.vkontakte.service
 			// get result data
 			var data:String = evt.target.data;
 			
-			trace("FINAL: "+data);
+			//trace("FINAL: "+data);
 			
 			// dispatch error
 			if(data.match('forgotPass') != null){
