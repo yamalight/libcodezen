@@ -1,7 +1,6 @@
 package com.codezen.helper
-{
-	import com.adobe.protocols.dict.events.ErrorEvent;
-	
+{	
+	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.ProgressEvent;
@@ -42,14 +41,14 @@ package com.codezen.helper
 		 */
 		protected function dispatchError(status:String, title:String = "Error occured!", showAlert:Boolean = true, errorCode:int = 0):void{
 			// show error
-			if(showAlert)
-				Alert.show(status,title);
+			//if(showAlert)
+			//	Alert.show(status,title);
 			// set error code
 			this.errorCode = errorCode;
 			// set status
 			this.status = status;
 			// Dispatch error event
-			dispatchEvent(new Event(ErrorEvent.ERROR));
+			this.dispatchEvent(new ErrorEvent(ErrorEvent.ERROR));
 		}
 		
 		/**

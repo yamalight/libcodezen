@@ -4,7 +4,6 @@ package com.codezen.vkontakte
 	import com.adobe.serialization.json.JSONDecoder;
 	import com.adobe.utils.XMLUtil;
 	import com.codezen.helper.Worker;
-	import com.codezen.util.HtmlParser;
 	import com.codezen.vkontakte.service.VkBase;
 	
 	import flash.events.Event;
@@ -124,8 +123,13 @@ package com.codezen.vkontakte
 			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
 			
 			var res:Object = JSON.decode(data);
-			var parser:HtmlParser = new HtmlParser();
-			var xml:XMLList = new XMLList( parser.HTMLtoXML(res.rows) );
+			//var parser:HtmlParser = new HtmlParser();
+			// FIX HERE!!!!
+			// !!!!!!!!!!!!
+			// !!!!!!!!!!!
+			// parser.HTMLtoXML(res.rows)
+			return;
+			var xml:XMLList = new XMLList(  );
 			
 			var newsItem:Object;
 			results = new ArrayCollection();

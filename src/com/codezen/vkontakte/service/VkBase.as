@@ -47,16 +47,12 @@ package com.codezen.vkontakte.service
 			urlRequest = new URLRequest();
 			myLoader = new URLLoader();
 			// set params and add error event listener
-			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/index.php";
-			urlRequest.userAgent = "Mozilla/5.0 (Windows; U; Windows NT 6.1; ru; rv:1.9.2.8) Gecko/20100722 Firefox/3.6.8";
-			urlRequest.manageCookies = true;
-			urlRequest.useCache = true;
-			urlRequest.followRedirects = true;
-			
-			//urlRequest.requestHeaders.push(new URLRequestHeader('Referer','http://vkontakte.ru/index.php'));
-			
-			myLoader.dataFormat = URLLoaderDataFormat.TEXT;
+			urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/";
+			//myLoader.dataFormat = URLLoaderDataFormat.TEXT;
+			myLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			myLoader.addEventListener(IOErrorEvent.IO_ERROR, onError);
+			// run init
+			init();
 		}
 		
 		/**
@@ -83,7 +79,7 @@ package com.codezen.vkontakte.service
 		 * Must be executed before search 
 		 */
 		public function init():void{
-			trace('VkBase init start');
+			//trace('VkBase init start');
 			// init request
 			urlRequest.url = "http://vkontakte.ru/";
 			// add event listener and load url
@@ -101,10 +97,11 @@ package com.codezen.vkontakte.service
 			// remove event litener
 			myLoader.removeEventListener(Event.COMPLETE, onCheckLogin);
 			
-			trace('VkBase onCheckLogin done');
+			//trace('VkBase onCheckLogin done');
 			
 			// get data
-			var data:String = myLoader.data;
+			var ba:ByteArray = myLoader.data as ByteArray;
+			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
 			
 			//trace('data: '+data);
 			
@@ -123,7 +120,7 @@ package com.codezen.vkontakte.service
 		 * Function that does log in to vkontakte.ru 
 		 */
 		protected function doLogin():void{
-			trace('VkBase doLogin');
+			//trace('VkBase doLogin');
 			
 			// create vars
 			var vars:URLVariables = new URLVariables();
@@ -150,16 +147,18 @@ package com.codezen.vkontakte.service
 			// add event listener and load url
 			myLoader.removeEventListener(Event.COMPLETE, onFirstLoad);
 			
-			trace('first load data: ' +evt.target.data); 
+			var ba:ByteArray = myLoader.data as ByteArray;
+			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
+			
+			//trace('first load data: ' +data); 
 			
 			// create vars
 			var vars:URLVariables = new URLVariables();
-			vars.email = login_mail;//.replace("@", "%40");
+			vars.email = login_mail;
 			vars.pass = login_pass;
 			vars.expire = '1';
-			//vars.vk = '';
-			
-			trace(ObjectUtil.toString(vars));
+			vars.al_test = '1';
+			vars.vk = '';
 			
 			// create urlrequester and urlloader
 			urlRequest.url = "http://login.vk.com/?act=login";
@@ -168,7 +167,6 @@ package com.codezen.vkontakte.service
 			urlRequest.data = vars;
 			
 			// add event listener and load url
-			myLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			myLoader.addEventListener(Event.COMPLETE, onSecondLoad);
 			myLoader.load(urlRequest);
 		}
@@ -180,11 +178,10 @@ package com.codezen.vkontakte.service
 			// add event listener and load url
 			myLoader.removeEventListener(Event.COMPLETE, onSecondLoad);
 			
-			// get result data
-			var ba:ByteArray = evt.target.data as ByteArray;
+			var ba:ByteArray = myLoader.data as ByteArray;
 			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
 			
-			trace('second load data: ' +data); 
+			//trace('second load data: ' +data); 
 			
 			var vars:URLVariables = new URLVariables();
 			
@@ -195,10 +192,8 @@ package com.codezen.vkontakte.service
 				res = re.exec(data);
 			}
 			
-			trace(ObjectUtil.toString(vars));
-			
 			// create urlrequester and urlloader
-			urlRequest.url = "http://login.vk.com/?act=login"//vkontakte.ru/login.php";
+			urlRequest.url = "http://vkontakte.ru/login.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.requestHeaders.push(new URLRequestHeader('X-Requested-With','XMLHttpRequest'));
 			urlRequest.data = vars;
@@ -216,7 +211,8 @@ package com.codezen.vkontakte.service
 			myLoader.removeEventListener(Event.COMPLETE, onSiteLoad);
 			
 			// get result data
-			var data:String = evt.target.data;
+			var ba:ByteArray = myLoader.data as ByteArray;
+			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
 			
 			//trace("FINAL: "+data);
 			
@@ -225,6 +221,7 @@ package com.codezen.vkontakte.service
 				// call event
 				dispatchError("Неверный логин или пароль вконтакте!");	
 			}else{
+				trace('vklogin initialized');
 				initialized = true;
 				dispatchEvent(new Event(Event.INIT));
 			}

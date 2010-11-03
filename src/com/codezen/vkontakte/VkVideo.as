@@ -3,7 +3,6 @@ package com.codezen.vkontakte
 	import com.adobe.serialization.json.JSON;
 	import com.codezen.helper.Worker;
 	import com.codezen.util.CUtils;
-	import com.codezen.util.HtmlParser;
 	import com.codezen.vkontakte.service.VkBase;
 	
 	import flash.events.Event;
@@ -155,7 +154,7 @@ package com.codezen.vkontakte
 				
 				res['input'] = '';
 				res[0] = '';
-				trace(ObjectUtil.toString(res));
+				//trace(ObjectUtil.toString(res));
 				
 				if(res[9] != null && int( String(res[9]).split(":")[0] ) > finddur){
 					info = new Object();
@@ -191,7 +190,7 @@ package com.codezen.vkontakte
 			re = null;
 			res = null;
 			
-			trace(ObjectUtil.toString(results));
+			//trace(ObjectUtil.toString(results));
 			
 			// init end
 			end();
