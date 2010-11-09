@@ -359,6 +359,7 @@
 			// counter
 			var num:int = 0;
 			var dur:int = 0;
+			var duration:String = '';
 			
 			// parse list
 			for each(var item:XML in songsList){
@@ -367,10 +368,22 @@
 				}else{
 					dur = 0;
 				}
+				
+				var secs:int = dur/(60*60);
+				var mins:int = secs/60;
+				secs = secs - mins*60;
+				if( secs < 10 ){ 
+					duration = mins+":0"+secs;
+				}else{
+					duration = mins+":"+secs;
+				}
+				
 				songs.addItem({id:item.@id,
 					num:num,
 					name:item.children()[0].text(),
-					dur:dur});
+					dur:dur,
+					duration:duration
+				});
 				//trace('find track:'+ item.children()[0].text());
 				num++;
 			}
@@ -386,9 +399,9 @@
 		/**
 		 * Loads a covers of found albums 
 		 */		
-		public function findAlbumCover(albumName:String):void{		
+		public function findAlbumCover(albumName:String, artist:String = null):void{		
 			// generate search string
-			var search_string:String = artistname+"/";
+			var search_string:String = (artist == null)?artistname:artist+"/";
 			search_string += CUtils.urlEncode( String(albumName).replace(/\(.*?\)/gs, "") );
 			// Generate url
 			var search_url:String = lastCoverURL.replace("%artistalbum%",search_string);
@@ -423,7 +436,7 @@
 			//if(cover.length < 0){ trace('error'); return; }
 			
 			// Report status
-			setStatus('Found '+(albums.length-counter+1)+' of '+albums.length+' covers.. Continuing');
+			setStatus('Found cover.. Continuing');
 			//setStatus('Найдено '+(albums.length-counter+1)+' из '+albums.length+' картинок. Продолжаем..');
 			
 			// save album cover url
@@ -439,6 +452,30 @@
 		}
 		
 		/**
+		 * 
+		 * @param e
+		 * 
+		 * Generic IO Error event handler
+		 */
+		protected function onAlbumsIOError(e:IOErrorEvent):void{
+			// remove event listener
+			myInfoLoader.removeEventListener(IOErrorEvent.IO_ERROR, onAlbumsIOError);
+			// close loader
+			//myInfoLoader.close();
+			
+			// Report status
+			setStatus('Not found cover.. Continuing');
+			//setStatus('Найдено '+(albums.length-counter+1)+' из '+albums.length+' картинок. Продолжаем..');
+			
+			// set default cover
+			albumCover = "http://cdn.last.fm/flatness/catalogue/noimage/2/default_album_medium.png";
+			
+			// end
+			endLoad();
+		}
+
+		
+		/**
 		 * Dispatches end of load event and does cleanup 
 		 */
 		override protected function endLoad():void{
@@ -452,29 +489,6 @@
 			//setStatus('Поиск завершен!');
 			// Dispatch complete event
 			dispatchEvent(new Event(Event.COMPLETE));
-		}
-		
-		/**
-		 * 
-		 * @param e
-		 * 
-		 * Generic IO Error event handler
-		 */
-		protected function onAlbumsIOError(e:IOErrorEvent):void{
-			// remove event listener
-			myInfoLoader.removeEventListener(IOErrorEvent.IO_ERROR, onAlbumsIOError);
-			// close loader
-			//myInfoLoader.close();
-			
-			// Report status
-			setStatus('Found '+(albums.length-counter+1)+' of '+albums.length+' covers.. Continuing');
-			//setStatus('Найдено '+(albums.length-counter+1)+' из '+albums.length+' картинок. Продолжаем..');
-			
-			// set default cover
-			albumCover = "http://cdn.last.fm/flatness/catalogue/noimage/2/default_album_medium.png";
-			
-			// end
-			endLoad();
 		}
 		
 		/**

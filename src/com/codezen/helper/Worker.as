@@ -48,7 +48,7 @@ package com.codezen.helper
 			// set status
 			this.status = status;
 			// Dispatch error event
-			this.dispatchEvent(new ErrorEvent(ErrorEvent.ERROR));
+			this.dispatchEvent(new ErrorEvent(ErrorEvent.ERROR, true, false, status));
 		}
 		
 		/**

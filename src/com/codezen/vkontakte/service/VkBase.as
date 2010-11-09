@@ -185,7 +185,7 @@ package com.codezen.vkontakte.service
 			
 			var vars:URLVariables = new URLVariables();
 			
-			var re:RegExp = new RegExp(/<input type='hidden' name='(.+?)' value='(.*?)' \/>/gs);
+			var re:RegExp = new RegExp(/<input type=['|"]hidden['|"] name=['|"](.+?)['|"] value=['|"](.*?)['|"] \/>/gs);
 			var res:Array = re.exec(data);
 			while(res != null){
 				vars[res[1]] = res[2];
