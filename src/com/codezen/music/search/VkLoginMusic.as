@@ -1,7 +1,7 @@
 package com.codezen.music.search
 {
 	import com.codezen.util.CUtils;
-	import com.codezen.vkontakte.service.VkBase;
+	import com.codezen.vkontakte.ajax.service.VkBase;
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;

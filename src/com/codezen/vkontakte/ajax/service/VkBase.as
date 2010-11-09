@@ -1,4 +1,4 @@
-package com.codezen.vkontakte.service
+package com.codezen.vkontakte.ajax.service
 {
 	import com.codezen.helper.Worker;
 	

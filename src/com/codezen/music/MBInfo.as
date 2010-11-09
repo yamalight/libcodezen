@@ -369,8 +369,8 @@
 					dur = 0;
 				}
 				
-				var secs:int = dur/(60*60);
-				var mins:int = secs/60;
+				var secs:int = dur/1000;
+				var mins:int = Math.floor(secs/60);
 				secs = secs - mins*60;
 				if( secs < 10 ){ 
 					duration = mins+":0"+secs;

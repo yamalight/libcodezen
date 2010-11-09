@@ -1,9 +1,9 @@
-package com.codezen.vkontakte
+package com.codezen.vkontakte.ajax
 {
 	import com.adobe.serialization.json.JSON;
 	import com.codezen.helper.Worker;
 	import com.codezen.util.CUtils;
-	import com.codezen.vkontakte.service.VkBase;
+	import com.codezen.vkontakte.ajax.service.VkBase;
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
