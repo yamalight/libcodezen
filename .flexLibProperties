@@ -11,8 +11,9 @@
     <classEntry path="com.codezen.music.search.ISearch"/>
     <classEntry path="com.codezen.music.search.VkApiMusic"/>
     <classEntry path="com.codezen.music.MusicFinder"/>
-    <classEntry path="com.codezen.vkontakte.api.Base"/>
+    <classEntry path="com.codezen.vkontakte.api.service.Base"/>
     <classEntry path="com.codezen.vkontakte.api.News"/>
+    <classEntry path="com.codezen.vkontakte.api.data.NewsItem"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
