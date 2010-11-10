@@ -8,18 +8,10 @@ package com.codezen.vkontakte.api.data
 		public var id:String;
 		
 		/**
-		 * User ID 
+		 * User 
 		 */
-		public var uid:String;
-		// user name, nickname, lastname
 		[Bindable]
-		public var user_name:String;
-		public var user_nname:String;
-		[Bindable]
-		public var user_lname:String;
-		public var user_sex:String;
-		[Bindable]
-		public var user_photo:String;
+		public var user:User;
 		
 		/**
 		 * Timestamp 
@@ -32,16 +24,21 @@ package com.codezen.vkontakte.api.data
 		[Bindable]
 		public var text:String;
 		
+		
 		/**
-		 * Media owned ID 
+		 * Photo var 
 		 */
-		public var owner:String;
+		[Bindable]
+		public var photo:Photo;
 		
 		/**
 		 * Media item ID 
 		 */
 		public var item:String;
-		
+		/**
+		 * Media owned ID 
+		 */
+		public var owner:String;
 		
 		/**
 		 * Item type: text, photo, audio, video(?) 

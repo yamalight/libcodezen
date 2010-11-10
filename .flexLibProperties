@@ -13,6 +13,8 @@
     <classEntry path="com.codezen.vkontakte.api.service.Base"/>
     <classEntry path="com.codezen.vkontakte.api.News"/>
     <classEntry path="com.codezen.vkontakte.api.data.NewsItem"/>
+    <classEntry path="com.codezen.vkontakte.api.data.User"/>
+    <classEntry path="com.codezen.vkontakte.api.data.Photo"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
