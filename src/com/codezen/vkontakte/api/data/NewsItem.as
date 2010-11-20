@@ -1,17 +1,16 @@
 package com.codezen.vkontakte.api.data
 {
+	import mx.collections.ArrayCollection;
+
 	public final class NewsItem
 	{
 		/**
-		 * Item ID 
-		 */
-		public var id:String;
-		
-		/**
-		 * User 
+		 * User and group  
 		 */
 		[Bindable]
-		public var user:User;
+		public var user:UserData;
+		[Bindable]
+		public var group:GroupData;
 		
 		/**
 		 * Timestamp 
@@ -24,21 +23,20 @@ package com.codezen.vkontakte.api.data
 		[Bindable]
 		public var text:String;
 		
-		
 		/**
-		 * Photo var 
+		 * media vars 
 		 */
 		[Bindable]
-		public var photo:Photo;
+		public var photo:PhotoItem;
+		[Bindable]
+		public var video:VideoItem;
+		[Bindable]
+		public var audio:AudioItem;
 		
 		/**
-		 * Media item ID 
+		 * media arrays
 		 */
-		public var item:String;
-		/**
-		 * Media owned ID 
-		 */
-		public var owner:String;
+		public var photos:ArrayCollection;
 		
 		/**
 		 * Item type: text, photo, audio, video(?) 
