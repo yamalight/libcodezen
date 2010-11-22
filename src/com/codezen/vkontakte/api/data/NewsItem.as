@@ -42,5 +42,8 @@ package com.codezen.vkontakte.api.data
 		 * Item type: text, photo, audio, video(?) 
 		 */
 		public var type:String;
+		
+		// source 
+		public var source:String = "vk";
 	}
 }
