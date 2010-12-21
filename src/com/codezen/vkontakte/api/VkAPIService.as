@@ -111,12 +111,12 @@ package com.codezen.vkontakte.api
 				newsItem.time = item.date.text();
 				
 				// user/group data
-				if( int(item.source_id) > 0 ){
+				if( int(item.source_id) > 0 ){					
 					newsItem.user = new UserData();
 					newsItem.user.id = item.source_id.text();
 					newsItem.user.name = profiles.(uid == newsItem.user.id).first_name.text();
 					newsItem.user.lastname = profiles.(uid == newsItem.user.id).last_name.text();
-					newsItem.user.photo = profiles.(uid == newsItem.user.id).photo_rec.text();
+					newsItem.user.photo = profiles.(uid == newsItem.user.id).photo.text();
 				}else{
 					newsItem.group = new GroupData();
 					newsItem.group.id = Math.abs( int(item.source_id) ).toString();
@@ -135,6 +135,7 @@ package com.codezen.vkontakte.api
 									newsItem.photo = new PhotoItem();
 									newsItem.photo.id = item.attachment.photo.pid.text();
 									newsItem.photo.owner = item.attachment.photo.owner_id.text();
+									newsItem.photo.album = item.attachment.photo.aid.text();
 									newsItem.photo.src = item.attachment.photo.src.text();
 									newsItem.photo.src_big = item.attachment.photo.src_big.text();
 									break;
@@ -142,6 +143,7 @@ package com.codezen.vkontakte.api
 									newsItem.photo = new PhotoItem();
 									newsItem.photo.id = item.attachment.posted_photo.pid.text();
 									newsItem.photo.owner = item.attachment.posted_photo.owner_id.text();
+									newsItem.photo.album = item.attachment.photo.aid.text();
 									newsItem.photo.src = item.attachment.posted_photo.src.text();
 									newsItem.photo.src_big = item.attachment.posted_photo.src_big.text();
 									break;
@@ -173,6 +175,7 @@ package com.codezen.vkontakte.api
 							photo = new PhotoItem();
 							photo.id = subitem.pid.text();
 							photo.owner = subitem.owner_id.text();
+							photo.album = subitem.aid.text();
 							photo.src = subitem.src.text();
 							photo.src_big = subitem.src_big.text();
 							newsItem.photos.addItem(photo);
