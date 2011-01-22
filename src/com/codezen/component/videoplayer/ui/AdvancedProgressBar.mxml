@@ -8,8 +8,10 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
+			import mx.events.FlexEvent;
 			[Bindable]
 			private var _offset:Number = 0;
+			private var changing:Boolean = false;
 			
 			public function reset():void{
 				_offset = 0;
@@ -28,10 +30,22 @@
 			}
 			
 			public function set position(pos:Number):void{
-				if(slider.getFocus() != slider){
+				if(slider.getFocus() != slider && !changing){
 					slider.value = pos;
 				}
 			}
+
+			protected function slider_changeStartHandler(event:FlexEvent):void
+			{
+				changing = true;
+			}
+
+
+			protected function slider_changeEndHandler(event:FlexEvent):void
+			{
+				changing = false;
+			}
+
 		]]>
 	</fx:Script>
 	<!--- 
@@ -51,5 +65,8 @@
 	</s:Rect>
 	<s:HSlider verticalCenter="0" left="0" right="0" id="slider" 
 			   skinClass="com.codezen.component.videoplayer.ui.AdvancedProgressSlider" 
-			   minimum="0" maximum="100" value="0"/>
+			   minimum="0" maximum="100" value="0"
+			   changeStart="slider_changeStartHandler(event)"
+			   changeEnd="slider_changeEndHandler(event)"
+			   />
 </s:BorderContainer>

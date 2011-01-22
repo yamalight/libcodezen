@@ -20,6 +20,7 @@ package com.codezen.vkontakte.api.service
 		// app data
 		protected var appID:String;
 		protected var appKey:String;
+		private var silentInit:Boolean;
 		
 		// auth data
 		protected var expire:String;
@@ -39,9 +40,10 @@ package com.codezen.vkontakte.api.service
 		protected var html:HTML;
 		protected var window:Window;
 		
-		public function Base(appID:String, appKey:String){
+		public function Base(appID:String, appKey:String, silentInit:Boolean){
 			this.appID = appID;
 			this.appKey = appKey;
+			this.silentInit = silentInit;
 			createClass();
 		}
 		
@@ -82,7 +84,7 @@ package com.codezen.vkontakte.api.service
 			window = new Window();
 			window.width = 600;
 			window.height = 500;
-			window.title = "Vkonatke.ru Authorisation";
+			window.title = "Vkonatke.ru Authorization";
 			window.alwaysInFront = true;
 			window.resizable = false;
 			window.showStatusBar = false;
@@ -98,6 +100,10 @@ package com.codezen.vkontakte.api.service
 			window.addElement( html );
 			
 			// show window
+			if( silentInit ){
+				window.visible = false;
+			}
+			
 			window.open(true);
 			
 			//html.htmlLoader.load( new URLRequest("http://vkontakte.ru/login.php?app="+appID+"&layout=popup&type=browser&settings=16363") );
@@ -110,6 +116,7 @@ package com.codezen.vkontakte.api.service
 		 * On recieve index page of vkontakte.ru
 		 */
 		protected function onLocationChange(e:Event):void{
+			trace(html.location);
 			// check status 
 			if (html.location.indexOf("login_success") > 0 ){
 				// remove event litener

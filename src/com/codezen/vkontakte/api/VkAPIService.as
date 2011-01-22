@@ -25,16 +25,18 @@ package com.codezen.vkontakte.api
 	{
 		// statuses result
 		private var statuses:ArrayCollection;
-		// video data
-		private var _videoData:ArrayCollection;
+		// videos data
+		private var _videosData:ArrayCollection;
 		// audio data
 		private var _audioData:Object;
+		// video data
+		private var _videoData:Object;
 		// user data
 		private var _userData:Object;
 		
-		public function VkAPIService(appID:String, appKey:String)
+		public function VkAPIService(appID:String, appKey:String, silentInit:Boolean)
 		{
-			super(appID, appKey);
+			super(appID, appKey, silentInit);
 		}
 		
 		public function get statusList():ArrayCollection{
@@ -45,24 +47,29 @@ package com.codezen.vkontakte.api
 			return _audioData;
 		}
 		
+		public function get videoData():Object{
+			return _videoData;
+		}
+		
 		public function get userData():Object{
 			return _userData;
 		}
 		
-		public function getStatuses():void{
+		public function getStatuses(time:Number = 0):void{
 			if(!initialized) return;
 			
 			var activity:String = "newsfeed.get";
 			var count:String = "100";
 			
-			// generate hash
-			var md5hash:String =  MD5.encrypt(
-				mid+
+			var md5_string:String = mid+
 				"api_id="+appID+
 				"count="+count+
-				"method="+activity+
-				"v=3.0"+
-				secret);
+				"method="+activity;
+			if(time != 0) md5_string += "start_time="+time;
+			md5_string += "v=3.0"+secret; 
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(md5_string);
 			
 			var vars:URLVariables = new URLVariables();
 			vars.api_id = appID;
@@ -71,6 +78,7 @@ package com.codezen.vkontakte.api
 			vars.sig = md5hash;
 			vars.v = "3.0";
 			vars.sid = sid;//+'&'+format;
+			if(time != 0) vars.start_time = time;
 			
 			// assign url
 			urlRequest.url =  'http://api.vkontakte.ru/api.php';
@@ -87,7 +95,7 @@ package com.codezen.vkontakte.api
 			
 			// create new collections
 			statuses = new ArrayCollection();
-			_videoData = new ArrayCollection();
+			_videosData = new ArrayCollection();
 			
 			// get data
 			var xml:XML = new XML(myLoader.data);
@@ -154,7 +162,7 @@ package com.codezen.vkontakte.api
 									newsItem.video.title = item.attachment.video.title.text();
 									newsItem.video.dur = item.attachment.video.duration.text();
 									
-									_videoData.addItem({id: newsItem.video.id, owner: newsItem.video.owner});
+									_videosData.addItem({id: newsItem.video.id, owner: newsItem.video.owner});
 									break;
 								case "audio":
 									newsItem.audio = new AudioItem();
@@ -202,9 +210,9 @@ package com.codezen.vkontakte.api
 			var vids:String = "";
 			var i:int = 0;
 			
-			for(i = 0; i < _videoData.length; i++){
-				vids += _videoData[i].owner + "_" + _videoData[i].id;
-				if(i < (_videoData.length-1) ) vids += ",";
+			for(i = 0; i < _videosData.length; i++){
+				vids += _videosData[i].owner + "_" + _videosData[i].id;
+				if(i < (_videosData.length-1) ) vids += ",";
 			}
 			
 			// generate hash
@@ -257,6 +265,68 @@ package com.codezen.vkontakte.api
 		}
 		
 		/**
+		 * Gets video data by userid_vidid 
+		 * @param id
+		 * 
+		 */
+		public function getVideoData(vids:String):void{
+			var activity:String = "video.get";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"api_id="+appID+
+				"method="+activity+
+				"v=3.0"+
+				"videos="+vids+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.videos = vids;
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;//+'&'+format;
+			
+			// assign url
+			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			myLoader.addEventListener(Event.COMPLETE, onVideoDataRecieve);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onVideoDataRecieve(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onVideoDataRecieve);
+			
+			var vids:XMLList = new XMLList( XML(myLoader.data).video );
+			
+			_videoData = new Object();
+			_videoData.image = vids.image.text();
+			_videoData.src = "http://vk.com/video"+vids.owner_id.text()+"_"+vids.vid.text();
+			_videoData.title = vids.title.text();
+			_videoData.dur = vids.duration.text();
+			_videoData.date = vids.date.text();
+			/*
+			RESPONSE:
+			<video>
+			<vid>158411118</vid>
+			<owner_id>117969393</owner_id>
+			<title>Test</title>
+			<description/>
+			<duration>30</duration>
+			<link>video158411118</link>
+			<image>http://cs12622.vkontakte.ru/u117969393/video/m_b87e3c75.jpg</image>
+			<date>1293207454</date>
+			</video>
+			*/
+			
+			end();
+		}
+		
+		/**
 		 * Gets song data 
 		 * @param songid
 		 * 
@@ -286,6 +356,8 @@ package com.codezen.vkontakte.api
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
+			trace( ObjectUtil.toString(urlRequest) );
+			
 			// load
 			myLoader.addEventListener(Event.COMPLETE, onAudioData);
 			myLoader.load(urlRequest);
@@ -295,13 +367,15 @@ package com.codezen.vkontakte.api
 			// remove
 			myLoader.removeEventListener(Event.COMPLETE, onAudioData);
 			
+			//trace(myLoader.data)
+			
 			// get result
 			var xml:XML = new XML(myLoader.data);
 			
 			_audioData = {
-				artist: xml.audio.artist,
-				title: xml.audio.title,
-				url: xml.audio.url
+				artist: xml.audio.artist.text(),
+				title: xml.audio.title.text(),
+				url: xml.audio.url.text()
 			};
 			
 			end();

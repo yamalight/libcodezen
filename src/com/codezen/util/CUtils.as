@@ -2,8 +2,11 @@ package com.codezen.util
 {
 	import flash.utils.ByteArray;
 	import flash.utils.unescapeMultiByte;
+	import flash.xml.XMLNode;
+	import flash.xml.XMLNodeType;
 	
 	import mx.collections.ArrayCollection;
+	import mx.utils.ObjectProxy;
 	
 	public final class CUtils
 	{		
@@ -55,10 +58,13 @@ package com.codezen.util
 		 * 
 		 */
 		public static function getItemIndexByProperty(array:ArrayCollection, property:String, value:String):int{
-			for (var i:int = 0; i < array.length; i++)
+			var obj:Object;
+			var i:int;
+			var size:int = array.length;
+			for (i = 0; i < size; i++)
 			{
-				var obj:Object = Object(array[i])
-				if (obj[property] == value)
+				obj = array[i] as Object;
+				if (obj.hasOwnProperty(property) && obj[property] == value)
 					return i;
 			}
 			return -1;
@@ -166,129 +172,136 @@ package com.codezen.util
 		 * 
 		 */
 		public static function convertHTMLEntities(str:String):String {
-			str = str.replace("&quot;", "\"");
-			str = str.replace("&apos;", "'");
-			str = str.replace("&amp;", "&");
-			str = str.replace("&lt;", "<");
-			str = str.replace("&gt;", ">");
-			str = str.replace("&nbsp;", " ");
-			str = str.replace("&iexcl;", "¡");
-			str = str.replace("&curren;", "Û");
-			str = str.replace("&cent;", "¢");
-			str = str.replace("&pound;", "£");
-			str = str.replace("&yen;", "´");
-			str = str.replace("&brvbar;", "¦");
-			str = str.replace("&sect;", "¤");
-			str = str.replace("&uml;", "¬");
-			str = str.replace("&copy;", "©");
-			str = str.replace("&ordf;", "»");
-			str = str.replace("&laquo;", "«");
-			str = str.replace("&not;", "Â");
-			str = str.replace("&shy;", "Ð");
-			str = str.replace("&reg;", "®");
-			str = str.replace("&trade;", "™");
-			str = str.replace("&macr;", "ø");
-			str = str.replace("&deg;", "¡");
-			str = str.replace("&plusmn;", "±");
-			str = str.replace("&sup2;", "Ó");
-			str = str.replace("&sup3;", "Ò");
-			str = str.replace("&acute;", "«");
-			str = str.replace("&micro;", "µ");
-			str = str.replace("&para;", "¦");
-			str = str.replace("&middot;", "á");
-			str = str.replace("&cedil;", "ü");
-			str = str.replace("&sup1;", "Õ");
-			str = str.replace("&ordm;", "¼");
-			str = str.replace("&raquo;", "»");
-			str = str.replace("&frac14;", "¹");
-			str = str.replace("&frac12;", "¸");
-			str = str.replace("&frac34;", "²");
-			str = str.replace("&iquest;", "À");
-			str = str.replace("&times;", "×");
-			str = str.replace("&divide;", "Ö");
-			str = str.replace("&Agrave;", "À");
-			str = str.replace("&Aacute;", "Á");
-			str = str.replace("&Acirc;", "Â");
-			str = str.replace("&Atilde;", "Ã");
-			str = str.replace("&Auml;", "Ä");
-			str = str.replace("&Aring;", "Å");
-			str = str.replace("&AElig;", "Æ");
-			str = str.replace("&Ccedil;", "Ç");
-			str = str.replace("&Egrave;", "È");
-			str = str.replace("&Eacute;", "É");
-			str = str.replace("&Ecirc;", "Ê");
-			str = str.replace("&Euml;", "Ë");
-			str = str.replace("&Igrave;", "Ì");
-			str = str.replace("&Iacute;", "Í");
-			str = str.replace("&Icirc;", "Î");
-			str = str.replace("&Iuml;", "Ï");
-			str = str.replace("&ETH;", "Ð");
-			str = str.replace("&Ntilde;", "Ñ");
-			str = str.replace("&Ograve;", "Ò");
-			str = str.replace("&Oacute;", "Ó");
-			str = str.replace("&Ocirc;", "Ô");
-			str = str.replace("&Otilde;", "Õ");
-			str = str.replace("&Ouml;", "Ö");
-			str = str.replace("&Oslash;", "Ø");
-			str = str.replace("&Ugrave;", "ô");
-			str = str.replace("&Uacute;", "ò");
-			str = str.replace("&Ucirc;", "ó");
-			str = str.replace("&Uuml;", "†");
-			str = str.replace("&THORN;", "Þ");
-			str = str.replace("&szlig;", "§");
-			str = str.replace("&agrave;", "ˆ");
-			str = str.replace("&aacute;", "‡");
-			str = str.replace("&acirc;", "‰");
-			str = str.replace("&atilde;", "‹");
-			str = str.replace("&auml;", "Š");
-			str = str.replace("&aring;", "Œ");
-			str = str.replace("&aelig;", "¾");
-			str = str.replace("&eacute;", "Ž");
-			str = str.replace("&euml;", "‘");
-			str = str.replace("&igrave;", "“");
-			str = str.replace("&iacute;", "’");
-			str = str.replace("&icirc;", "”");
-			str = str.replace("&iuml;", "•");
-			str = str.replace("&eth;", "Ý");
-			str = str.replace("&ntilde;", "–");
-			str = str.replace("&ograve;", "˜");
-			str = str.replace("&oacute;", "—");
-			str = str.replace("&ocirc;", "™");
-			str = str.replace("&otilde;", "›");
-			str = str.replace("&ouml;", "š");
-			str = str.replace("&oslash;", "¿");
-			str = str.replace("&uacute;", "œ");
-			str = str.replace("&ucirc;", "ž");
-			str = str.replace("&uuml;", "Ÿ");
-			str = str.replace("&yacute;", "à");
-			str = str.replace("&thorn;", "ß");
-			str = str.replace("&yuml;", "Ø");
-			str = str.replace("&OElig;", "Œ");
-			str = str.replace("&oelig;", "œ");
-			str = str.replace("&Scaron;", "Š");
-			str = str.replace("&scaron;", "š");
-			str = str.replace("&Yuml;", "Ÿ");
-			str = str.replace("&circ;", "ˆ");
-			str = str.replace("&tilde;", "˜");
-			str = str.replace("&ndash;", "–");
-			str = str.replace("&mdash;", "—");
-			str = str.replace("&lsquo;", "‘");
-			str = str.replace("&rsquo;", "’");
-			str = str.replace("&sbquo;", "‚");
-			str = str.replace("&ldquo;", "“");
-			str = str.replace("&rdquo;", "”");
-			str = str.replace("&bdquo;", "„");
-			str = str.replace("&dagger;", "†");
-			str = str.replace("&Dagger;", "‡");
-			str = str.replace("&hellip;", "…");
-			str = str.replace("&permil;", "‰");
-			str = str.replace("&lsaquo;", "‹");
-			str = str.replace("&rsaquo;", "›");
-			str = str.replace("&euro;", "€");
-			str = str.replace("&#215;", "×");
+			if( str == null || str.length < 1) return '';
+			
+			str = str.replace(/&quot;/gs, "\"");
+			str = str.replace(/&apos;/gs, "'");
+			str = str.replace(/&amp;/gs, "&");
+			str = str.replace(/&lt;/gs, "<");
+			str = str.replace(/&gt;/gs, ">");
+			str = str.replace(/&nbsp;/gs, " ");
+			str = str.replace(/&iexcl;/gs, "¡");
+			str = str.replace(/&curren;/gs, "Û");
+			str = str.replace(/&cent;/gs, "¢");
+			str = str.replace(/&pound;/gs, "£");
+			str = str.replace(/&yen;/gs, "´");
+			str = str.replace(/&brvbar;/gs, "¦");
+			str = str.replace(/&sect;/gs, "¤");
+			str = str.replace(/&uml;/gs, "¬");
+			str = str.replace(/&copy;/gs, "©");
+			str = str.replace(/&ordf;/gs, "»");
+			str = str.replace(/&laquo;/gs, "«");
+			str = str.replace(/&not;/gs, "Â");
+			str = str.replace(/&shy;/gs, "Ð");
+			str = str.replace(/&reg;/gs, "®");
+			str = str.replace(/&trade;/gs, "™");
+			str = str.replace(/&macr;/gs, "ø");
+			str = str.replace(/&deg;/gs, "¡");
+			str = str.replace(/&plusmn;/gs, "±");
+			str = str.replace(/&sup2;/gs, "Ó");
+			str = str.replace(/&sup3;/gs, "Ò");
+			str = str.replace(/&acute;/gs, "«");
+			str = str.replace(/&micro;/gs, "µ");
+			str = str.replace(/&para;/gs, "¦");
+			str = str.replace(/&middot;/gs, "á");
+			str = str.replace(/&cedil;/gs, "ü");
+			str = str.replace(/&sup1;/gs, "Õ");
+			str = str.replace(/&ordm;/gs, "¼");
+			str = str.replace(/&raquo;/gs, "»");
+			str = str.replace(/&frac14;/gs, "¹");
+			str = str.replace(/&frac12;/gs, "¸");
+			str = str.replace(/&frac34;/gs, "²");
+			str = str.replace(/&iquest;/gs, "À");
+			str = str.replace(/&times;/gs, "×");
+			str = str.replace(/&divide;/gs, "Ö");
+			str = str.replace(/&Agrave;/gs, "À");
+			str = str.replace(/&Aacute;/gs, "Á");
+			str = str.replace(/&Acirc;/gs, "Â");
+			str = str.replace(/&Atilde;/gs, "Ã");
+			str = str.replace(/&Auml;/gs, "Ä");
+			str = str.replace(/&Aring;/gs, "Å");
+			str = str.replace(/&AElig;/gs, "Æ");
+			str = str.replace(/&Ccedil;/gs, "Ç");
+			str = str.replace(/&Egrave;/gs, "È");
+			str = str.replace(/&Eacute;/gs, "É");
+			str = str.replace(/&Ecirc;/gs, "Ê");
+			str = str.replace(/&Euml;/gs, "Ë");
+			str = str.replace(/&Igrave;/gs, "Ì");
+			str = str.replace(/&Iacute;/gs, "Í");
+			str = str.replace(/&Icirc;/gs, "Î");
+			str = str.replace(/&Iuml;/gs, "Ï");
+			str = str.replace(/&ETH;/gs, "Ð");
+			str = str.replace(/&Ntilde;/gs, "Ñ");
+			str = str.replace(/&Ograve;/gs, "Ò");
+			str = str.replace(/&Oacute;/gs, "Ó");
+			str = str.replace(/&Ocirc;/gs, "Ô");
+			str = str.replace(/&Otilde;/gs, "Õ");
+			str = str.replace(/&Ouml;/gs, "Ö");
+			str = str.replace(/&Oslash;/gs, "Ø");
+			str = str.replace(/&Ugrave;/gs, "ô");
+			str = str.replace(/&Uacute;/gs, "ò");
+			str = str.replace(/&Ucirc;/gs, "ó");
+			str = str.replace(/&Uuml;/gs, "†");
+			str = str.replace(/&THORN;/gs, "Þ");
+			str = str.replace(/&szlig;/gs, "§");
+			str = str.replace(/&agrave;/gs, "ˆ");
+			str = str.replace(/&aacute;/gs, "‡");
+			str = str.replace(/&acirc;/gs, "‰");
+			str = str.replace(/&atilde;/gs, "‹");
+			str = str.replace(/&auml;/gs, "Š");
+			str = str.replace(/&aring;/gs, "Œ");
+			str = str.replace(/&aelig;/gs, "¾");
+			str = str.replace(/&eacute;/gs, "Ž");
+			str = str.replace(/&euml;/gs, "‘");
+			str = str.replace(/&igrave;/gs, "“");
+			str = str.replace(/&iacute;/gs, "’");
+			str = str.replace(/&icirc;/gs, "”");
+			str = str.replace(/&iuml;/gs, "•");
+			str = str.replace(/&eth;/gs, "Ý");
+			str = str.replace(/&ntilde;/gs, "–");
+			str = str.replace(/&ograve;/gs, "˜");
+			str = str.replace(/&oacute;/gs, "—");
+			str = str.replace(/&ocirc;/gs, "™");
+			str = str.replace(/&otilde;/gs, "›");
+			str = str.replace(/&ouml;/gs, "š");
+			str = str.replace(/&oslash;/gs, "¿");
+			str = str.replace(/&uacute;/gs, "œ");
+			str = str.replace(/&ucirc;/gs, "ž");
+			str = str.replace(/&uuml;/gs, "Ÿ");
+			str = str.replace(/&yacute;/gs, "à");
+			str = str.replace(/&thorn;/gs, "ß");
+			str = str.replace(/&yuml;/gs, "Ø");
+			str = str.replace(/&OElig;/gs, "Œ");
+			str = str.replace(/&oelig;/gs, "œ");
+			str = str.replace(/&Scaron;/gs, "Š");
+			str = str.replace(/&scaron;/gs, "š");
+			str = str.replace(/&Yuml;/gs, "Ÿ");
+			str = str.replace(/&circ;/gs, "ˆ");
+			str = str.replace(/&tilde;/gs, "˜");
+			str = str.replace(/&ndash;/gs, "–");
+			str = str.replace(/&mdash;/gs, "—");
+			str = str.replace(/&lsquo;/gs, "‘");
+			str = str.replace(/&rsquo;/gs, "’");
+			str = str.replace(/&sbquo;/gs, "‚");
+			str = str.replace(/&ldquo;/gs, "“");
+			str = str.replace(/&rdquo;/gs, "”");
+			str = str.replace(/&bdquo;/gs, "„");
+			str = str.replace(/&dagger;/gs, "†");
+			str = str.replace(/&Dagger;/gs, "‡");
+			str = str.replace(/&hellip;/gs, "…");
+			str = str.replace(/&permil;/gs, "‰");
+			str = str.replace(/&lsaquo;/gs, "‹");
+			str = str.replace(/&rsaquo;/gs, "›");
+			str = str.replace(/&euro;/gs, "€");
+			str = str.replace(/&#215;/gs, "×");
 			
 			return str;
 			
+		}
+		
+		public static function htmlEscape(str:String):String
+		{
+			return XML( new XMLNode( XMLNodeType.TEXT_NODE, str ) ).toXMLString();
 		}
 		
 		/**
