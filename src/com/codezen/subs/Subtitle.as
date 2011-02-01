@@ -13,6 +13,7 @@ package com.codezen.subs{
 	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
 	import mx.utils.ObjectUtil;
+	import mx.utils.object_proxy;
 	
 	public class Subtitle extends EventDispatcher
 	{
@@ -362,9 +363,11 @@ package com.codezen.subs{
 				var idx:Number = arr[1].indexOf(' --> ');
 				obj['begin'] = Number(seconds(arr[1].substr(0,idx)));
 				obj['end'] = Number(seconds(arr[1].substr(idx+5)));
-				obj['text'] = arr[2];
+				obj['text'] = arr[2] == null ? "" : arr[2];
 				obj['srt'] = true;
 				if(arr[3]) { obj['text'] += '<br />'+arr[3]; }
+				trace( ObjectUtil.toString(obj) );
+				trace('----------------------------------');
 			} catch (err:Error) {}
 			return obj;
 		};

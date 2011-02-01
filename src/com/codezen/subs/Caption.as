@@ -150,7 +150,9 @@ package com.codezen.subs{
 		}
 		
 		private function drop():void{
-			_owner.subtitles_mc.removeChild(_field);
+			try{
+				_owner.subtitles_mc.removeChild(_field);
+			}catch(e:Error){}
 			active = false;
 			_field = null;
 		}
