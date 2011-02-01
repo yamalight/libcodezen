@@ -366,8 +366,6 @@ package com.codezen.subs{
 				obj['text'] = arr[2] == null ? "" : arr[2];
 				obj['srt'] = true;
 				if(arr[3]) { obj['text'] += '<br />'+arr[3]; }
-				trace( ObjectUtil.toString(obj) );
-				trace('----------------------------------');
 			} catch (err:Error) {}
 			return obj;
 		};

@@ -131,7 +131,9 @@ package com.codezen.subs{
 			if(animation.y != undefined) animation.y = countHeight(animation.y) - _field.height + _owner.y;
 			
 			if(_field.y < 0) _field.y = _owner.y;
+			if(_field.x < 0) _field.x = _owner.x;
 			if(animation.y < 0) animation.y = _owner.y;
+			if(animation.x < 0) animation.x = _owner.x;
 			
 			// ROTATION
 			if(frx != 0) _field.rotationX = frx;
@@ -158,7 +160,7 @@ package com.codezen.subs{
 		}
 		
 		private function width(delta:*):Number{
-			return _owner.width * Number(delta);
+			return _owner.width * ( Number(delta) / 2 );
 		}
 		
 		private function countHeight(delta:*):Number{
