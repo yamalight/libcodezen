@@ -156,7 +156,13 @@ package com.codezen.vkontakte.ajax
 				res[0] = '';
 				//trace(ObjectUtil.toString(res));
 				
-				if(res[9] != null && int( String(res[9]).split(":")[0] ) > finddur){
+				/* Duration parsing fix  */
+				var duration:int = 0;
+				if (res[9] != null) {
+					duration = (String(res[9]).split(":").length > 2)?(int(String(res[9]).split(":")[0]) * 60) + int(String(res[9]).split(":")[1]):int(String(res[9]).split(":")[0]);
+				}
+				
+				if(duration > finddur){
 					info = new Object();
 					info.uid = res[1];
 					info.host = res[2];
