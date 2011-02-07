@@ -25,7 +25,7 @@ package com.codezen.subs{
 		
 		private var srt:Boolean = false;
 		
-		private var text:String = '';
+		public var text:String = '';
 		private var font:String = 'Arial';
 		private var size:Number = 0.0556;
 		private var color:Number = 0xFFFFFF;
@@ -60,7 +60,9 @@ package com.codezen.subs{
 			}
 		}
 		
-		public function sub():void{
+		public function sub(animate:Boolean = true):void{
+			if(_field != null) return;
+			
 			_field = new TextField();
 			var captionTextFormat:TextFormat = new TextFormat();
 			
@@ -97,6 +99,7 @@ package com.codezen.subs{
 			_field.defaultTextFormat = captionTextFormat;
 			_field.multiline = true;
 			_field.wordWrap = true;
+			_field.antiAliasType = AntiAliasType.NORMAL;
 			/*_field.border = true;*/
 			_field.selectable = false;
 			_field.autoSize = TextFieldAutoSize.CENTER;
@@ -108,7 +111,7 @@ package com.codezen.subs{
 				if(activeSubsArray.length > 0){
 					for each (var item:Caption in activeSubsArray)
 					{
-						if( item.end > this.begin )
+						if( item != this && ( (item.end > this.begin && item.begin < this.begin) || (item.begin == this.begin && item.end == this.end) ) )
 							collision_delta += item.height + item.marginV;
 					}
 				}
@@ -140,15 +143,22 @@ package com.codezen.subs{
 			if(fry != 0) _field.rotationY = fry;
 			if(frz != 0) _field.rotationZ = -frz;
 			
-			_field.alpha = 0;
-			TweenLite.to(_field, 1, animation);
-			TweenLite.to(_field, fadeIn, {alpha:1});
+			if(animate){
+				_field.alpha = 0;
+				TweenLite.to(_field, 1, animation);
+				TweenLite.to(_field, fadeIn, {alpha:1});
+			}
 			_owner.subtitles_mc.addChild(_field);
 			active = true;
 		}
 		
-		public function unsub():void{
-			TweenLite.to(_field, fadeOut, {onComplete:drop, alpha:0});
+		public function unsub(animate:Boolean = true):void{
+			if( _field == null ) return;
+			if(animate){
+				TweenLite.to(_field, fadeOut, {onComplete:drop, alpha:0});
+			}else{
+				drop();
+			}
 		}
 		
 		private function drop():void{

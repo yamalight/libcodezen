@@ -125,7 +125,7 @@ package com.codezen.subs{
 				var dialogObject:Object = new Object();
 				var dialogParseRegString:String = '';
 				for (var f:String in _format){
-					if(_format[f] != 'Text'){
+					if(_format[f] != "Text"){
 						dialogParseRegString += '(?P<'+_format[f]+'>[^,]*),';
 					}else{
 						dialogParseRegString += '(?P<'+_format[f]+'>.+)?\r?$';

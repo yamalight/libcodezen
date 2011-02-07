@@ -122,7 +122,10 @@ package com.codezen.vkontakte.api.service
 				// remove event litener
 				html.removeEventListener(Event.LOCATION_CHANGE, onLocationChange);
 				
+				//{"mid":47636,"sid":"d292cbef2e5f9a32c15f840ea26c035e58a9d1d4a50b9d22b535f0bfa0bf83","secret":"7ad0d2063b","expire":0,"sig":"ecfc74e26c8350626ffebc6b81621acd"}
 				var re:RegExp = new RegExp(/{"mid":(.+?),"sid":"(.+?)","secret":"(.+?)","expire":(.+?),"sig":"(.+?)"}/gs);
+				// var re:RegExp = new RegExp(/{"mid":(.+?),"secret":"(.+?)","sid":"(.+?)","expire":(.+?)}/gs);
+				// 7.2.2011 - {"mid":47636,"secret":"0eafe29608","sid":"fe30000f3d1174ab3f72e8b92ed49e47c818787c6ab7a75623aa90c896a9fc","expire":0}
 				var res:Array = re.exec( decodeURIComponent(html.location) );
 				
 				mid = res[1];

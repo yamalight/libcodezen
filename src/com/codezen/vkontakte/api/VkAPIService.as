@@ -33,10 +33,16 @@ package com.codezen.vkontakte.api
 		private var _videoData:Object;
 		// user data
 		private var _userData:Object;
+		// string result
+		private var _stringResult:String;
 		
 		public function VkAPIService(appID:String, appKey:String, silentInit:Boolean)
 		{
 			super(appID, appKey, silentInit);
+		}
+		
+		public function get stringResult():String{
+			return _stringResult;
 		}
 		
 		public function get statusList():ArrayCollection{
@@ -426,6 +432,53 @@ package com.codezen.vkontakte.api
 				name: xml.user_name.text(),
 				photo: xml.user_photo.text()
 			};
+			
+			end();
+		}
+		
+		/**
+		 * Make message post 
+		 * 
+		 */
+		public function postMessage(msg:String):void{
+			var activity:String = "wall.post";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"api_id="+appID+
+				"message="+msg+
+				"method="+activity+
+				"v=3.0"+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.method = activity;
+			vars.message = msg;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;
+			
+			// assign url
+			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			// load
+			myLoader.addEventListener(Event.COMPLETE, onMessagePost);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onMessagePost(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onMessagePost);
+			
+			// get result
+			var xml:XML = new XML(myLoader.data);
+			
+			trace(xml);
+			
+			_stringResult = xml.post_id;
 			
 			end();
 		}
