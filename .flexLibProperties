@@ -3,7 +3,6 @@
   <includeClasses>
     <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressBar"/>
     <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressSlider"/>
-    <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressSliderTrack"/>
     <classEntry path="com.codezen.vkontakte.ajax.service.VkBase"/>
     <classEntry path="com.codezen.vkontakte.ajax.VkNews"/>
     <classEntry path="com.codezen.music.MBInfo"/>

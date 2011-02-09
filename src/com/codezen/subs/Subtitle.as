@@ -5,20 +5,18 @@
  */
 
 package com.codezen.subs{  
+	import flash.display.MovieClip;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
 	import flash.net.*;
 	
-	import mx.collections.ArrayCollection;
 	import mx.controls.Alert;
-	import mx.utils.ObjectUtil;
-	import mx.utils.object_proxy;
 	
 	public class Subtitle extends EventDispatcher
 	{
 		private var _owner:*;
-		private var _captions:ArrayCollection = new ArrayCollection();
+		private var _captions:Array = [];
 		
 		private var ext:String = "ass";
 		
@@ -26,8 +24,8 @@ package com.codezen.subs{
 		private var _mode:String;
 		private var _file:String;
 		private var _format:Array;
-		private var _styles:Object = new Object();
-		private var _styles_arr:Array = new Array();
+		private var _styles:Object = {};
+		private var _styles_arr:Array = [];
 		private var x_resolution:Number;
 		private var y_resolution:Number;
 		
@@ -36,7 +34,7 @@ package com.codezen.subs{
 			_file = subfile;
 		}
 		
-		public function get captions():ArrayCollection{
+		public function get captions():Array{
 			return _captions;
 		}
 		
@@ -75,7 +73,8 @@ package com.codezen.subs{
 		
 		private function parseASS(dat:String):void{
 			var stringsArr:Array = dat.split(/\r?\n/);
-			for each (var str:String in stringsArr){
+			var str:String;
+			for each (str in stringsArr){
 				if( str.length > 0 ) parseASSString(str)
 			}
 			dispatchEvent(new Event("SubParsed"));
@@ -116,7 +115,8 @@ package com.codezen.subs{
 			}else if(styleRes){
 				var styleArray:Array = styleRes[1].split(",");
 				var styleObj:Object = new Object();
-				for (var p:String in _format){
+				var p:String;
+				for (p in _format){
 					styleObj[_format[p]] = styleArray[p];
 				}
 				_styles[styleObj.Name] = styleObj;
@@ -124,7 +124,8 @@ package com.codezen.subs{
 			}else if(dialogRes){
 				var dialogObject:Object = new Object();
 				var dialogParseRegString:String = '';
-				for (var f:String in _format){
+				var f:String;
+				for (f in _format){
 					if(_format[f] != "Text"){
 						dialogParseRegString += '(?P<'+_format[f]+'>[^,]*),';
 					}else{
@@ -133,7 +134,8 @@ package com.codezen.subs{
 				}
 				var dialogParseReg:RegExp = new RegExp(dialogParseRegString);
 				var dialogParseRes:Array = dialogParseReg.exec(dialogRes[1]);
-				for (var s:String in _format)
+				var s:String;
+				for (s in _format)
 				{
 					var fieldName:String = _format[s];
 					if(fieldName == 'Style'){
@@ -160,8 +162,8 @@ package com.codezen.subs{
 		};
 		
 		private function parseASSDialog(dialog:Object):void{
-			var captionAnmationObject:Object = new Object();
-			var captionObject:Object = new Object();
+			var captionAnmationObject:Object = {};
+			var captionObject:Object = {};
 			
 			captionObject['begin'] = Number(seconds( dialog.Start ));
 			captionObject['end'] = Number(seconds( dialog.End ));
@@ -332,7 +334,7 @@ package com.codezen.subs{
 					}
 				}
 				captionObject['animation'] = captionAnmationObject;					
-				_captions.addItem(new Caption(_owner, captionObject));
+				_captions.push(new Caption(_owner, captionObject));
 			}
 		}
 		
@@ -343,12 +345,12 @@ package com.codezen.subs{
 		}
 		
 		private function parseSRT(dat:String):void{
-			var arr:Array = new Array();
+			var arr:Array = [];
 			var lst:Array = dat.split("\r\n\r\n");
 			if(lst.length == 1) { lst = dat.split("\n\n"); }
 			for(var i:Number=0; i<lst.length; i++) {
 				var obj:Object = parseSRTCaption(lst[i]);
-				if(obj['end']) { _captions.addItem(new Caption(_owner, obj)) };
+				if(obj['end']) { _captions.push(new Caption(_owner, obj)) };
 			}
 			dispatchEvent(new Event("SubParsed"));
 			//return arr;
@@ -356,7 +358,7 @@ package com.codezen.subs{
 		
 		/** Parse a single captions entry. **/
 		private function parseSRTCaption(dat:String):Object {
-			var obj:Object = new Object();
+			var obj:Object = {};
 			var arr:Array = dat.split("\r\n");
 			if(arr.length == 1) { arr = dat.split("\n"); }
 			try { 

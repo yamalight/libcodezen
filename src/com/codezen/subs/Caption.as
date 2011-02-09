@@ -9,6 +9,7 @@ package com.codezen.subs{
 	
 	import com.greensock.TweenLite;
 	
+	import flash.display.MovieClip;
 	import flash.filters.DropShadowFilter;
 	import flash.filters.GlowFilter;
 	import flash.text.*;
@@ -39,7 +40,7 @@ package com.codezen.subs{
 		private var marginL:Number = 0.0;
 		private var marginR:Number = 0.0;
 		private var marginV:Number = 0.0;
-		private var animation:Object = new Object();
+		private var animation:Object = {};
 		private var fadeIn:Number = 0.0;
 		private var fadeOut:Number = 0.0;
 		private var outline:Number = 2;
@@ -109,7 +110,8 @@ package com.codezen.subs{
 				var activeSubsArray:Array = _owner.getActiveSubs(valign);
 				var collision_delta:Number = 0;
 				if(activeSubsArray.length > 0){
-					for each (var item:Caption in activeSubsArray)
+					var item:Caption;
+					for each (item in activeSubsArray)
 					{
 						if( item != this && ( (item.end > this.begin && item.begin < this.begin) || (item.begin == this.begin && item.end == this.end) ) )
 							collision_delta += item.height + item.marginV;
