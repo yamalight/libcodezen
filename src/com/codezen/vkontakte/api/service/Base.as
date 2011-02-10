@@ -47,6 +47,10 @@ package com.codezen.vkontakte.api.service
 			createClass();
 		}
 		
+		public function get sessionKey():String{
+			return sid;
+		}
+		
 		protected function createClass():void
 		{
 			// init state
