@@ -23,6 +23,7 @@ package com.codezen.subs{
 		public var active:Boolean = false;
 		public var begin:Number;
 		public var end:Number;
+		public var shift:int = 0;
 		
 		private var srt:Boolean = false;
 		
@@ -53,10 +54,11 @@ package com.codezen.subs{
 		
 		public function Caption(p_owner:*, p_caption:Object){
 			_owner = p_owner;
-			var caption:Object = this;
-			for (var p:String in p_caption){
-				if(caption[p] != undefined){
-					caption[p] = p_caption[p];
+			//var caption:Object = this;
+			var p:String;
+			for (p in p_caption){
+				if(this[p] != undefined){
+					this[p] = p_caption[p];
 				}
 			}
 		}
@@ -83,24 +85,24 @@ package com.codezen.subs{
 				45, 
 				shadowColor, 
 				shadow/4, 
-				shadow*1.5, 
-				shadow*1.5,
-				shadow*2);
+				shadow*2.5, 
+				shadow*2.5,
+				shadow*4);
 			
 			if(outline < 1) outline = 1;
 			var outlineFilter:GlowFilter = new GlowFilter(
 				outlineColor,
 				1.0,
-				outline*1.5,
-				outline*1.5,
-				outline*4);
+				outline*2.5,
+				outline*2.5,
+				outline*6);
 			_field.filters = new Array(outlineFilter, shadowFilter);
 			
 			_field.width = _owner.width;
 			_field.defaultTextFormat = captionTextFormat;
 			_field.multiline = true;
 			_field.wordWrap = true;
-			_field.antiAliasType = AntiAliasType.NORMAL;
+			_field.antiAliasType = AntiAliasType.ADVANCED;
 			/*_field.border = true;*/
 			_field.selectable = false;
 			_field.autoSize = TextFieldAutoSize.CENTER;
@@ -111,11 +113,33 @@ package com.codezen.subs{
 				var collision_delta:Number = 0;
 				if(activeSubsArray.length > 0){
 					var item:Caption;
-					for each (item in activeSubsArray)
-					{
-						if( item != this && ( (item.end > this.begin && item.begin < this.begin) || (item.begin == this.begin && item.end == this.end) ) )
-							collision_delta += item.height + item.marginV;
+					var maxShift:int = activeSubsArray[0].shift;
+					var minShift:int = activeSubsArray[0].shift;
+					var shifts:Array = [];
+					shift = 0;
+					trace('--------------------------------------------');
+					trace('shift for sub: '+text);
+					trace('init shift: '+shift+' maxShift: '+maxShift);
+					for each (item in activeSubsArray){
+						shifts.push(item.shift);
+						if( item.shift > maxShift ) maxShift = item.shift;
+						if( item.shift < minShift ) minShift = item.shift;
 					}
+					trace('maxShift detected: '+maxShift);
+					trace('minShift detected: '+minShift);
+					
+					
+					for each (item in activeSubsArray){						
+						if( shift < minShift) break;
+						if( item != this && ( (item.end > this.begin && item.begin < this.begin) || (item.begin == this.begin && item.end == this.end) )
+							&& item.shift > -1){
+							collision_delta += item.height + item.marginV;
+							shift++;
+							if( shifts.indexOf(shift) < 0 || shift > maxShift ) break;
+						}
+					}
+
+					trace('set shift: '+shift);
 				}
 				if(valign == 'top'){
 					_field.y = countHeight(0.0) + collision_delta;
@@ -167,6 +191,7 @@ package com.codezen.subs{
 			try{
 				_owner.subtitles_mc.removeChild(_field);
 			}catch(e:Error){}
+			shift = -1;
 			active = false;
 			_field = null;
 		}

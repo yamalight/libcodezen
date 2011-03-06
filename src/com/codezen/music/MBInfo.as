@@ -36,7 +36,6 @@
 		private var artistid:String;
 		private var artistname:String;
 		private var moreArtists:String;
-		private var artist2find:String;
 		private var albumCover:String;
 		private var albums:ArrayCollection;
 		private var songs:ArrayCollection;
@@ -131,9 +130,12 @@
 		 * 
 		 */		
 		public function findArtist(artist:String):void{
+			artistid = null;
+			artistname = null;
+			moreArtists = null;
+			
 			// Generate url
 			var search_url:String = artistURL.replace("%query%",CUtils.urlEncode(artist));
-			artist2find = artist;	
 			// Report status
 			setStatus('Begining artist search..');
 			//setStatus('Начинаем поиск исполнителя..');
@@ -166,16 +168,16 @@
 			var artistsList:XMLList = data.descendants("artist-list").children();
 			
 			//set found 
-			var found:int = 0;
-			var step:int = 0;
-			var disambiguation:String = "";
+			//var found:int = 0;
+			//var step:int = 0;
+			//var disambiguation:String = "";
 			
 			// Getting artist with same name
 			for each(var item:XML in artistsList){
-				if (found == 0 && ((artist2find.toLowerCase() == item.name.text().toLowerCase()) || (('the '+artist2find.toLowerCase()) == item.name.text().toLowerCase()))){
+				//if (found == 0 && ((artist2find.toLowerCase() == item.name.text().toLowerCase()) || (('the '+artist2find.toLowerCase()) == item.name.text().toLowerCase()))){
 					artistid = item.@id;
 					artistname = item.name.text();
-					found = 1;
+					/*found = 1;
 					step++;
 					if (step == 4) break;
 				}
@@ -185,16 +187,15 @@
 					}
 					else disambiguation = item.disambiguation.text().toLowerCase();
 					moreArtists += item.@id + "|" + item.name.text() + "|" + item.name.text() + disambiguation + "@";
-				}
+				}*/
+				break;
 			}
 
 			// Report status
-			if (found == 0){
-				artistname = '';
+			if (artistname == null){
 				setStatus('Album list not found :(');
 				//setStatus('Списка альбомов не найдено(');
-			}
-			else{
+			}else{
 				setStatus('Artist found: '+artistname+'!');
 				//setStatus('Исполнитель найден: '+artistname+'!');				
 			}
@@ -210,6 +211,8 @@
 		 * Loads a list of albums of found artist 
 		 */		
 		public function findAlbums(artistId:String,artistName:String):void{
+			albums = null;
+			
 			artistid = artistId;
 			artistname = artistName;
 			// Generate url
@@ -295,9 +298,6 @@
 			setStatus('Found '+albums.length+' albums! Begining cover images search.');
 			//setStatus('Найдено '+albums.length+' альбомов! Начинаем поиск картинок..');
 			
-			// set counter
-			counter = albums.length;
-			
 			// get albums covers
 			//loadAlbumCovers();
 			endLoad();
@@ -309,6 +309,8 @@
 		 * 
 		 */
 		public function findTracks(albumid:String):void{
+			songs = null;
+			
 			if(albumid == '' || albumid.length < 1){
 				// Dispatch error event
 				dispatchError("No album ID specified!", "Tracks find error!");
@@ -399,7 +401,9 @@
 		/**
 		 * Loads a covers of found albums 
 		 */		
-		public function findAlbumCover(albumName:String, artist:String = null):void{		
+		public function findAlbumCover(albumName:String, artist:String = null):void{	
+			albumCover = null;
+			
 			// generate search string
 			var search_string:String = (artist == null)?artistname:artist+"/";
 			search_string += CUtils.urlEncode( String(albumName).replace(/\(.*?\)/gs, "") );

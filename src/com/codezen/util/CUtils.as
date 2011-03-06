@@ -57,11 +57,11 @@ package com.codezen.util
 		 * @return (int) index of item or -1 
 		 * 
 		 */
-		public static function getItemIndexByProperty(array:ArrayCollection, property:String, value:String):int{
+		public static function getItemIndexByProperty(array:ArrayCollection, property:String, value:String, startind:int = 0):int{
 			var obj:Object;
 			var i:int;
 			var size:int = array.length;
-			for (i = 0; i < size; i++)
+			for (i = startind; i < size; i++)
 			{
 				obj = array[i] as Object;
 				if (obj.hasOwnProperty(property) && obj[property] == value)
@@ -365,6 +365,17 @@ package com.codezen.util
 				}
 			}
 			return d[n][m];
+		}
+		
+		/**
+		 * Trims string 
+		 * @param p_string
+		 * @return 
+		 * 
+		 */
+		public static function trim(p_string:String):String {
+			if (p_string == null) return '';
+			return p_string.replace(/^\s+|\s+$/g, '');
 		}
 		
 		/**

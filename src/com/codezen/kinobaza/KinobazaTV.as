@@ -314,7 +314,7 @@ package com.codezen.kinobaza
 		 * Error parser
 		 **/
 		private function onError(e:IOErrorEvent):void{
-			dispatchError(e.text, "IO Error happened in MusicSearch class");
+			dispatchError(e.text, "IO Error happened in Kinobaza class");
 			//trace('io-error: '+e.text);
 		}
 	}

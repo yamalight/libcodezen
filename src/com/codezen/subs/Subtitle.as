@@ -333,8 +333,19 @@ package com.codezen.subs{
 						paramsRes = paramsReg.exec(paramsStringRes.params);
 					}
 				}
-				captionObject['animation'] = captionAnmationObject;					
-				_captions.push(new Caption(_owner, captionObject));
+				captionObject['animation'] = captionAnmationObject;
+				
+				// check for same captions
+				var cap:Caption;
+				var isThere:Boolean = false;
+				for each(cap in _captions){
+					//  || cap.text == captionObject['text']
+					if( cap.text == captionObject['text'] && cap.begin == captionObject['begin'] && cap.end == captionObject['end'] ){
+						isThere = true;
+						break;
+					}
+				}
+				if(!isThere) _captions.push(new Caption(_owner, captionObject));
 			}
 		}
 		

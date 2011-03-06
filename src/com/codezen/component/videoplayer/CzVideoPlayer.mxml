@@ -194,6 +194,9 @@
 				ns = new NetStream(nc);
 				// assign client
 				ns.client = customClient;
+				ns.addEventListener(NetStatusEvent.NET_STATUS, function(e:NetStatusEvent):void{
+					trace("NetStatus: "+ObjectUtil.toString(e));
+				});
 				// create new video
 				vid = new Video(video_player.width, video_player.height);
 				// max quality

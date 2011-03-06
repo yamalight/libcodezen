@@ -99,17 +99,17 @@ package com.codezen.vkontakte.api.service
 			html.y = 0;
 			html.width = 600;
 			html.height = 500;
-			html.location = "http://vkontakte.ru/login.php?app="+appID+"&layout=popup&type=browser&settings=16383";
 			html.addEventListener(Event.LOCATION_CHANGE, onLocationChange);
 			window.addElement( html );
 			
 			// show window
-			if( silentInit ){
-				window.visible = false;
-			}
+			//if( silentInit ){
+				//window.visible = false;
+			//}
 			
 			window.open(true);
 			
+			html.location = "http://vkontakte.ru/login.php?app="+appID+"&layout=popup&type=browser&settings=16383";
 			//html.htmlLoader.load( new URLRequest("http://vkontakte.ru/login.php?app="+appID+"&layout=popup&type=browser&settings=16363") );
 		}
 		
@@ -128,15 +128,27 @@ package com.codezen.vkontakte.api.service
 				
 				//{"mid":47636,"sid":"d292cbef2e5f9a32c15f840ea26c035e58a9d1d4a50b9d22b535f0bfa0bf83","secret":"7ad0d2063b","expire":0,"sig":"ecfc74e26c8350626ffebc6b81621acd"}
 				var re:RegExp = new RegExp(/{"mid":(.+?),"sid":"(.+?)","secret":"(.+?)","expire":(.+?),"sig":"(.+?)"}/gs);
-				// var re:RegExp = new RegExp(/{"mid":(.+?),"secret":"(.+?)","sid":"(.+?)","expire":(.+?)}/gs);
+				var re2:RegExp = new RegExp(/{"mid":(.+?),"secret":"(.+?)","sid":"(.+?)","expire":(.+?)}/gs);
 				// 7.2.2011 - {"mid":47636,"secret":"0eafe29608","sid":"fe30000f3d1174ab3f72e8b92ed49e47c818787c6ab7a75623aa90c896a9fc","expire":0}
 				var res:Array = re.exec( decodeURIComponent(html.location) );
 				
-				mid = res[1];
-				sid = res[2];
-				secret = res[3];
-				expire = res[4];
-				sig = res[5];
+				if( res != null ){
+					mid = res[1];
+					sid = res[2];
+					secret = res[3];
+					expire = res[4];
+					sig = res[5];
+				}else{
+					res = re2.exec( decodeURIComponent(html.location) );
+					if( res != null ){
+						mid = res[1];
+						secret = res[2];
+						sid = res[3];
+						expire = res[4];
+					}else{
+						dispatchError("Cannot login correctly. Vkontakte server problems. Try later");
+					}
+				}
 				
 				initialized = true;
 				window.close();
@@ -148,7 +160,6 @@ package com.codezen.vkontakte.api.service
 			}else if( html.location.indexOf("login_failure") > 0 ){
 				// remove event litener
 				html.removeEventListener(Event.LOCATION_CHANGE, onLocationChange);
-				
 				
 				window.close();
 				
