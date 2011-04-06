@@ -125,28 +125,28 @@
 			private var progressOffset:Number;
 			
 			// EMBED ASSETS STUFF
-			[Embed(source="com/codezen/component/videoplayer/assets/player/ontop_lock.png")]
+			[Embed(source="assets/player/ontop_lock.png")]
 			[Bindable]
 			public var onTopLock:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/ontop_norm.png")]
+			[Embed(source="assets/player/ontop_norm.png")]
 			[Bindable]
 			public var onTopNormal:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/play_loop_selected.png")]
+			[Embed(source="assets/player/play_loop_selected.png")]
 			[Bindable]
 			public var loopSel:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/play_loop.png")]
+			[Embed(source="assets/player/play_loop.png")]
 			[Bindable]
 			public var loopOff:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/play.png")]
+			[Embed(source="assets/player/play.png")]
 			[Bindable]
 			public var playBtn:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/pause.png")]
+			[Embed(source="assets/player/pause.png")]
 			[Bindable]
 			public var pauseBtn:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/soundOn.png")]
+			[Embed(source="assets/player/soundOn.png")]
 			[Bindable]
 			public var muteBtn:Class;
-			[Embed(source="com/codezen/component/videoplayer/assets/player/soundOff.png")]
+			[Embed(source="assets/player/soundOff.png")]
 			[Bindable]
 			public var unmuteBtn:Class;
 			
