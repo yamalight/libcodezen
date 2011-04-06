@@ -1,1 +1,6 @@
 Flex and AS3 classes and components library
+
+Depends on:
+http://www.greensock.com/tweenlite/ (used for subtitles animation)
+http://github.com/mikechambers/as3corelib (used for JSON parsing)
+
