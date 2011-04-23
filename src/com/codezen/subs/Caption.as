@@ -14,6 +14,8 @@ package com.codezen.subs{
 	import flash.filters.GlowFilter;
 	import flash.text.*;
 	
+	import mx.utils.ObjectUtil;
+	
 	public class Caption extends Object
 	{
 		
@@ -174,7 +176,7 @@ package com.codezen.subs{
 				TweenLite.to(_field, 1, animation);
 				TweenLite.to(_field, fadeIn, {alpha:1});
 			}
-			_owner.subtitles_mc.addChild(_field);
+			_owner.subtitles_mc.addChild(_field);			
 			active = true;
 		}
 		

@@ -43,6 +43,7 @@ package com.codezen.helper
 			// show error
 			//if(showAlert)
 			//	Alert.show(status,title);
+			trace("error occured: ", status, title);
 			// set error code
 			this.errorCode = errorCode;
 			// set status

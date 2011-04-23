@@ -19,6 +19,8 @@
     <classEntry path="com.codezen.vkontakte.api.data.AudioItem"/>
     <classEntry path="com.codezen.subs.Subtitle"/>
     <classEntry path="com.codezen.subs.Caption"/>
+    <classEntry path="com.codezen.mailru.service.Base"/>
+    <classEntry path="com.codezen.mailru.service.Mailru"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
