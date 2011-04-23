@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" 
-		 width="710" height="490" 
-		 contentBackgroundColor="#000000"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
 		 xmlns:videoplayer="com.codezen.component.videoplayer.*" 
-		 xmlns:ui="com.codezen.component.videoplayer.ui.*">
+		 xmlns:ui="com.codezen.component.videoplayer.ui.*"
+		 width="710" height="490">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 		<s:Parallel id="showEff">
@@ -15,9 +14,6 @@
 		<s:Parallel id="hideEff">
 			<s:Fade alphaFrom="1.0" alphaTo="0.0" duration="200" />
 		</s:Parallel>
-		
-		<fx:Boolean id="showLoop">true</fx:Boolean>
-		<fx:Boolean id="showScale">true</fx:Boolean>
 		
 		<fx:String id="prev_ep_img"></fx:String>
 		<fx:String id="prev_ep_txt">null</fx:String>
@@ -50,22 +46,21 @@
 		[Event(name="playNext", type="flash.events.Event")]
 		[Event(name="returnView", type="flash.events.Event")]
 		[Event(name="updateTime", type="flash.events.Event")]
+		[Event(name="onPlay", type="flash.events.Event")]
+		[Event(name="onPause", type="flash.events.Event")]
+		[Event(name="onEnd", type="flash.events.Event")]
 	</fx:Metadata>
 	
 	<fx:Script source="CzVideoPlayer.as" />
 	
-	<s:Rect left="0" right="0" top="0" bottom="0">
-		<s:fill>
-			<s:SolidColor color="#000000"/>
-		</s:fill>
-	</s:Rect>
-	
 	<!-- loading label -->
-	<s:Label horizontalCenter="0" verticalCenter="0" text="Загрузка..." verticalAlign="middle" textAlign="center" fontFamily="Gothic" fontSize="20" fontWeight="bold" color="#FFFFFF"/>
+	<s:Label horizontalCenter="0" verticalCenter="0" text="Загрузка..." 
+			 verticalAlign="middle" textAlign="center" color="#FFFFFF"
+			 fontFamily="Gothic" fontSize="20" fontWeight="bold" 
+			 id="loading_text"/>
 	
 	<!-- video placeholder -->
-	<mx:UIComponent id="video_player" left="0" right="0" top="0" bottom="0" creationComplete="{playerState()}"
-					resize="{onVideoResize()}"/>
+	<mx:UIComponent id="video_player" left="0" right="0" top="0" bottom="0" resize="{onVideoResize()}"/>
 	
 	<!-- Subtitles -->
 	<mx:UIComponent id="subtitles_mc" left="0" right="0" top="0" bottom="0" mouseChildren="false" mouseEnabled="false" />
@@ -83,30 +78,37 @@
 						 id="video_title" color="#FFFFFF" styleName="playerControl"/>
 			</s:HGroup>		
 			
-			<!-- scale list -->
-			<s:DropDownList id="ratio_list" verticalCenter="0" width="165" right="92" color="#E9E9E9" selectedIndex="0"
-							change="{onVideoResize()}" open="ratio_list_openHandler(event)" close="ratio_list_closeHandler(event)" 
-							chromeColor="#353535" dropShadowVisible="false" visible="{showScale}">
-				<s:dataProvider>
-					<s:ArrayCollection>
-						<fx:Object label="Сохранять пропорции" data="orig" />
-						<fx:Object label="Растянуть горизонтально" data="horizontal" />
-						<fx:Object label="Растянуть вертикально" data="vertical" />
-					</s:ArrayCollection>
-				</s:dataProvider>
-			</s:DropDownList>
-			
-			<!-- loop button -->
-			<ui:ToggleImage onImage="{loopSel}" offImage="{loopOff}" 
-							id="play_nonstop" right="65" verticalCenter="0" toolTip="Играть подряд" 
-							width="22" height="22" visible="{showLoop}"/>
-			<!-- lock button -->
-			<ui:ToggleImage onImage="{onTopLock}" offImage="{onTopNormal}" 
-							id="above_all" right="35" verticalCenter="0" click="{aboveAll()}" toolTip="Поверх всех"
-							width="22" height="22"/>
-			<!-- close button -->
-			<mx:Image right="5" verticalCenter="0" useHandCursor="true" buttonMode="true" source="@Embed('assets/player/close_normal.png')"
-					  click="returnView()" toolTip="Закрыть" width="22" height="22"/>
+			<s:HGroup right="5" top="4" bottom="0" verticalAlign="middle" horizontalAlign="right" id="scale_vid">
+				<!-- scale list -->
+				<s:DropDownList id="ratio_list" width="165" color="#E9E9E9" selectedIndex="0"
+								change="{onVideoResize()}" open="ratio_list_openHandler(event)" close="ratio_list_closeHandler(event)" 
+								chromeColor="#353535" dropShadowVisible="false" visible="{_showScale}">
+					<s:dataProvider>
+						<s:ArrayCollection>
+							<fx:Object label="Сохранять пропорции" data="orig" />
+							<fx:Object label="Растянуть горизонтально" data="horizontal" />
+							<fx:Object label="Растянуть вертикально" data="vertical" />
+						</s:ArrayCollection>
+					</s:dataProvider>
+				</s:DropDownList>
+				
+				<!-- loop button -->
+				<ui:ToggleImage onImage="{loopSel}" offImage="{loopOff}" 
+								id="play_nonstop" toolTip="Играть подряд" 
+								width="{loop_width}" height="22" 
+								visible="{_showLoop}"/>
+				
+				<!-- lock button -->
+				<ui:ToggleImage onImage="{onTopLock}" offImage="{onTopNormal}" 
+								id="above_all" click="{aboveAll()}" toolTip="Поверх всех"
+								width="{top_width}" height="22"
+								visible="{_showTop}"/>
+				
+				<!-- close button -->
+				<s:Image  useHandCursor="true" buttonMode="true" source="@Embed('assets/player/close_normal.png')"
+						  click="returnView()" toolTip="Закрыть" width="{close_width}" height="22"
+						  visible="{_showClose}" id="close_btn"/>
+			</s:HGroup>
 		</s:BorderContainer>
 		
 		<!-- subtitles -->
@@ -158,7 +160,7 @@
 		</s:BorderContainer>
 		
 		<!-- FULLSCREEN -->
-		<mx:Image source="@Embed('assets/player/fullscreen.png')" id="fullscreen_btn" click="{toggleFullScreen()}" 
+		<s:Image source="@Embed('assets/player/fullscreen.png')" id="fullscreen_btn" click="{toggleFullScreen()}" 
 				  width="24" height="24" useHandCursor="true" buttonMode="true" alpha="0.5" verticalCenter="0" right="15"/>
 	</s:BorderContainer>
 	
@@ -166,14 +168,14 @@
 	<!-- previous next episodes windows -->
 	<s:BorderContainer height="127" verticalCenter="0" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd" width="140" left="100" color="#FFFFFF"
 					   click="{prevEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
-		<mx:Image y="20" width="120" height="66" id="player_prev_ep_img" x="10" source="{prev_ep_img}"/>
+		<s:Image y="20" width="120" height="66" id="player_prev_ep_img" x="10" source="{prev_ep_img}"/>
 		<s:Label y="94" width="120" fontFamily="Verdana" textAlign="center" id="player_prev_ep_txt" x="10" color="#FFFFFF"
 				 text="{prev_ep_txt}"/>
 		<s:Label x="10" y="5" text="Предыдущий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
 	</s:BorderContainer>
 	<s:BorderContainer height="127" verticalCenter="0" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd_1" width="140" right="100"
 					   click="{nextEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
-		<mx:Image y="20" width="120" height="66" id="player_next_ep_img" x="10" source="{next_ep_img}"/>
+		<s:Image y="20" width="120" height="66" id="player_next_ep_img" x="10" source="{next_ep_img}"/>
 		<s:Label y="94" text="{next_ep_txt}" width="120" fontFamily="Verdana" id="player_next_ep_txt" textAlign="center" x="10" color="#FFFFFF"/>
 		<s:Label x="10" y="5" text="Следующий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
 	</s:BorderContainer>

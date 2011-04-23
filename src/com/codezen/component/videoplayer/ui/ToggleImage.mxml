@@ -42,7 +42,7 @@
 			}
 		]]>
 	</fx:Script>
-	<mx:Image left="0" top="0" right="0" bottom="0"
+	<s:Image left="0" top="0" right="0" bottom="0"
 			  click="{toggleState();}" useHandCursor="true" buttonMode="true"
 			  source.Off="{offImage}"
 			  source.On="{onImage}"/>

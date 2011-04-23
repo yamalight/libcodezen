@@ -11,12 +11,17 @@ import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.events.NetStatusEvent;
 import flash.events.ProgressEvent;
+import flash.events.StageVideoAvailabilityEvent;
+import flash.events.StageVideoEvent;
 import flash.events.TimerEvent;
 import flash.events.UncaughtErrorEvent;
 import flash.external.ExternalInterface;
+import flash.geom.Rectangle;
 import flash.media.Sound;
 import flash.media.SoundChannel;
 import flash.media.SoundTransform;
+import flash.media.StageVideo;
+import flash.media.StageVideoAvailability;
 import flash.media.Video;
 import flash.net.NetConnection;
 import flash.net.NetStream;
@@ -38,6 +43,9 @@ import mx.utils.ObjectUtil;
 
 import spark.events.DropDownEvent;
 
+private var sv:StageVideo;
+private var svAvailable:Boolean;
+// netsteam
 private var ns:NetStream;
 private var nc:NetConnection;
 private var vid:Video;
@@ -92,6 +100,8 @@ private var volumeLevel:Number;
 private var progressOffset:Number;
 // start position
 private var startPos:Number;
+// autoplay flag
+private var _autoplay:Boolean = true;
 
 // EMBED ASSETS STUFF
 [Embed(source="assets/player/play.png")]
@@ -125,11 +135,114 @@ private const RETURN_VIEW:String = "returnView";
 private const PLAY_PREV:String = "playPrev";
 private const PLAY_NEXT:String = "playNext";
 private const UPDATE_TIME:String = "updateTime";
+private const ON_PLAY:String = "onPlay";
+private const ON_PAUSE:String = "onPause";
+private const ON_END:String = "onEnd";
+
+// visibility of btns
+[Bindable]
+private var _showLoop:Boolean = true;
+[Bindable]
+private var loop_width:int = 22;
+
+[Bindable]
+private var _showScale:Boolean = true;
+
+[Bindable]
+private var _showClose:Boolean = true;
+[Bindable]
+private var close_width:int = 22;
+
+[Bindable]
+private var _showTop:Boolean = true;
+[Bindable]
+private var top_width:int = 22;
+
+public function set showLoop(show:Boolean):void{
+	_showLoop = show;
+	if(!_showLoop){
+		loop_width = 1;
+	}else{
+		loop_width = 22;
+	}
+}
+public function set showScale(show:Boolean):void{
+	_showScale = show;
+}
+public function set showClose(show:Boolean):void{
+	_showClose = show;
+	if(!_showClose){
+		close_width = 1;
+	}else{
+		close_width = 22;
+	}
+}
+public function set showTop(show:Boolean):void{
+	_showTop = show;
+	if(!_showTop){
+		top_width = 1;
+	}else{
+		top_width = 22;
+	}
+}
+public function set autoplay(ap:Boolean):void{
+	_autoplay = ap;
+}
+
 
 // init functions
-private function playerState():void{
+public function initStagePlayer():void{
+	// stagevideo check
+	stage.addEventListener(StageVideoAvailabilityEvent.STAGE_VIDEO_AVAILABILITY, onStageVideoState);
+	
 	//loadVideoAndPlay("http://serials.tulavideo.net/MER/MER-01-01.mp4");
 	//this.invalidateDisplayList();	
+}
+
+private function onStageVideoState(event:StageVideoAvailabilityEvent):void       {       
+	svAvailable = (event.availability == StageVideoAvailability.AVAILABLE);       
+}
+
+private function stageVideoStateChange(event:StageVideoEvent):void{          
+	var status:String = event.status;
+	trace(status);
+	resizeStageVideo();
+}
+
+private function resizeStageVideo():void{
+	trace('resize sv');
+	if(sv == null) return;
+	// rescale saving proportions
+	var _width:Number;
+	var _height:Number
+	var _x:Number;
+	var _y:Number;
+	if(video_player.height > (origHeight*(video_player.width/origWidth)) ){
+		_width = video_player.width;
+		_height = origHeight*(video_player.width/origWidth);
+		_y = (video_player.height - _height)/2;
+		_x = 0;
+	}else{
+		_height = video_player.height;
+		_width = origWidth*(video_player.height/origHeight);
+		_x = (video_player.width - _width)/2;
+		_y = 0;
+	}
+	
+	trace(_x, _y, _width, _height);
+	
+	//if(_x < 1 || _y < 1 || _width < 1 || _height < 1) return;
+	
+	sv.viewPort = new Rectangle(_x, _y, _width, _height);
+	
+	// rescale sub
+	var s:Caption;
+	for each(s in subCurrent){
+		if(s.active){
+			s.unsub(); 
+			s.sub();
+		}
+	}
 }
 
 public function getActiveSubs(valign:String):Array{
@@ -201,23 +314,33 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	ns.addEventListener(NetStatusEvent.NET_STATUS, function(e:NetStatusEvent):void{
 		trace("NetStatus: "+ObjectUtil.toString(e));
 	});
-	// create new video
-	vid = new Video(video_player.width, video_player.height);
-	// max quality
-	vid.smoothing = true;
-	vid.deblocking = 0;
 	
-	// add video to stage
-	video_player.addChild(vid);
+	// if StageVideo is available, attach the NetStream to StageVideo       
+	if (svAvailable)       
+	{       
+		trace('stage');
+		sv = stage.stageVideos[0];
+		sv.attachNetStream(ns);
+	}else{
+		trace('normal');
+		vid = new Video(video_player.width, video_player.height);
+		// max quality
+		vid.smoothing = true;
+		vid.deblocking = 0;
+		
+		// add video to stage
+		video_player.addChild(vid);
+		
+		// attach stream to video 
+		vid.attachNetStream(ns);
+	}
 	
-	// attach stream to video and play
-	vid.attachNetStream(ns);
 	ns.play(videoURL);
 	
 	// set volume
 	if(volumeLevel >= 0){
 		player_volume.value = volumeLevel;
-		ns.soundTransform = new SoundTransform(player_volume.value/100);
+		setVolume();
 	}
 	
 	// init gui timer
@@ -349,7 +472,7 @@ private function loadSubtitles(subURL:String):void{
 	
 }
 
-private function setSubtitles(time:Number):void{
+private function setSubtitles(time:Number):void{	
 	// add subs to current
 	var sub:Caption;
 	//var del:Boolean = false;
@@ -398,6 +521,11 @@ private function setSubtitles(time:Number):void{
 private function setupListeners():void{
 	// assign event listeners
 	
+	// sv
+	if(svAvailable){
+		sv.addEventListener(StageVideoEvent.RENDER_STATE, stageVideoStateChange);
+	}
+	
 	// refresh
 	this.addEventListener(Event.ENTER_FRAME, onPlayerEnterFrame);
 	// mouse stuff
@@ -420,16 +548,34 @@ private function setupListeners():void{
 
 private function onMouseWheel(e:MouseEvent):void{
 	if(e.delta > 0){
-		if(player_volume.value < 100){
-			player_volume.value += 5;
-		}
-		volumeLevel = player_volume.value;
-		ns.soundTransform = new SoundTransform(player_volume.value/100);
+		volumeUp();
 	}else{
-		if(player_volume.value > 5){
-			player_volume.value -= 5;
-		}
-		volumeLevel = player_volume.value;
+		volumeDown();
+	}
+}
+
+private function volumeUp():void{
+	if(player_volume.value < 100){
+		player_volume.value += 5;
+	}
+	volumeLevel = player_volume.value;
+	
+	if(isSoundPlaying){
+		soundPlayer.volume = player_volume.value/100;
+	}else{	
+		ns.soundTransform = new SoundTransform(player_volume.value/100);
+	}
+}
+
+private function volumeDown():void{
+	if(player_volume.value > 5){
+		player_volume.value -= 5;
+	}
+	volumeLevel = player_volume.value;
+	
+	if(isSoundPlaying){
+		soundPlayer.volume = player_volume.value/100;
+	}else{	
 		ns.soundTransform = new SoundTransform(player_volume.value/100);
 	}
 }
@@ -456,6 +602,7 @@ private function onVideoState(e:NetStatusEvent):void{
 		if(play_nonstop.selected){
 			nextEpisode();
 		}else{
+			dispatchEvent(new Event(ON_END));
 			// toggle next episode wnd
 			if(player_next_ep_txt.text != "null")
 				player_episodes_wnd_1.visible = true;
@@ -526,12 +673,12 @@ private function onMouseMove(e:Event):void{
 	/*}else if( player_subselect.mouseX >= 0 && player_subselect.mouseY >= 0 && 
 		player_subselect.mouseX <= player_subselect.width &&
 		player_subselect.mouseY <= player_subselect.height &&*/
-	if(isSub && isSubSwitch)
+	if(isSubSwitch)
 		player_subselect.visible = true;
 	/*}else if( player_sndselect.mouseX >= 0 && player_sndselect.mouseY >= 0 && 
 		player_sndselect.mouseX <= player_sndselect.width &&
 		player_sndselect.mouseY <= player_sndselect.height &&*/
-	if(isSnd && isSndSwitch)
+	if(isSndSwitch)
 		player_sndselect.visible = true;
 	//}else{ // otherwise hide
 		if( int(seekOffset+ns.time) != int(totalDuration) ){
@@ -558,8 +705,7 @@ private function onMouseClick(e:Event):void{
 		(fullscreen_btn.mouseX >= 0 && fullscreen_btn.mouseX <= fullscreen_btn.width &&
 			fullscreen_btn.mouseY >= 0 && fullscreen_btn.mouseY <= fullscreen_btn.height)
 		|| (mouseY < 40)
-	)
-	){
+	) ){
 		togglePlayPause();
 	}
 	video_player.setFocus();
@@ -602,8 +748,9 @@ private function onPlayerEnterFrame(e:Event):void{
 	}
 	// sync sound
 	if( soundPlayer && isSoundPlaying ){
-		var delta:Number = (seekOffset+ns.time) - soundPlayer.currentSeconds;
+		var delta:Number = (seekOffset+ns.time) - soundPlayer.currentMiliseconds/1000;
 		if( delta > 0.3 || delta < -0.3 ){
+			trace('delta: '+delta, ' vid: '+(seekOffset+ns.time), ' sound: '+soundPlayer.currentSeconds);
 			soundPlayer.scrobbleTo( (seekOffset+ns.time)*1000 );
 		}
 		if(!firstSndPlay && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05 )  ){
@@ -635,9 +782,15 @@ private function metaDataHandler(infoObject:Object):void {
 		origWidth = infoObject["width"];
 		origHeight = infoObject["height"];
 		// set size
-		vid.width = origWidth;
-		vid.height = origHeight;
-		onVideoResize();
+		if(svAvailable){
+			resizeStageVideo();
+		}else{
+			vid.width = origWidth;
+			vid.height = origHeight;
+			onVideoResize();
+		}
+		
+		loading_text.visible = false;
 		
 		// seek if already watched
 		if( startPos > -1 ){
@@ -645,7 +798,11 @@ private function metaDataHandler(infoObject:Object):void {
 			onSeek(null);
 		}
 		
-		//ns.pause();
+		if(!_autoplay){
+			playpause.select = playState;
+			playState = !playState;
+			ns.pause();
+		}
 	}else{
 		seekOffset = totalDuration - Number(infoObject["duration"]);
 		rescaleProgress();
@@ -694,6 +851,11 @@ private function onSeek(e:Event):void{
 		playpause.select = playState;
 		playState = !playState;
 		video_player.setFocus();
+		if(playState){
+			dispatchEvent(new Event(ON_PLAY));
+		}else{
+			dispatchEvent(new Event(ON_PAUSE));
+		}
 	}
 	// clean subs and sounds
 	if(seekOffset != seekTime){
@@ -724,7 +886,7 @@ private function togglePlayPause(ignoreBuffer:Boolean = false):void{
 	if( !ignoreBuffer && soundPlayer != null && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05)  ) return; 
 	playpause.select = playState;
 	playState = !playState;
-	if( soundPlayer != null ) {
+	if( soundPlayer != null && soundPlayer.playlist.length > 0 ) {
 		if( isSoundPlaying ){
 			//soundPausePoint = soundChannel.position;
 			soundPlayer.pause();
@@ -738,6 +900,11 @@ private function togglePlayPause(ignoreBuffer:Boolean = false):void{
 	if(ns)
 		ns.togglePause();
 	video_player.setFocus();
+	if(playState){
+		dispatchEvent(new Event(ON_PLAY));
+	}else{
+		dispatchEvent(new Event(ON_PAUSE));
+	}
 }
 
 /**
@@ -746,6 +913,7 @@ private function togglePlayPause(ignoreBuffer:Boolean = false):void{
  */
 private function toggleFullScreen():void{
 	switch (stage.displayState) {
+		case StageDisplayState.FULL_SCREEN:
 		case StageDisplayState.FULL_SCREEN_INTERACTIVE:
 			/* If already in full screen mode, switch to normal mode. */
 			stage.displayState = StageDisplayState.NORMAL;
@@ -761,6 +929,8 @@ private function toggleFullScreen():void{
 	}
 	//subText = '';
 	video_player.setFocus();
+	
+	if(svAvailable) resizeStageVideo();
 }
 
 /**
@@ -887,8 +1057,12 @@ private function setProgress(progress:Number):void{
  * Set volume 
  * 
  */
-private function setVolume():void{				
-	ns.soundTransform = new SoundTransform(player_volume.value/100);
+private function setVolume():void{
+	if(isSoundPlaying){
+		soundPlayer.volume = player_volume.value/100;
+	}else{
+		ns.soundTransform = new SoundTransform(player_volume.value/100);
+	}
 	volumeLevel = player_volume.value;
 	video_player.setFocus();
 }
@@ -946,6 +1120,9 @@ private function resetPlayer(nofullscreen:Boolean = true):void{
 	
 	// reset watch
 	watchedReport = false;
+	
+	// show loader
+	loading_text.visible = true;
 	
 	// reset next and prev windows
 	player_episodes_wnd.visible = false;
@@ -1021,18 +1198,10 @@ private function onPlayerKey(event:KeyboardEvent):void{
 			toggleFullScreen();
 			break;
 		case Keyboard.UP:
-			if(player_volume.value < 100){
-				player_volume.value += 5;
-			}
-			volumeLevel = player_volume.value;
-			ns.soundTransform = new SoundTransform(player_volume.value/100);
+			volumeUp();
 			break;
 		case Keyboard.DOWN:
-			if(player_volume.value > 5){
-				player_volume.value -= 5;
-			}
-			volumeLevel = player_volume.value;
-			ns.soundTransform = new SoundTransform(player_volume.value/100);
+			volumeDown();
 			break;
 		case Keyboard.LEFT:
 			if(ns.time < 10) break;
@@ -1076,8 +1245,7 @@ private function toggleMute():void{
 	}else{
 		player_volume.value = volumeLevel;
 	}
-	if(ns)
-		ns.soundTransform = new SoundTransform(player_volume.value/100);
+	setVolume();
 }
 
 private function returnView():void{
@@ -1120,15 +1288,13 @@ private function aboveAll():void{
 	//}
 }
 
-protected function ratio_list_openHandler(event:DropDownEvent):void
-{
+protected function ratio_list_openHandler(event:DropDownEvent):void{
 	// TODO Auto-generated method stub
 	hideTimer.stop();
 }
 
 
-protected function ratio_list_closeHandler(event:DropDownEvent):void
-{
+protected function ratio_list_closeHandler(event:DropDownEvent):void{
 	// TODO Auto-generated method stub
 	hideTimer.start();
 	video_player.setFocus();
@@ -1170,8 +1336,7 @@ private function lastGC():void{
 }
 
 
-protected function subBar_itemClickHandler(event:ItemClickEvent):void
-{
+protected function subBar_itemClickHandler(event:ItemClickEvent):void{
 	var i:int = event.index - 1;
 	if( i >= 0 && i < subArray.length ){
 		loadSubtitles(subArray[i]);
@@ -1180,8 +1345,7 @@ protected function subBar_itemClickHandler(event:ItemClickEvent):void
 	}
 }
 
-protected function sndBar_itemClickHandler(event:ItemClickEvent):void
-{
+protected function sndBar_itemClickHandler(event:ItemClickEvent):void{
 	var i:int = event.index - 1;
 	if( i >= 0 && i < sndArray.length ){
 		loadSound(sndArray[i]);
