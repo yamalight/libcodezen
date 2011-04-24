@@ -4,6 +4,7 @@
 		 xmlns:mx="library://ns.adobe.com/flex/mx"
 		 xmlns:videoplayer="com.codezen.component.videoplayer.*" 
 		 xmlns:ui="com.codezen.component.videoplayer.ui.*"
+		 creationComplete="{onCreationComplete()}"
 		 width="710" height="490">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -116,9 +117,17 @@
 						   visible="{isSubSwitch}" id="player_subselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
-						id="subBar" itemClick="subBar_itemClickHandler(event)">
-			</mx:LinkBar>
+			<s:List labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
+					height="30" y="17" horizontalCenter="0" maxWidth="70"
+					useHandCursor="true" id="subBar" change="subBar_itemClickHandler(event)">
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				<s:dataProvider>
+					<s:ArrayCollection source="{subNames}" />
+				</s:dataProvider>
+			</s:List>
 			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 		
@@ -127,9 +136,17 @@
 						   visible="{isSndSwitch}" id="player_sndselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<mx:LinkBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
-						id="sndBar" itemClick="sndBar_itemClickHandler(event)">
-			</mx:LinkBar>
+			<s:List labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
+					height="30" y="17" horizontalCenter="0" maxWidth="70"
+					useHandCursor="true" id="sndBar" change="sndBar_itemClickHandler(event)">
+				<s:layout>
+					<s:HorizontalLayout />
+				</s:layout>
+				<s:dataProvider>
+					<s:ArrayCollection source="{sndNames}" />
+				</s:dataProvider>
+			</s:List>
 			<s:Label text="Звук" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 	</s:BorderContainer>
@@ -139,29 +156,35 @@
 					   left="0" right="0"
 					   horizontalCenter="0" borderVisible="false"
 					   showEffect="{showEff}" hideEffect="{hideEff}">
-		<ui:ToggleImage onImage="{playBtn}" offImage="{pauseBtn}" 
-						id="playpause" x="1" click="{togglePlayPause()}" width="32" height="32" verticalCenter="0"/>
+		<s:layout>
+			<s:HorizontalLayout gap="5" verticalAlign="middle" variableColumnWidth="true"
+								paddingRight="5"/>
+		</s:layout>
 		
-		<!-- VOLUME -->
-		<ui:ToggleImage onImage="{unmuteBtn}" offImage="{muteBtn}" click="{toggleMute()}" width="20" height="20" 
-				  verticalCenter="0" right="140"/>
-		<s:HSlider id="player_volume" minimum="0" maximum="100" value="100" change="{setVolume()}" 
-				   width="90" visible="true" verticalCenter="-1" right="50"/>
+		<ui:ToggleImage onImage="{playBtn}" offImage="{pauseBtn}" 
+						id="playpause" click="{togglePlayPause()}" width="32" height="32"/>
 		
 		<!-- PROGRESS -->
-		<ui:AdvancedProgressBar verticalCenter="0" left="40" right="265" id="video_progress" >
+		<ui:AdvancedProgressBar width="100%" id="video_progress" >
 		</ui:AdvancedProgressBar>
 		
 		<!-- TIME -->
-		<s:BorderContainer width="90" height="15" verticalCenter="0" backgroundAlpha="0.0" borderVisible="false" dropShadowVisible="false" right="170">
-			<s:Label text="0:00:00" color="#FFFFFF" id="video_time" fontFamily="Gothic" left="0" verticalCenter="0"/>
-			<s:Label text="0:00:00" color="#FFFFFF" id="video_time_end" fontFamily="Gothic" verticalCenter="0" left="50"/>
-			<s:Label text="/" color="#FFFFFF" fontFamily="Gothic" left="42" verticalCenter="0"/>
-		</s:BorderContainer>
+		<!-- <s:HGroup width="90" height="15" verticalCenter="0" right="180" verticalAlign="middle" gap="1"> -->
+			<s:Label text="0:00:00" color="#FFFFFF" id="video_time" fontFamily="Gothic" fontSize="15"/>
+			<s:Label text="/" color="#FFFFFF" fontFamily="Gothic" fontSize="15"/>
+			<s:Label text="0:00:00" color="#FFFFFF" id="video_time_end" fontFamily="Gothic" fontSize="15"/>
+		<!-- </s:HGroup> -->
+		
+		<!-- VOLUME -->
+		<ui:ToggleImage onImage="{unmuteBtn}" offImage="{muteBtn}" click="{toggleMute()}" width="20" height="20" 
+						visible="{!_isMobile}" id="mute_btn"/>
+		<s:HSlider id="player_volume" minimum="0" maximum="100" value="100" change="{setVolume()}" 
+				   width="90" visible="{!_isMobile}"/>
 		
 		<!-- FULLSCREEN -->
-		<s:Image source="@Embed('assets/player/fullscreen.png')" id="fullscreen_btn" click="{toggleFullScreen()}" 
-				  width="24" height="24" useHandCursor="true" buttonMode="true" alpha="0.5" verticalCenter="0" right="15"/>
+		<s:Image source="@Embed('assets/player/fullscreen.png')" id="fullscreen_btn" click="{toggleFullScreen()}"
+				  width="24" height="24" useHandCursor="true" buttonMode="true" alpha="0.5"
+				  visible="{!_isMobile}"/>
 	</s:BorderContainer>
 	
 	

@@ -158,6 +158,12 @@ private var _showTop:Boolean = true;
 [Bindable]
 private var top_width:int = 22;
 
+
+// mobile
+[Bindable]
+private var _isMobile:Boolean; 
+
+// setters
 public function set showLoop(show:Boolean):void{
 	_showLoop = show;
 	if(!_showLoop){
@@ -188,7 +194,22 @@ public function set showTop(show:Boolean):void{
 public function set autoplay(ap:Boolean):void{
 	_autoplay = ap;
 }
+public function set isMobile(m:Boolean):void{
+	_isMobile = m;
+}
 
+private function onCreationComplete():void{
+	// rescale for mobile
+	if(_isMobile){
+		player_controls.removeElement(fullscreen_btn);//.width = 0;
+		player_controls.removeElement(player_volume);//.width = 0;
+		player_controls.removeElement(mute_btn);//.width = 0;
+		
+		// temp disable sub
+		player_data.removeElement(player_subselect);
+		player_data.removeElement(player_sndselect);
+	}
+}
 
 // init functions
 public function initStagePlayer():void{
@@ -311,6 +332,7 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	ns = new NetStream(nc);
 	// assign client
 	ns.client = customClient;
+	if(_isMobile) ns.maxPauseBufferTime = 120;
 	ns.addEventListener(NetStatusEvent.NET_STATUS, function(e:NetStatusEvent):void{
 		trace("NetStatus: "+ObjectUtil.toString(e));
 	});
@@ -324,9 +346,15 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	}else{
 		trace('normal');
 		vid = new Video(video_player.width, video_player.height);
-		// max quality
-		vid.smoothing = true;
-		vid.deblocking = 0;
+		if(!_isMobile){
+			// max quality
+			vid.smoothing = true;
+			vid.deblocking = 0;
+		}else{
+			// disable all filters for speed
+			vid.smoothing = false;
+			vid.deblocking = 1;
+		}
 		
 		// add video to stage
 		video_player.addChild(vid);
@@ -635,7 +663,7 @@ private function onHideTimer(e:Event):void{
 		player_data_bg.visible = false;
 	//}
 	
-	if( mouseY < (parent.height - 40) ){
+	if( mouseY < (parent.height - 40) || mouseY > parent.height  ){
 		player_controls.visible = false;
 	}
 	
@@ -694,21 +722,22 @@ private function onMouseMove(e:Event):void{
  */
 private function onMouseClick(e:Event):void{
 	if( !(mouseY > (parent.height - 36) || 
-		(player_subselect.mouseX >= 0 && player_subselect.mouseY >= 0 && 
-			player_subselect.mouseX <= player_subselect.width &&
-			player_subselect.mouseY <= player_subselect.height &&
-			isSub && isSubSwitch) || 
-		(player_sndselect.mouseX >= 0 && player_sndselect.mouseY >= 0 && 
-			player_sndselect.mouseX <= player_sndselect.width &&
-			player_sndselect.mouseY <= player_sndselect.height &&
-			isSub && isSubSwitch) || 
-		(fullscreen_btn.mouseX >= 0 && fullscreen_btn.mouseX <= fullscreen_btn.width &&
-			fullscreen_btn.mouseY >= 0 && fullscreen_btn.mouseY <= fullscreen_btn.height)
+		(player_subselect.contentMouseX >= 0 && player_subselect.contentMouseY >= 0 && 
+			player_subselect.contentMouseX <= player_subselect.width &&
+			player_subselect.contentMouseY <= player_subselect.height &&
+			isSubSwitch) || 
+		(player_sndselect.contentMouseX >= 0 && player_sndselect.contentMouseY >= 0 && 
+			player_sndselect.contentMouseX <= player_sndselect.width &&
+			player_sndselect.contentMouseY <= player_sndselect.height &&
+			isSndSwitch) || 
+		(fullscreen_btn.contentMouseX >= 0 && fullscreen_btn.contentMouseX <= fullscreen_btn.width &&
+			fullscreen_btn.contentMouseY >= 0 && fullscreen_btn.mouseY <= fullscreen_btn.height)
 		|| (mouseY < 40)
 	) ){
 		togglePlayPause();
 	}
-	video_player.setFocus();
+	
+	
 }
 
 private function sendUpdateTime():void{
@@ -1099,7 +1128,7 @@ private function timeDataTip(val:String):String{
  * Player cleanup 
  * 
  */
-private function resetPlayer(nofullscreen:Boolean = true):void{
+public function resetPlayer(nofullscreen:Boolean = true):void{
 	// reset controls
 	video_progress.reset();
 	video_time_end.text = "0:00:00";
@@ -1250,7 +1279,8 @@ private function toggleMute():void{
 
 private function returnView():void{
 	// reset ontop
-	FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = false;
+	if(FlexGlobals.topLevelApplication.hasOwnProperty("nativeWindow"))
+		FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = false;
 	// reset player
 	resetPlayer();
 	//
@@ -1336,8 +1366,8 @@ private function lastGC():void{
 }
 
 
-protected function subBar_itemClickHandler(event:ItemClickEvent):void{
-	var i:int = event.index - 1;
+protected function subBar_itemClickHandler(event:Event):void{
+	var i:int = subBar.selectedIndex - 1;
 	if( i >= 0 && i < subArray.length ){
 		loadSubtitles(subArray[i]);
 	}else{
@@ -1345,8 +1375,8 @@ protected function subBar_itemClickHandler(event:ItemClickEvent):void{
 	}
 }
 
-protected function sndBar_itemClickHandler(event:ItemClickEvent):void{
-	var i:int = event.index - 1;
+protected function sndBar_itemClickHandler(event:Event):void{
+	var i:int = sndBar.selectedIndex - 1;
 	if( i >= 0 && i < sndArray.length ){
 		loadSound(sndArray[i]);
 	}else{

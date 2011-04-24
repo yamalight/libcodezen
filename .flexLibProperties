@@ -21,6 +21,7 @@
     <classEntry path="com.codezen.subs.Caption"/>
     <classEntry path="com.codezen.mailru.service.Base"/>
     <classEntry path="com.codezen.mailru.service.Mailru"/>
+    <classEntry path="com.codezen.skins.app.BlankApp"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
