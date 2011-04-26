@@ -122,6 +122,37 @@ package com.codezen.util
 			return date;
 		}
 		
+		public static function dateTimeDifference(time:Number):String{
+			var date:Date = new Date(time);
+			var now:Date = new Date();
+			
+			if(date.fullYear != now.fullYear ||
+				date.date != now.date ||
+				date.day != now.day ||
+				Math.abs(date.hours - now.hours) > 1 ){
+				return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+			}else{
+				var strtime:String = '';
+				var h:int;
+				var m:int;
+				if( now.minutes < date.minutes ){
+					h = now.hours - date.hours - 1;
+					if(h > 0) strtime += h + 'h ';
+					strtime += (60 - now.minutes - date.minutes) + 'minutes ';
+				}else{
+					h = now.hours - date.hours;
+					if(h > 0) strtime += h + 'h ';
+					strtime += (now.minutes - date.minutes) + ' minutes';
+				}
+				strtime += ' ago';
+				return strtime;
+			}
+			
+			
+			
+			return '';
+		}
+		
 		/**
 		 * Removes whitespaces from start of string
 		 * 

@@ -28,6 +28,8 @@ package com.codezen.vkontakte.api
 		private var _users:ArrayCollection;
 		// statuses result
 		private var statuses:ArrayCollection;
+		// wall data
+		private var _wallData:Object;
 		// videos data
 		private var _videosData:ArrayCollection;
 		// audio data
@@ -35,13 +37,21 @@ package com.codezen.vkontakte.api
 		// video data
 		private var _videoData:Object;
 		private var _videoURL:String;
-		// video data
+		// photo data
 		private var _photoData:Object;
+		private var _photos:Array;
+		// albums data
+		private var _albumsData:Array;
 		// user data
 		private var _userData:Object;
 		private var _usersData:Array;
 		// string result
 		private var _stringResult:String;
+		
+		// users help vars
+		private var user_counter:int;
+		private var users_all:Array;
+		private var users_to_get:Array;
 		
 		public function VkAPIService(appID:String, appKey:String, silentInit:Boolean)
 		{
@@ -49,6 +59,21 @@ package com.codezen.vkontakte.api
 			_users = new ArrayCollection();
 		}
 		
+		public function get wallData():Object
+		{
+			return _wallData;
+		}
+
+		public function get albumsData():Array
+		{
+			return _albumsData;
+		}
+
+		public function get photos():Array
+		{
+			return _photos;
+		}
+
 		public function get usersData():Array
 		{
 			return _usersData;
@@ -154,10 +179,13 @@ package com.codezen.vkontakte.api
 			
 			for each(item in stats){
 				// reset item
+//				trace(item);
 				newsItem = new NewsItem();
 				
 				// append common data
 				newsItem.time = item.date.text();
+				newsItem.commentsCount = item.comments.count.text();
+				newsItem.likesCount = item.likes.count.text();
 				
 				// user/group data
 				if( int(item.source_id) > 0 ){					
@@ -179,6 +207,9 @@ package com.codezen.vkontakte.api
 				switch( String(item.type) ){
 					// if it's a post
 					case "post":
+						// item id
+						newsItem.post_id = item.post_id.text();
+						// text
 						newsItem.text = item.text.text();
 						if( item.attachment != null ){
 							switch( String(item.attachment.type) ){
@@ -370,7 +401,124 @@ package com.codezen.vkontakte.api
 		}
 		
 		/**
-		 * Gets video data by userid_vidid 
+		 * Gets photos from album by albumid
+		 * @param albumid
+		 * @param owner
+		 * 
+		 */
+		public function getPhotosFromAlbum(albumid:String, owner:String):void{
+			var activity:String = "photos.get";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"aid="+albumid+
+				"api_id="+appID+
+				"method="+activity+
+				"uid="+owner+
+				"v=3.0"+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.aid = albumid;
+			vars.uid = owner;
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;//+'&'+format;
+			
+			// assign url
+			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			myLoader.addEventListener(Event.COMPLETE, onPhotosFromAlbumRecieve);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onPhotosFromAlbumRecieve(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onPhotosFromAlbumRecieve);
+			
+			var photos:XMLList = new XMLList( XML(myLoader.data).photo );
+			
+			_photos = [];
+			
+			var obj:Object;
+			var photo:PhotoItem;
+			for each(obj in photos){
+				photo = new PhotoItem();
+				photo.id = obj.pid.text();
+				photo.album = obj.aid.text();
+				photo.src = obj.src.text();
+				photo.src_big = obj.src_big.text();
+				photo.owner = obj.owner_id.text();
+				_photos.push(photo);
+			}
+			
+			end();
+		}
+		
+		/**
+		 * Gets album info by id
+		 * @param albumid
+		 * @param owner
+		 * 
+		 */
+		public function getAlbumInfo(albumid:String, owner:String):void{
+			var activity:String = "photos.getAlbums";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"aid="+albumid+
+				"api_id="+appID+
+				"method="+activity+
+				"uid="+owner+
+				"v=3.0"+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.aid = albumid;
+			vars.uid = owner;
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;//+'&'+format;
+			
+			// assign url
+			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			myLoader.addEventListener(Event.COMPLETE, onAlbumInfoRecieve);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onAlbumInfoRecieve(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onAlbumInfoRecieve);
+			
+			var albums:XMLList = new XMLList( XML(myLoader.data).album );
+			
+			_albumsData = [];
+			
+			var obj:Object;
+			for each(obj in albums){
+				_albumsData.push({
+					id: obj.aid.text(),
+					title: obj.title.text(),
+					created: obj.created.text(),
+					updated: obj.updated.text(),
+					size: obj.size.text()
+				});
+			}
+			
+			end();
+		}
+		
+		/**
+		 * Gets photo comments 
 		 * @param id
 		 * 
 		 */
@@ -422,6 +570,67 @@ package com.codezen.vkontakte.api
 					from_img: '',
 					date: obj.date.text(),
 					message: obj.message.text()
+				});
+			}
+			
+			end();
+		}
+		
+		/**
+		 * Gets photo comments 
+		 * @param id
+		 * 
+		 */
+		public function getWallComments(pid:String, owner:String):void{
+			var activity:String = "wall.getComments";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"api_id="+appID+
+				"method="+activity+
+				"owner_id="+owner+
+				"post_id="+pid+
+				"v=3.0"+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.post_id = pid;
+			vars.owner_id = owner;
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;//+'&'+format;
+			
+			// assign url
+			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			myLoader.addEventListener(Event.COMPLETE, onWallCommentsRecieve);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onWallCommentsRecieve(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onWallCommentsRecieve);
+			
+			var comments:XMLList = new XMLList( XML(myLoader.data).comment );
+			
+			_wallData = new Object();
+			_wallData.comments = [];
+			
+//			trace(comments);
+			
+			var obj:Object;
+			for each(obj in comments){
+				_wallData.comments.push({
+					cid: obj.cid.text(),
+					from_id: obj.uid.text(),
+					from_name: '',
+					from_img: '',
+					date: obj.date.text(),
+					message: obj.text.text()
 				});
 			}
 			
@@ -502,7 +711,7 @@ package com.codezen.vkontakte.api
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
-			trace( ObjectUtil.toString(urlRequest) );
+			//trace( ObjectUtil.toString(urlRequest) );
 			
 			// load
 			myLoader.addEventListener(Event.COMPLETE, onAudioData);
@@ -565,7 +774,7 @@ package com.codezen.vkontakte.api
 			// get result
 			var xml:XML = new XML(myLoader.data);
 			
-			trace(xml);
+			//trace(xml);
 			
 			_userData = {
 				id: xml.user_id.text(),
@@ -627,7 +836,7 @@ package com.codezen.vkontakte.api
 			// get result
 			var xml:XML = new XML(myLoader.data);
 			
-			trace(xml);
+			//trace(xml);
 			
 			_stringResult = xml.post_id;
 			
@@ -639,9 +848,6 @@ package com.codezen.vkontakte.api
 		 * @param uid
 		 * 
 		 */
-		private var user_counter:int;
-		private var users_all:Array;
-		private var users_to_get:Array;
 		public function getOtherUserInfo(users:Array):void{
 			user_counter = users.length;
 			users_all = users;
@@ -667,11 +873,11 @@ package com.codezen.vkontakte.api
 				var index:int = CUtils.getItemIndexByProperty(_users, "id", uid);
 				if(index < 0){
 					// need get from vk
-					trace(uid+' added for request');
+					//trace(uid+' added for request');
 					users_to_get.push(uid);
 				}else{
 					// have info, done with this
-					trace(uid+' already known');
+					//trace(uid+' already known');
 					_usersData.push(_users[index]);
 				}
 			}
@@ -721,7 +927,7 @@ package com.codezen.vkontakte.api
 			var user:XML;
 			var ud:UserData;
 			for each(user in xml){
-				trace(user);
+				//trace(user);
 				ud = new UserData();
 				ud.id = user.uid.text();
 				ud.name = user.first_name.text();

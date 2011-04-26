@@ -4,6 +4,8 @@ package com.codezen.vkontakte.api.data
 
 	public final class NewsItem
 	{
+		public var post_id:String;
+		
 		/**
 		 * User and group  
 		 */
@@ -37,6 +39,12 @@ package com.codezen.vkontakte.api.data
 		 * media arrays
 		 */
 		public var photos:ArrayCollection;
+		
+		/**
+		 * Comments and likes count 
+		 */
+		public var commentsCount:int = -1;
+		public var likesCount:int = -1;
 		
 		/**
 		 * Item type: text, photo, audio, video(?) 
