@@ -1,132 +1,244 @@
 package com.codezen.skins.layouts
 {
 	import flash.geom.Matrix3D;
+	import flash.geom.PerspectiveProjection;
+	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	
-	import mx.core.ILayoutElement;
-
-	public class Wall3DLayout extends LayoutBase3D
+	import mx.controls.Alert;
+	import mx.controls.Image;
+	import mx.core.IVisualElement;
+	import mx.core.UIComponent;
+	
+	import spark.filters.GlowFilter;
+	import spark.layouts.supportClasses.LayoutBase;
+	
+	/**
+	 * Flex 4 3D Wall layout
+	 * based on Tony Georgiev TopSitesLayout (http://tgeorgiev.blogspot.com)
+	 */
+	public class Wall3DLayout extends LayoutBase
 	{
-		// ========================================
-		// private properties
-		// ========================================
-		private var _gap:Number = 2;
-		private var _baseY:Number = 100;
+		private var _columnWidth:Number;
+		private var _rowHeight:Number;
+		private var _columns:int;
+		private var _rows:int;
 		
-		// ========================================
-		// public properties
-		// ========================================
+		private var isColumnWidthSet:Boolean;
+		private var isRowHeightSet:Boolean;
+		private var isColumnsSet:Boolean;
+		private var isRowsSet:Boolean;
 		
-		/**
-		 * Gap between each item
-		 */
-		public function get gap():Number
-		{
-			return _gap;
-		}
-		public function set gap( value:Number ):void
-		{
-			if ( _gap != value )
-			{
-				_gap = value;
-				invalidateTarget();
-			}
-		}
+		private var _horizontalGap:Number;
+		private var _verticalGap:Number;
 		
-		// ========================================
-		// constructor
-		// ========================================
+		private var rotatingAngle:Number;
+		private var radius:Number;
+		private var cameraPosition:Number;
+		private var chordLength:Number;
+		private var arcLength:Number;
+				
+		public static var VIEW_ANGLE:Number = 120;
 		
-		/**
-		 * Constructor
-		 */
 		public function Wall3DLayout()
 		{
 			super();
+			_columnWidth = 0;
+			_rowHeight = 0;
+			_rows = 0;
+			_horizontalGap = 0;
+			_verticalGap = 0;
 		}
 		
-		// ========================================
-		// public methods
-		// ========================================
-		
-		override public function updateDisplayList( width:Number, height:Number ) : void
+		/**
+		 * Specifies the width in pixels of each column. If not specified
+		 * the width will be auto calculated depending on the width of the target
+		 * and the number of columns
+		 */
+		public function get columnWidth():Number
 		{
-			var numElements:int = target.numElements;
-			if(numElements < 1) return;
+			return _columnWidth;
+		}
+
+		public function set columnWidth(value:Number):void
+		{
+			_columnWidth = value;
+			isColumnWidthSet = true;
+		}
+		
+		/**
+		 * Specifies the height in pixels of each row. If not specified
+		 * the height will be auto calculated depending on the height of the target
+		 * and the number of rows
+		 */
+		public function get rowHeight():Number
+		{
+			return _rowHeight;
+		}
+		
+		public function set rowHeight(value:Number):void
+		{
+			_rowHeight = value;
+			isRowHeightSet = true;
+		}
+		
+		/**
+		 * The number of columns to display. If not specified
+		 * the number will be self determined
+		 */
+		public function get columns():int
+		{
+			return _columns;
+		}
+		
+		public function set columns(value:int):void
+		{
+			_columns = value;
+			isColumnsSet = true;
+		}
+		
+		/**
+		 * The number of rows to display. If not specified
+		 * the number will be self determined
+		 */
+		public function get rows():int
+		{
+			return _rows;
+		}
+		
+		public function set rows(value:int):void
+		{
+			_rows = value;
+			isRowsSet = true;
+		}
+		
+		/**
+		 * The space in pixels between two rows
+		 */
+		public function get horizontalGap():Number
+		{
+			return _horizontalGap;
+		}
+		
+		public function set horizontalGap(value:Number):void
+		{
+			_horizontalGap = value;
+		}
+		
+		/**
+		 * The space in pixels between two columns
+		 */
+		public function get verticalGap():Number
+		{
+			return _verticalGap;
+		}
+		
+		public function set verticalGap(value:Number):void
+		{
+			_verticalGap = value;
+		}
+		
+		override public function updateDisplayList(width:Number, height:Number):void
+		{
+			calculateRowsCols();
+			chordLength = width;
+			calculateRadiusAndArc(width, height);
 			
-			var selectedIndex:int = index == -1 ? int( target.numElements / 2 ) : index;
-			var selectedChild:ILayoutElement = target.getElementAt( selectedIndex );
 			
-			var element:ILayoutElement;
-			var elementWidth:Number;
-			var elementHeight:Number;
-			var matrix:Matrix3D;
 			
-			var rowElementsNum:int = -1;
-			var startAngle:int = -15;
-			var maxAngle:int = 15;
-			var stepAngle:Number;
-			var x:Number = 0, y:Number = 0;
-			var xi:int = 0, yi:int = 0;
-			var angle:Number = startAngle;
-			var oldWidth:Number = 10;
+			var degreesMove:Number = rotatingAngle / (_columns-1);
+			if(isNaN(degreesMove))
+				degreesMove = 0;
+			var startDegree:Number = -rotatingAngle/2;
 			
-			for(var i:int = 0; i < numElements; i++){
-				element = target.getElementAt( i );
-				element.setLayoutBoundsSize( NaN, NaN, false ); // reset size
-				
-				elementWidth = element.getLayoutBoundsWidth( false );
-				elementHeight = element.getLayoutBoundsHeight( false );
-				
-				if(rowElementsNum == -1){
-					rowElementsNum = width/(elementWidth+_gap);
-					stepAngle = ( maxAngle - startAngle ) / (rowElementsNum-1);
-				}
-				
-				matrix = new Matrix3D();
-				
-				angle = startAngle + stepAngle*xi;
-//				trace(angle);
-				
-//				var dy:Number = 0;//Math.pow( (elementsNum-1)/2 - xi, 2) / Math.pow( (elementsNum-1)/4, 2 );
-//				trace(dy);
-//				var dx:Number = elementWidth * Math.cos(angle*Math.PI/180);//( (elementsNum - 1)/2 - xi )*Math.abs(Math.abs(angle) - maxAngle);
-//				trace(dx);
-				
-				
-//				if(xi == 0){
-//					x += oldWidth + _gap;
-//				}else{
-//					x += oldWidth*2 - elementWidth + _gap;
-//				}
-				y = elementHeight*yi;// + _gap*yi;
-				xi++;
-				
-				
-				if(xi >= rowElementsNum){
-					x = 10;
-					yi++;
-					xi = 0;
+			for(var i:int = 0; i < _rows; i++)
+			{
+				for(var j:int = 0; j < _columns; j++)
+				{
+					var index:int = i*_columns + j;
+					if(index >= target.numElements)
+					{
+						return;
+					}
+					var element:IVisualElement = target.getVirtualElementAt(index);
+					element.setLayoutBoundsSize(_columnWidth, _rowHeight, true);
 					
-					angle = startAngle;
-					oldWidth = 10;
-					y = elementHeight*yi;// + _gap*yi;
+					var pp:PerspectiveProjection = new PerspectiveProjection();
+					pp.fieldOfView = 15;
+					pp.projectionCenter = new Point(width/2, height/2);
+					
+					element["transform"].perspectiveProjection = pp;
+					
+					var matrix:Matrix3D = new Matrix3D();
+					matrix.appendTranslation(-_columnWidth/2, 0, radius);
+					matrix.appendRotation(startDegree + degreesMove*j, Vector3D.Y_AXIS);
+					matrix.appendTranslation(width/2, (_rowHeight + _horizontalGap) * i ,-cameraPosition);
+					element.setLayoutMatrix3D(matrix, false);
 				}
-				
-				matrix.appendTranslation(x,y,1);
-				
-				matrix.appendTranslation( -elementWidth/2, -elementHeight / 2, -1 ); // negative so selected index is in front
-				matrix.appendRotation(angle, Vector3D.Y_AXIS); // rotate on y axis
-				matrix.appendTranslation( elementWidth/2, elementHeight / 2, 1 ); // center element in container
-				
-				
-				element.setLayoutMatrix3D( matrix, false );
-				
-//				trace(x, oldWidth);
-				
-				x += _gap + elementWidth * Math.cos(angle*Math.PI/180);
-//				trace(oldWidth);
-//				trace('------------------------------');
+			}
+		
+		}
+		
+		protected function calculateRadiusAndArc(width:Number, height:Number):void
+		{
+			
+			var viewAngleRadians:Number = VIEW_ANGLE * Math.PI / 180;
+			
+			//chordLength = 2r * sin (angle/2);
+			var sinus:Number = Math.sin( viewAngleRadians );
+			radius = chordLength / (2 * Math.sin( viewAngleRadians / 2 ));
+			
+			//chordLength = 2*Math.sqrt(r*r - h*h)
+			cameraPosition = Math.sqrt(4 * radius * radius - chordLength * chordLength) / 2;
+			
+			//arcLength 
+			arcLength = viewAngleRadians * radius;
+			
+			measureRowsColsWidth(arcLength, height);
+			
+			//the old length of the arc minus width for element
+			//half for the left, half for the right
+			var newArcLength:Number = arcLength - (_columnWidth + _verticalGap);
+			
+			//the angle of the new arc, a.k.a the allowed degrees move
+			var rotatingAngleRadians:Number =  newArcLength/radius
+			rotatingAngle = rotatingAngleRadians * 180/Math.PI;
+		}
+		
+		private function measureRowsColsWidth(width:Number, height:Number):void
+		{
+			if(isRowHeightSet == false)
+			{
+				_rowHeight = (height - _rows*_horizontalGap) / _rows;
+			}
+			
+			if(isColumnWidthSet == false)
+			{
+				_columnWidth = (width - _columns*_verticalGap) / _columns;
+			}
+		}
+		
+		private function calculateRowsCols():void
+		{
+			if(isColumnsSet == false && isRowsSet == false)
+			{
+				if( target.getVirtualElementAt(0) == null ){
+					trace('no elems');
+					return;
+				}
+				trace(target.getVirtualElementAt(0).getMinBoundsWidth() )
+				_columns = Math.ceil( target.width / target.getVirtualElementAt(0).getMinBoundsWidth() ); //Math.ceil(Math.sqrt(target.numElements));
+				_rows = Math.ceil(target.numElements / _columns);
+			}
+			else
+			if(isColumnsSet == false)
+			{
+				_columns = Math.ceil(target.numElements / _rows);
+			}
+			else
+			if(isRowsSet == false)
+			{
+				_rows = Math.ceil(target.numElements / _columns);
 			}
 		}
 	}

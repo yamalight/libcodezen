@@ -638,6 +638,67 @@ package com.codezen.vkontakte.api
 		}
 		
 		/**
+		 * Gets photo comments 
+		 * @param id
+		 * 
+		 */
+		public function getVideoComments(vid:String, owner:String):void{
+			var activity:String = "video.getComments";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"api_id="+appID+
+				"method="+activity+
+				"owner_id="+owner+
+				"v=3.0"+
+				"vid="+vid+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.vid = vid;
+			vars.owner_id = owner;
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;//+'&'+format;
+			
+			// assign url
+			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			myLoader.addEventListener(Event.COMPLETE, onVideoCommentsRecieve);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onVideoCommentsRecieve(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onVideoCommentsRecieve);
+			
+			trace(myLoader.data);
+			
+			var comments:XMLList = new XMLList( XML(myLoader.data).comment );
+			
+			_videoData = new Object();
+			_videoData.comments = [];
+			
+			var obj:Object;
+			for each(obj in comments){
+				_videoData.comments.push({
+					cid: obj.cid.text(),
+					from_id: obj.from_id.text(),
+					from_name: '',
+					from_img: '',
+					date: obj.date.text(),
+					message: obj.message.text()
+				});
+			}
+			
+			end();
+		}
+		
+		/**
 		 * Gets direct video uri from source page 
 		 * @param source
 		 * 
@@ -655,10 +716,10 @@ package com.codezen.vkontakte.api
 			
 			var data:String = e.target.data;
 			
-			//trace(data);
+//			trace(data);
 			
 			// create regex
-			var re:RegExp = new RegExp(/"uid":"(.+?)".+?"host":"(.+?)".+?"vtag":"(.+?)".+?"hd":(.+?),/gs);
+			var re:RegExp = new RegExp(/\\"uid\\":\\"(.+?)\\".+?\\"host\\":\\"(.+?)\\".+?\\"vtag\\":\\"(.+?)\\".+?\\"hd\\":(.+?),/gs);
 			// create res array
 			var res:Array = re.exec(data);
 			
@@ -675,7 +736,9 @@ package com.codezen.vkontakte.api
 			hdDef["3"] = "720";
 			
 			var url:String = res[2]+'u'+res[1]+'/video/'+res[3]+'.'+hdDef[res[4]]+'.mp4';
-			url = url.replace(/\\\//gs, "\/");
+			url = url.replace(/\\\//g, "\/");
+			url = url.replace(/\\\//g, "\/");
+			url = url.replace(/\\\//g, "\/");
 			
 			_videoURL = url;
 			end();

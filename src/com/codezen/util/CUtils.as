@@ -138,7 +138,7 @@ package com.codezen.util
 				if( now.minutes < date.minutes ){
 					h = now.hours - date.hours - 1;
 					if(h > 0) strtime += h + 'h ';
-					strtime += (60 - now.minutes - date.minutes) + 'minutes ';
+					strtime += (60 - now.minutes - date.minutes) + ' minutes';
 				}else{
 					h = now.hours - date.hours;
 					if(h > 0) strtime += h + 'h ';
