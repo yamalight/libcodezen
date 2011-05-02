@@ -172,7 +172,7 @@ package com.codezen.skins.layouts
 					var matrix:Matrix3D = new Matrix3D();
 					matrix.appendTranslation(-_columnWidth/2, 0, radius);
 					matrix.appendRotation(startDegree + degreesMove*j, Vector3D.Y_AXIS);
-					matrix.appendTranslation(width/2, (_rowHeight + _horizontalGap) * i ,-cameraPosition);
+					matrix.appendTranslation(width/2, (_rowHeight + _verticalGap) * i ,-cameraPosition);
 					element.setLayoutMatrix3D(matrix, false);
 				}
 			}
@@ -198,7 +198,7 @@ package com.codezen.skins.layouts
 			
 			//the old length of the arc minus width for element
 			//half for the left, half for the right
-			var newArcLength:Number = arcLength - (_columnWidth + _verticalGap);
+			var newArcLength:Number = arcLength - (_columnWidth + _horizontalGap);
 			
 			//the angle of the new arc, a.k.a the allowed degrees move
 			var rotatingAngleRadians:Number =  newArcLength/radius
@@ -209,7 +209,12 @@ package com.codezen.skins.layouts
 		{
 			if(isRowHeightSet == false)
 			{
-				_rowHeight = (height - _rows*_horizontalGap) / _rows;
+				if( target.getVirtualElementAt(0) == null ){
+					_rowHeight = (height - _rows*_horizontalGap) / _rows;
+				}else{
+//					trace('row height from elemheight');
+					_rowHeight = target.getVirtualElementAt(0).getMinBoundsHeight() + _verticalGap; // (height - _rows*_horizontalGap) / _rows;
+				}
 			}
 			
 			if(isColumnWidthSet == false)
@@ -226,9 +231,9 @@ package com.codezen.skins.layouts
 					trace('no elems');
 					return;
 				}
-				trace(target.getVirtualElementAt(0).getMinBoundsWidth() )
+//				trace(target.getVirtualElementAt(0).getMinBoundsWidth() )
 				_columns = Math.ceil( target.width / target.getVirtualElementAt(0).getMinBoundsWidth() ); //Math.ceil(Math.sqrt(target.numElements));
-				_rows = Math.ceil(target.numElements / _columns);
+				_rows = Math.ceil( target.height / target.getVirtualElementAt(0).getMinBoundsHeight() ); //Math.ceil(target.numElements / _columns);
 			}
 			else
 			if(isColumnsSet == false)
@@ -238,7 +243,11 @@ package com.codezen.skins.layouts
 			else
 			if(isRowsSet == false)
 			{
-				_rows = Math.ceil(target.numElements / _columns);
+				if( target.getVirtualElementAt(0) == null ){
+					_rows = Math.ceil(target.numElements / _columns);
+				}else{
+					_rows = Math.ceil( target.height / target.getVirtualElementAt(0).getMinBoundsHeight() );//Math.ceil(target.numElements / _columns);
+				}
 			}
 		}
 	}

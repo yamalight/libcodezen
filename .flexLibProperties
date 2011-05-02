@@ -22,6 +22,7 @@
     <classEntry path="com.codezen.mailru.service.Base"/>
     <classEntry path="com.codezen.mailru.service.Mailru"/>
     <classEntry path="com.codezen.skins.app.BlankApp"/>
+    <classEntry path="com.codezen.helper.URLArrayLoader"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
