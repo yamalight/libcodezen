@@ -88,7 +88,7 @@ package com.codezen.vkontakte.api.service
 			window = new Window();
 			window.width = 600;
 			window.height = 500;
-			window.title = "Vkonatke.ru Authorization";
+			window.title = "Vkontakte.ru Authorization";
 			window.alwaysInFront = true;
 			window.resizable = false;
 			window.showStatusBar = false;

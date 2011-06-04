@@ -209,10 +209,12 @@ private function onCreationComplete():void{
 		player_data.removeElement(player_subselect);
 		player_data.removeElement(player_sndselect);
 	}
+	
+	this.addEventListener(Event.ADDED_TO_STAGE, initStagePlayer);
 }
 
 // init functions
-public function initStagePlayer():void{
+public function initStagePlayer(e:Event = null):void{
 	// stagevideo check
 	stage.addEventListener(StageVideoAvailabilityEvent.STAGE_VIDEO_AVAILABILITY, onStageVideoState);
 	

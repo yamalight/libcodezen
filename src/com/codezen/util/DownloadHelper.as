@@ -6,6 +6,9 @@ package com.codezen.util
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
+	import flash.filesystem.File;
+	import flash.filesystem.FileMode;
+	import flash.filesystem.FileStream;
 	import flash.net.URLRequest;
 	import flash.net.URLStream;
 	import flash.utils.ByteArray;
@@ -20,11 +23,7 @@ package com.codezen.util
 	 * 
 	 */
 	public class DownloadHelper extends Worker
-	{
-		import flash.filesystem.File;
-		import flash.filesystem.FileMode;
-		import flash.filesystem.FileStream;
-	    
+	{	    
 	    private var request:URLRequest; 
 		private var stream:URLStream;
 		private var fileStream:FileStream;

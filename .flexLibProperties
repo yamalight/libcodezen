@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
-  <includeClasses>
-    <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressBar"/>
-    <classEntry path="com.codezen.component.videoplayer.ui.AdvancedProgressSlider"/>
-    <classEntry path="com.codezen.vkontakte.ajax.service.VkBase"/>
-    <classEntry path="com.codezen.vkontakte.ajax.VkNews"/>
-    <classEntry path="com.codezen.music.MBInfo"/>
-    <classEntry path="com.codezen.music.search.ISearch"/>
-    <classEntry path="com.codezen.music.search.VkApiMusic"/>
-    <classEntry path="com.codezen.music.MusicFinder"/>
-    <classEntry path="com.codezen.vkontakte.api.service.Base"/>
-    <classEntry path="com.codezen.vkontakte.api.VkAPIService"/>
-    <classEntry path="com.codezen.vkontakte.api.data.NewsItem"/>
-    <classEntry path="com.codezen.vkontakte.api.data.UserData"/>
-    <classEntry path="com.codezen.vkontakte.api.data.PhotoItem"/>
-    <classEntry path="com.codezen.vkontakte.api.data.VideoItem"/>
-    <classEntry path="com.codezen.vkontakte.api.data.GroupData"/>
-    <classEntry path="com.codezen.vkontakte.api.data.AudioItem"/>
-    <classEntry path="com.codezen.subs.Subtitle"/>
-    <classEntry path="com.codezen.subs.Caption"/>
-    <classEntry path="com.codezen.mailru.service.Base"/>
-    <classEntry path="com.codezen.mailru.service.Mailru"/>
-    <classEntry path="com.codezen.skins.app.BlankApp"/>
-    <classEntry path="com.codezen.helper.URLArrayLoader"/>
-  </includeClasses>
+  <includeClasses/>
   <includeResources/>
   <namespaceManifests/>
 </flexLibProperties>

@@ -117,17 +117,21 @@
 						   visible="{isSubSwitch}" id="player_subselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<s:List labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+			<!--
+			<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
 					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
 					height="30" y="17" horizontalCenter="0" maxWidth="70"
 					useHandCursor="true" id="subBar" change="subBar_itemClickHandler(event)">
 				<s:layout>
-					<s:HorizontalLayout />
+					<s:HorizontalLayout gap="1" />
 				</s:layout>
 				<s:dataProvider>
 					<s:ArrayCollection source="{subNames}" />
 				</s:dataProvider>
-			</s:List>
+			</s:List> -->
+			<mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+						id="subBar" itemClick="subBar_itemClickHandler(event)">
+			</mx:LinkBar>
 			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 		
@@ -136,7 +140,7 @@
 						   visible="{isSndSwitch}" id="player_sndselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<s:List labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+			<!--<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
 					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
 					height="30" y="17" horizontalCenter="0" maxWidth="70"
 					useHandCursor="true" id="sndBar" change="sndBar_itemClickHandler(event)">
@@ -146,7 +150,10 @@
 				<s:dataProvider>
 					<s:ArrayCollection source="{sndNames}" />
 				</s:dataProvider>
-			</s:List>
+			</s:List>-->
+			<mx:LinkBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+						id="sndBar" itemClick="sndBar_itemClickHandler(event)">
+			</mx:LinkBar>
 			<s:Label text="Звук" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 	</s:BorderContainer>

@@ -209,12 +209,12 @@ package com.codezen.skins.layouts
 		{
 			if(isRowHeightSet == false)
 			{
-				if( target.getVirtualElementAt(0) == null ){
+//				if( target.getVirtualElementAt(0) == null ){
 					_rowHeight = (height - _rows*_horizontalGap) / _rows;
-				}else{
-//					trace('row height from elemheight');
-					_rowHeight = target.getVirtualElementAt(0).getMinBoundsHeight() + _verticalGap; // (height - _rows*_horizontalGap) / _rows;
-				}
+//				}else{
+////					trace('row height from elemheight');
+//					_rowHeight = target.getVirtualElementAt(0).getMinBoundsHeight() + _verticalGap; // (height - _rows*_horizontalGap) / _rows;
+//				}
 			}
 			
 			if(isColumnWidthSet == false)
@@ -227,13 +227,15 @@ package com.codezen.skins.layouts
 		{
 			if(isColumnsSet == false && isRowsSet == false)
 			{
-				if( target.getVirtualElementAt(0) == null ){
-					trace('no elems');
-					return;
-				}
+				//if( target.getVirtualElementAt(0) == null ){
+				//	trace('no elems');
+				//	return;
+				//}
 //				trace(target.getVirtualElementAt(0).getMinBoundsWidth() )
-				_columns = Math.ceil( target.width / target.getVirtualElementAt(0).getMinBoundsWidth() ); //Math.ceil(Math.sqrt(target.numElements));
-				_rows = Math.ceil( target.height / target.getVirtualElementAt(0).getMinBoundsHeight() ); //Math.ceil(target.numElements / _columns);
+//				_columns = Math.ceil( target.width / target.getVirtualElementAt(0).getMinBoundsWidth() ); //
+//				_rows = Math.ceil( target.height / target.getVirtualElementAt(0).getMinBoundsHeight() ); //
+				_columns = Math.ceil(Math.sqrt(target.numElements));
+				_rows = Math.ceil(target.numElements / _columns);
 			}
 			else
 			if(isColumnsSet == false)
@@ -243,11 +245,11 @@ package com.codezen.skins.layouts
 			else
 			if(isRowsSet == false)
 			{
-				if( target.getVirtualElementAt(0) == null ){
+//				if( target.getVirtualElementAt(0) == null ){
 					_rows = Math.ceil(target.numElements / _columns);
-				}else{
-					_rows = Math.ceil( target.height / target.getVirtualElementAt(0).getMinBoundsHeight() );//Math.ceil(target.numElements / _columns);
-				}
+//				}else{
+//					_rows = Math.ceil( target.height / target.getVirtualElementAt(0).getMinBoundsHeight() );//Math.ceil(target.numElements / _columns);
+//				}
 			}
 		}
 	}

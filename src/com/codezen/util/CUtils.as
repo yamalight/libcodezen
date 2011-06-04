@@ -64,7 +64,7 @@ package com.codezen.util
 			for (i = startind; i < size; i++)
 			{
 				obj = array[i] as Object;
-				if (obj.hasOwnProperty(property) && obj[property] == value)
+				if (obj != null && obj.hasOwnProperty(property) && obj[property] == value)
 					return i;
 			}
 			return -1;

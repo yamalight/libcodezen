@@ -36,13 +36,13 @@ package com.codezen.helper
 		
 		private function loadNextURL():void{
 			var url:String = _urls[index];
-			trace('loading '+url);
+//			trace('loading '+url);
 			urlRequest.url = url;
 			myLoader.load(urlRequest);
 		}
 		
 		private function onDataLoad(e:Event):void{
-			trace('complete: '+String(myLoader.data).length);
+//			trace('complete: '+String(myLoader.data).length);
 			
 			_onload(myLoader.data);
 			
@@ -52,19 +52,19 @@ package com.codezen.helper
 		private function checkEnd():void{
 			index++;
 			
-			trace('check end index: '+index);
+//			trace('check end index: '+index);
 			
 			if(index >= urlsLength){
-				trace('end load');
+//				trace('end load');
 				endLoad();
 			}else{
-				trace('loading next. '+ (urlsLength-index) +' left');
+//				trace('loading next. '+ (urlsLength-index) +' left');
 				loadNextURL();
 			}
 		}
 		
 		protected override function onError(e:ErrorEvent):void{
-			trace('error');
+//			trace('error');
 			
 			checkEnd();
 		}

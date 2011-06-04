@@ -41,7 +41,7 @@
 			private var downloadQueue:ArrayCollection;
 			
 			// download manager
-			private var downloadHelper:DownloadHelper;
+			private var downloadHelper:Object;//DownloadHelper;
 			
 			/**
 			 * Initializes download manager 
