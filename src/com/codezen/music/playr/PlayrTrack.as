@@ -12,7 +12,8 @@ package com.codezen.music.playr{
 		public var album:String = "";
 		public var totalTime:String = "0:00";
 		public var file:String="";
-		public var request:URLRequest = null;
+		public var streamRequest:URLRequest = null;
+		public var downloadRequest:URLRequest = null;
 		public var trackNumber:Number=0;
 		private var _totalSeconds:Number = 0;
 		
@@ -65,7 +66,7 @@ package com.codezen.music.playr{
 			copy.title = this.title;
 			copy.titleName = this.titleName;
 			copy.trackNumber = this.trackNumber;
-			copy.request = this.request;
+			copy.streamRequest = this.streamRequest;
 			return copy;
 		}
 	}

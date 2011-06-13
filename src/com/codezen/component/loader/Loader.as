@@ -110,11 +110,11 @@ public class Loader extends Canvas
 			if( !this.contains( img ) )
 				addChild( img );
 
-			var g:Graphics = fade.graphics;				
+			/*var g:Graphics = fade.graphics;				
 			g.clear();
 			g.beginFill( 0xFFFFFF, .6 );
 			g.drawRect( 0, 0, unscaledWidth, unscaledHeight );
-			g.endFill();			
+			g.endFill();*/			
 		}else{
 			img.source = null;
 			
