@@ -5,7 +5,7 @@
 		 xmlns:videoplayer="com.codezen.component.videoplayer.*" 
 		 xmlns:ui="com.codezen.component.videoplayer.ui.*"
 		 creationComplete="{onCreationComplete()}"
-		 width="710" height="490">
+		 width="710" height="490" xmlns:loader="com.codezen.component.loader.*">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 		<s:Parallel id="showEff">
@@ -54,11 +54,17 @@
 	
 	<fx:Script source="CzVideoPlayer.as" />
 	
-	<!-- loading label -->
-	<s:Label horizontalCenter="0" verticalCenter="0" text="Загрузка..." 
-			 verticalAlign="middle" textAlign="center" color="#FFFFFF"
-			 fontFamily="Gothic" fontSize="20" fontWeight="bold" 
-			 id="loading_text"/>
+	<!-- preview image -->
+	<s:Image width="100%" height="100%" backgroundColor="#000000" id="preview_img" />
+	
+	<!-- loading indicator -->
+	<s:HGroup horizontalCenter="0" verticalCenter="0" id="loading_wnd" verticalAlign="middle" horizontalAlign="center">
+		<loader:Loader isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
+		<s:Label text="Загрузка..." 
+				 verticalAlign="middle" textAlign="center" color="#FFFFFF"
+				 fontFamily="Gothic" fontSize="20" fontWeight="bold" 
+				 id="loading_text"/>
+	</s:HGroup>
 	
 	<!-- video placeholder -->
 	<mx:UIComponent id="video_player" left="0" right="0" top="0" bottom="0" resize="{onVideoResize()}"/>
@@ -117,7 +123,7 @@
 						   visible="{isSubSwitch}" id="player_subselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<!--
+			
 			<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
 					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
 					height="30" y="17" horizontalCenter="0" maxWidth="70"
@@ -128,10 +134,10 @@
 				<s:dataProvider>
 					<s:ArrayCollection source="{subNames}" />
 				</s:dataProvider>
-			</s:List> -->
-			<mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+			</s:List>
+			<!-- <mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
 						id="subBar" itemClick="subBar_itemClickHandler(event)">
-			</mx:LinkBar>
+			</mx:LinkBar> -->
 			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 		
@@ -140,7 +146,7 @@
 						   visible="{isSndSwitch}" id="player_sndselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<!--<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+			<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
 					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
 					height="30" y="17" horizontalCenter="0" maxWidth="70"
 					useHandCursor="true" id="sndBar" change="sndBar_itemClickHandler(event)">
@@ -150,10 +156,10 @@
 				<s:dataProvider>
 					<s:ArrayCollection source="{sndNames}" />
 				</s:dataProvider>
-			</s:List>-->
-			<mx:LinkBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+			</s:List>
+			<!-- <mx:LinkBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
 						id="sndBar" itemClick="sndBar_itemClickHandler(event)">
-			</mx:LinkBar>
+			</mx:LinkBar> -->
 			<s:Label text="Звук" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 	</s:BorderContainer>

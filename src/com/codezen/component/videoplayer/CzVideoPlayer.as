@@ -10,36 +10,23 @@ import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
 import flash.events.NetStatusEvent;
-import flash.events.ProgressEvent;
 import flash.events.StageVideoAvailabilityEvent;
 import flash.events.StageVideoEvent;
 import flash.events.TimerEvent;
-import flash.events.UncaughtErrorEvent;
-import flash.external.ExternalInterface;
 import flash.geom.Rectangle;
-import flash.media.Sound;
-import flash.media.SoundChannel;
 import flash.media.SoundTransform;
 import flash.media.StageVideo;
 import flash.media.StageVideoAvailability;
 import flash.media.Video;
 import flash.net.NetConnection;
 import flash.net.NetStream;
-import flash.net.URLLoader;
-import flash.net.URLRequest;
 import flash.ui.Keyboard;
 import flash.ui.Mouse;
 import flash.utils.Timer;
 
 import mx.collections.ArrayCollection;
-import mx.collections.Sort;
-import mx.collections.SortField;
-import mx.controls.Alert;
 import mx.core.FlexGlobals;
-import mx.events.CollectionEvent;
 import mx.events.FlexEvent;
-import mx.events.ItemClickEvent;
-import mx.utils.ObjectUtil;
 
 import spark.events.DropDownEvent;
 
@@ -216,7 +203,7 @@ private function onCreationComplete():void{
 // init functions
 public function initStagePlayer(e:Event = null):void{
 	// stagevideo check
-	stage.addEventListener(StageVideoAvailabilityEvent.STAGE_VIDEO_AVAILABILITY, onStageVideoState);
+	this.stage.addEventListener(StageVideoAvailabilityEvent.STAGE_VIDEO_AVAILABILITY, onStageVideoState);
 	
 	//loadVideoAndPlay("http://serials.tulavideo.net/MER/MER-01-01.mp4");
 	//this.invalidateDisplayList();	
@@ -334,16 +321,20 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	ns = new NetStream(nc);
 	// assign client
 	ns.client = customClient;
-	if(_isMobile) ns.maxPauseBufferTime = 120;
-	ns.addEventListener(NetStatusEvent.NET_STATUS, function(e:NetStatusEvent):void{
-		trace("NetStatus: "+ObjectUtil.toString(e));
-	});
+	if(_isMobile){
+		ns.maxPauseBufferTime = 120;
+		ns.backBufferTime = 3;
+		ns.bufferTimeMax = 120;
+	}
+	//ns.addEventListener(NetStatusEvent.NET_STATUS, function(e:NetStatusEvent):void{
+	//	trace("NetStatus: "+ObjectUtil.toString(e));
+	//});
 	
 	// if StageVideo is available, attach the NetStream to StageVideo       
 	if (svAvailable)       
 	{       
 		trace('stage');
-		sv = stage.stageVideos[0];
+		sv = this.stage.stageVideos[0];
 		sv.attachNetStream(ns);
 	}else{
 		trace('normal');
@@ -529,7 +520,7 @@ private function setSubtitles(time:Number):void{
 			i = subCurrent.indexOf(sub);
 		}
 	}
-
+	
 	if(del && subCurrent.length > 1){
 		// resub
 		for each(sub in subCurrent) {
@@ -632,7 +623,7 @@ private function onVideoState(e:NetStatusEvent):void{
 		if(play_nonstop.selected){
 			nextEpisode();
 		}else{
-			dispatchEvent(new Event(ON_END));
+			this.dispatchEvent(new Event(ON_END));
 			// toggle next episode wnd
 			if(player_next_ep_txt.text != "null")
 				player_episodes_wnd_1.visible = true;
@@ -662,23 +653,23 @@ private function onHideTimer(e:Event):void{
 	}
 	
 	//if( player_data_bg.mouseY > player_data_bg.height ){
-		player_data_bg.visible = false;
+	player_data_bg.visible = false;
 	//}
 	
-	if( mouseY < (parent.height - 40) || mouseY > parent.height  ){
+	if( this.mouseY < (this.parent.height - 40) || this.mouseY > this.parent.height  ){
 		player_controls.visible = false;
 	}
 	
 	/*if( player_subselect.mouseX < 0 || player_subselect.mouseY < 0 ||
-		player_subselect.mouseX > player_subselect.width ||
-		player_subselect.mouseY > player_subselect.height){*/
-		player_subselect.visible = false;
+	player_subselect.mouseX > player_subselect.width ||
+	player_subselect.mouseY > player_subselect.height){*/
+	player_subselect.visible = false;
 	//}
 	
 	/*if( player_sndselect.mouseX < 0 || player_sndselect.mouseY < 0 ||
-		player_sndselect.mouseX > player_sndselect.width ||
-		player_sndselect.mouseY > player_sndselect.height){*/
-		player_sndselect.visible = false;
+	player_sndselect.mouseX > player_sndselect.width ||
+	player_sndselect.mouseY > player_sndselect.height){*/
+	player_sndselect.visible = false;
 	//}
 }
 
@@ -694,26 +685,26 @@ private function onMouseMove(e:Event):void{
 	
 	// if mouse is over controls
 	//if( mouseY > (parent.height - 36) ){ // do not hide
-		player_controls.visible = true;
-		//hideTimer.stop();
-		//}else if( mouseY < 40 ){
-		//player_data_bg.visible = true;
+	player_controls.visible = true;
+	//hideTimer.stop();
 	//}else if( mouseY < 40 ){
-		player_data_bg.visible = true;
+	//player_data_bg.visible = true;
+	//}else if( mouseY < 40 ){
+	player_data_bg.visible = true;
 	/*}else if( player_subselect.mouseX >= 0 && player_subselect.mouseY >= 0 && 
-		player_subselect.mouseX <= player_subselect.width &&
-		player_subselect.mouseY <= player_subselect.height &&*/
+	player_subselect.mouseX <= player_subselect.width &&
+	player_subselect.mouseY <= player_subselect.height &&*/
 	if(isSubSwitch)
 		player_subselect.visible = true;
 	/*}else if( player_sndselect.mouseX >= 0 && player_sndselect.mouseY >= 0 && 
-		player_sndselect.mouseX <= player_sndselect.width &&
-		player_sndselect.mouseY <= player_sndselect.height &&*/
+	player_sndselect.mouseX <= player_sndselect.width &&
+	player_sndselect.mouseY <= player_sndselect.height &&*/
 	if(isSndSwitch)
 		player_sndselect.visible = true;
 	//}else{ // otherwise hide
-		if( int(seekOffset+ns.time) != int(totalDuration) ){
-			hideTimer.start();
-		}
+	if( int(seekOffset+ns.time) != int(totalDuration) ){
+		hideTimer.start();
+	}
 	//}
 }
 
@@ -723,7 +714,7 @@ private function onMouseMove(e:Event):void{
  * 
  */
 private function onMouseClick(e:Event):void{
-	if( !(mouseY > (parent.height - 36) || 
+	if( !(this.mouseY > (this.parent.height - 36) || 
 		(player_subselect.contentMouseX >= 0 && player_subselect.contentMouseY >= 0 && 
 			player_subselect.contentMouseX <= player_subselect.width &&
 			player_subselect.contentMouseY <= player_subselect.height &&
@@ -734,7 +725,7 @@ private function onMouseClick(e:Event):void{
 			isSndSwitch) || 
 		(fullscreen_btn.contentMouseX >= 0 && fullscreen_btn.contentMouseX <= fullscreen_btn.width &&
 			fullscreen_btn.contentMouseY >= 0 && fullscreen_btn.mouseY <= fullscreen_btn.height)
-		|| (mouseY < 40)
+		|| (this.mouseY < 40)
 	) ){
 		togglePlayPause();
 	}
@@ -745,7 +736,7 @@ private function onMouseClick(e:Event):void{
 private function sendUpdateTime():void{
 	updateTime = saveTime;
 	// dispatch update time event
-	dispatchEvent(new Event(UPDATE_TIME));
+	this.dispatchEvent(new Event(UPDATE_TIME));
 }
 
 /**
@@ -821,7 +812,8 @@ private function metaDataHandler(infoObject:Object):void {
 			onVideoResize();
 		}
 		
-		loading_text.visible = false;
+		loading_wnd.visible = loading_spin.isLoading = preview_img.visible = false;
+		//loading_text.visible = false;
 		
 		// seek if already watched
 		if( startPos > -1 ){
@@ -883,9 +875,9 @@ private function onSeek(e:Event):void{
 		playState = !playState;
 		video_player.setFocus();
 		if(playState){
-			dispatchEvent(new Event(ON_PLAY));
+			this.dispatchEvent(new Event(ON_PLAY));
 		}else{
-			dispatchEvent(new Event(ON_PAUSE));
+			this.dispatchEvent(new Event(ON_PAUSE));
 		}
 	}
 	// clean subs and sounds
@@ -932,9 +924,9 @@ private function togglePlayPause(ignoreBuffer:Boolean = false):void{
 		ns.togglePause();
 	video_player.setFocus();
 	if(playState){
-		dispatchEvent(new Event(ON_PLAY));
+		this.dispatchEvent(new Event(ON_PLAY));
 	}else{
-		dispatchEvent(new Event(ON_PAUSE));
+		this.dispatchEvent(new Event(ON_PAUSE));
 	}
 }
 
@@ -943,18 +935,18 @@ private function togglePlayPause(ignoreBuffer:Boolean = false):void{
  * 
  */
 private function toggleFullScreen():void{
-	switch (stage.displayState) {
+	switch (this.stage.displayState) {
 		case StageDisplayState.FULL_SCREEN:
 		case StageDisplayState.FULL_SCREEN_INTERACTIVE:
 			/* If already in full screen mode, switch to normal mode. */
-			stage.displayState = StageDisplayState.NORMAL;
+			this.stage.displayState = StageDisplayState.NORMAL;
 			
 			//player_controls.bottom = "50";
 			break;
 		default:
 			/* If not in full screen mode, switch to full screen mode. */
 			//stage.fullScreenSourceRect = new Rectangle(0,0,stage.width,stage.height);
-			stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+			this.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
 			//player_controls.bottom = "135";
 			break;
 	}
@@ -974,7 +966,7 @@ private function onVideoResize():void{
 	switch(ratio_list.selectedItem.data){
 		default:
 		case "orig":
-			if(height > (origHeight*(video_player.width/origWidth)) ){
+			if(this.height > (origHeight*(video_player.width/origWidth)) ){
 				vid.width = video_player.width;
 				vid.height = origHeight*(video_player.width/origWidth);
 				vid.y = (video_player.height - vid.height)/2;
@@ -1153,7 +1145,8 @@ public function resetPlayer(nofullscreen:Boolean = true):void{
 	watchedReport = false;
 	
 	// show loader
-	loading_text.visible = true;
+	loading_wnd.visible = loading_spin.isLoading = preview_img.visible = true;
+	//loading_text.visible = true;
 	
 	// reset next and prev windows
 	player_episodes_wnd.visible = false;
@@ -1163,15 +1156,15 @@ public function resetPlayer(nofullscreen:Boolean = true):void{
 	
 	
 	// reset fullscreen
-	if (nofullscreen && stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE){
+	if (nofullscreen && this.stage.displayState == StageDisplayState.FULL_SCREEN_INTERACTIVE){
 		/* If already in full screen mode, switch to normal mode. */
-		stage.displayState = StageDisplayState.NORMAL;
+		this.stage.displayState = StageDisplayState.NORMAL;
 		
 		//player_controls.bottom = "75";
 	}
 	
 	// reset on top
-	if(nofullscreen && FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront){
+	if(nofullscreen && FlexGlobals.topLevelApplication.hasOwnProperty("nativeWindow") && FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront){
 		FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront = !FlexGlobals.topLevelApplication.nativeWindow.alwaysInFront;
 		above_all.selected = false;
 		//above_all.text = "'";
@@ -1288,7 +1281,7 @@ private function returnView():void{
 	//
 	Mouse.show();
 	// event
-	dispatchEvent(new Event(RETURN_VIEW)); 
+	this.dispatchEvent(new Event(RETURN_VIEW)); 
 }
 
 private function prevEpisode():void{
@@ -1298,7 +1291,7 @@ private function prevEpisode():void{
 	// play prev
 	//series_video_list.selectedIndex += 1;
 	//series_video_list.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
-	dispatchEvent(new Event(PLAY_PREV)); 
+	this.dispatchEvent(new Event(PLAY_PREV)); 
 } 
 
 private function nextEpisode():void{
@@ -1308,7 +1301,7 @@ private function nextEpisode():void{
 	// play prev
 	//series_video_list.selectedIndex -= 1;
 	//series_video_list.dispatchEvent(new MouseEvent(MouseEvent.CLICK));
-	dispatchEvent(new Event(PLAY_NEXT)); 
+	this.dispatchEvent(new Event(PLAY_NEXT)); 
 }
 
 private function aboveAll():void{
@@ -1344,7 +1337,7 @@ private var gcCount:int;
  */
 private function startGCCycle():void{
 	gcCount = 0;
-	addEventListener(Event.ENTER_FRAME, doGC);
+	this.addEventListener(Event.ENTER_FRAME, doGC);
 }
 
 /**
@@ -1355,7 +1348,7 @@ private function startGCCycle():void{
 private function doGC(evt:Event):void{
 	flash.system.System.gc();
 	if(++gcCount > 1){
-		removeEventListener(Event.ENTER_FRAME, doGC);
+		this.removeEventListener(Event.ENTER_FRAME, doGC);
 		setTimeout(lastGC, 40);
 	}
 }

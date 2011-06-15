@@ -14,6 +14,8 @@ import mx.containers.Canvas;
 import mx.controls.Image;
 import mx.core.UIComponent;
 
+import spark.filters.GlowFilter;
+
 /**
  * 	Loader displays a loading indicator when isLoading is set to true
  */
@@ -38,6 +40,12 @@ public class Loader extends Canvas
 	private var fade:UIComponent;
 	
 	private var _isLoading:Boolean;
+	
+	private var _colorOverlay:uint = 0x000000;
+	
+	public function set colorOverlay( c:uint ):void{
+		_colorOverlay = c;
+	}
 	
 	[Bindable]
 	public function set isLoading( l:Boolean ):void
@@ -104,6 +112,9 @@ public class Loader extends Canvas
 			}else{
 				img.source = loadAnimation1;
 			}
+			
+			var gf:GlowFilter = new GlowFilter(_colorOverlay, 1, 200, 200, 2, 1, true);
+			img.filters = [gf];
 			
 			if( !this.contains( fade ) )
 				addChild( fade );
