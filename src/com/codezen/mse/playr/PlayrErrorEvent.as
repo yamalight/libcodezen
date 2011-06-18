@@ -1,4 +1,4 @@
-package com.codezen.music.playr{
+package com.codezen.mse.playr{
 	import flash.events.Event;
 	/**
 	 * Dedicated error event class. The class won't be breaking your application which is a good thing. However you won't be notified by the ActionScript debugger when runtime errors occur (such as 'url not found') as they are caught and translated into harmless events.

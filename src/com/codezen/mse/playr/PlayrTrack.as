@@ -1,4 +1,4 @@
-package com.codezen.music.playr{
+package com.codezen.mse.playr{
 	import flash.net.URLRequest;
 
 	/**

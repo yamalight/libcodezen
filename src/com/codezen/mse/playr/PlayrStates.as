@@ -1,4 +1,4 @@
-package com.codezen.music.playr{
+package com.codezen.mse.playr{
 	/**
 	 * Defines that states in which the Playr instance can be residing.
 	 */

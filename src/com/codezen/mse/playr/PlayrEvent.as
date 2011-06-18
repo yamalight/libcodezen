@@ -1,4 +1,4 @@
-package com.codezen.music.playr{
+package com.codezen.mse.playr{
 	import flash.events.Event;
 		/**
 		 * Dedicated event class. These events are the only events you should be listening to. Built-in events from Flash will not be fired by Playr.

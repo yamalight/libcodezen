@@ -1,4 +1,4 @@
-package com.codezen.music.playr{
+package com.codezen.mse.playr{
 	/**
 	 * Repeat constants. Used to set the repeat version.
 	 */

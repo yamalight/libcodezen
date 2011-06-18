@@ -1,6 +1,6 @@
-package com.codezen.music.search
+package com.codezen.mse.search
 {
-	import com.codezen.music.playr.PlayrTrack;
+	import com.codezen.mse.playr.PlayrTrack;
 	
 	import flash.events.IEventDispatcher;
 
