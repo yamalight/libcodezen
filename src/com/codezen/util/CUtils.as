@@ -325,6 +325,7 @@ package com.codezen.util
 			str = str.replace(/&rsaquo;/gs, "›");
 			str = str.replace(/&euro;/gs, "€");
 			str = str.replace(/&#215;/gs, "×");
+			str = str.replace(/&#39;/gs, "'");
 			
 			return str;
 			

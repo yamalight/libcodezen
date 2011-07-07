@@ -3,14 +3,18 @@ package com.codezen.mse {
     import com.codezen.mse.models.Album;
     import com.codezen.mse.models.Artist;
     import com.codezen.mse.models.Song;
+    import com.codezen.mse.playr.PlayrTrack;
     import com.codezen.mse.plugins.PluginManager;
+    import com.codezen.mse.services.BBCRadio;
     import com.codezen.mse.services.LastFM;
     import com.codezen.mse.services.MusicBrainz;
     import com.codezen.mse.services.Stereomood;
-    import com.codezen.mse.playr.PlayrTrack;
+    import com.codezen.util.CUtils;
     
     import flash.events.Event;
     import flash.filesystem.File;
+    
+    import flashx.textLayout.utils.CharacterUtil;
     
     import mx.collections.ArrayCollection;
     import mx.utils.ObjectUtil;
@@ -21,6 +25,9 @@ package com.codezen.mse {
 		
 		// stereomood
 		private var moodSearch:Stereomood;
+		
+		// bbc
+		private var bbcSearch:BBCRadio;
 		
         // lastfm
         private var lastfmSearch:LastFM;
@@ -49,6 +56,8 @@ package com.codezen.mse {
 		
 		// limit
 		private var _limit:int = 10;
+		
+		private var _song2find:Song;
 
         public function MusicSearchEngine() {
 			artistSearch = new MusicBrainz(_limit);
@@ -56,6 +65,7 @@ package com.codezen.mse {
 			lastfmSearch = new LastFM(_limit);
 			songSearch = new MusicBrainz(_limit);
 			//moodSearch = new Stereomood();
+			bbcSearch = new BBCRadio();
 			
 			initPluginManager();
         }
@@ -225,6 +235,33 @@ package com.codezen.mse {
 			
 			endLoad();
 		}
+		// ------------------------ FIND ARTIST ----------------------------------
+		public function findArtist(query:String):void{
+			artistSearch.addEventListener(Event.COMPLETE, onArtistSearch);
+			artistSearch.findArtist(query);
+		}
+		
+		private function onArtistSearch(e:Event):void{
+			artistSearch.removeEventListener(Event.COMPLETE, onArtistSearch);
+			
+			_artists = artistSearch.artistsList;
+			
+			endLoad();
+		}
+		
+		// ------------------------ FIND ALBUMS ----------------------------------
+		public function findAlbum(query:String):void{
+			albumSearch.addEventListener(Event.COMPLETE, onAlbumSearch);
+			albumSearch.findAlbums(query);
+		}
+		
+		private function onAlbumSearch(e:Event):void{
+			albumSearch.removeEventListener(Event.COMPLETE, onAlbumSearch);
+			
+			_albums = albumSearch.albumsList;
+			
+			endLoad();
+		}
 		
 		// ------------------------------------------------------------------
 		public function getAlbumTracks(album:Album):void{
@@ -241,26 +278,86 @@ package com.codezen.mse {
 			endLoad();
 		}
 		
+		// ---------------------------- GET TOP TRACKS -----------------------------------
+		public function getTopTracks():void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onTopSongs);
+			lastfmSearch.getTopTracks();
+		}
+		
+		private function onTopSongs(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onTopSongs);
+			
+			_songs = lastfmSearch.resultArray;
+			
+			endLoad();
+		}
+		
+		// -------------------------- GET TOP ARTISTS ------------------------------------
+		public function getTopArtists():void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onTopArtists);
+			lastfmSearch.getTopArtists();
+		}
+		
+		private function onTopArtists(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onTopArtists);
+			
+			_artists = lastfmSearch.resultArray;
+			
+			endLoad();
+		}
+		
+		// -------------------------- GET TOP ALBUMS ---------------------------------------
+		public function getTopAlbums():void{
+			bbcSearch.addEventListener(Event.COMPLETE, onChart);
+			bbcSearch.getCharts();
+		}
+		
+		private function onChart(e:Event):void{
+			bbcSearch.removeEventListener(Event.COMPLETE, onChart);
+			
+			_albums = bbcSearch.albumsChart;
+			
+			endLoad();
+		}
+		
 		// ---------------------- PLUGINS STUFF --------------------------------
 		private function initPluginManager():void{
 			pluginManager = new PluginManager( File.applicationDirectory.resolvePath("plugins/").nativePath );
 		}
 		
 		public function findMP3(song:Song):void{
+			_song2find = song;
+			
 			pluginManager.addEventListener(Event.COMPLETE, onSong);
 			pluginManager.findURLs(song.artist.name + ' ' + song.name, song.duration);
+		}
+		
+		public function findMP3byText(query:String):void{
+			_song2find = null;
+			
+			pluginManager.addEventListener(Event.COMPLETE, onSong);
+			pluginManager.findURLs(query,0);
 		}
 		
 		private function onSong(e:Event):void{
 			pluginManager.removeEventListener(Event.COMPLETE, onSong);
 			
-			trace( ObjectUtil.toString(pluginManager.results) )
+			//trace( ObjectUtil.toString(pluginManager.results) )
 			
 			_mp3s = [];
 			var track:PlayrTrack;
 			for each( track in pluginManager.results ){
-				_mp3s.push(track);
+				if( _song2find != null ){
+					if( CUtils.compareStrings(track.title.toLowerCase(), _song2find.name.toLowerCase()) > 80 &&
+						CUtils.compareStrings(track.artist.toLowerCase(), _song2find.artist.name.toLowerCase()) > 80 ){
+						_mp3s.push(track);
+					}
+				}else{
+					_mp3s.push(track);
+				}
 			}
+			
+			trace( ObjectUtil.toString(_mp3s) );
 			
 			endLoad();
 		}

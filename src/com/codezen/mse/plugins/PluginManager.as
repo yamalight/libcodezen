@@ -17,6 +17,7 @@ package com.codezen.mse.plugins
 	import flash.system.LoaderContext;
 	
 	import mx.utils.ObjectUtil;
+	import mx.utils.object_proxy;
 	
 	public final class PluginManager extends Worker
 	{
@@ -94,7 +95,6 @@ package com.codezen.mse.plugins
 		// load plugin from path
 		private function loadPluginsFromPath():void{
 			var path:String = _loadQueue[ _loadQueue.length - counter ];
-			trace('started loading: '+path);
 			urlReq = new URLRequest(path);			
 			urlLoad = new URLLoader();
 			urlLoad.dataFormat = URLLoaderDataFormat.BINARY;
@@ -120,13 +120,8 @@ package com.codezen.mse.plugins
 			
 			var className:Class = loader.contentLoaderInfo.applicationDomain.getDefinition("Searcher") as Class;
 			var classInstance:ISearchProvider = new className();
-			
-			//trace( ObjectUtil.toString(classInstance) );
-			
 			_plugins.push(classInstance);
 			
-			//trace( 'loaded: '+ObjectUtil.toString(_plugins) );
-			trace('------------------------------------------------');
 			checkInit();
 		}
 		
@@ -179,6 +174,7 @@ package com.codezen.mse.plugins
 			
 			var searcher:ISearchProvider = e.target as ISearchProvider;
 			searcher.removeEventListener(Event.COMPLETE, onSearchComplete);
+			
 			if(searcher.result == null || searcher.result.length < 1){
 				findNext();
 			}else{

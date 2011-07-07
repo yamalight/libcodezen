@@ -24,7 +24,7 @@ package com.codezen.mse.services{
 		// song info
 		private var _song:Song;
 		
-		// api key
+		// api key - this one from Mielophone
 		private var api_key:String = "0b18095c48d2bb8bf4acbab629bcc30e";
 		
 		// limit
@@ -59,14 +59,116 @@ package com.codezen.mse.services{
         public function get resultArray():Array{
             return _results;
         }
+		
+		public function getTopArtists():void{
+			// reset old stuff
+			_results = [];
+			
+			//get topartists by tag
+			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=chart.gettopartists&api_key="+api_key;
+			
+			// add event listener and load url
+			myLoader.addEventListener(Event.COMPLETE, onTopArtistLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onTopArtistLoad(evt:Event):void{
+			// add event listener and load url
+			myLoader.removeEventListener(Event.COMPLETE, onTopArtistLoad);
+			
+			// create result XML
+			var data:XML = new XML(evt.target.data);
+			var artistList:XMLList = data.artists.children();
+			
+			// counter
+			var artist:Artist;
+			var itemArtist:XML;
+			
+			for each(itemArtist in artistList){
+				artist = new Artist();
+				artist.name = itemArtist.name.text();
+				if( itemArtist.image.(@size == "large") != null ){
+					artist.image = itemArtist.image.(@size == "large").text();
+				}
+				artist.mbID = itemArtist.mbid.text();
+				
+				_results.push(artist);
+			}
+			
+			// erase vars
+			data = null;
+			artistList = null;
+			
+			// Finished
+			endLoad();
+		}
+		
+		public function getTopTracks():void{
+			// reset old stuff
+			_results = [];
+			
+			//get toptracks by tag
+			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key="+api_key;
+			
+			// add event listener and load url
+			myLoader.addEventListener(Event.COMPLETE, onTopTracksLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onTopTracksLoad(evt:Event):void{
+			// add event listener and load url
+			myLoader.removeEventListener(Event.COMPLETE, onTopTracksLoad);
+			
+			// create result XML
+			var data:XML = new XML(evt.target.data);
+			var songsList:XMLList = data.tracks.children();
+			
+			// parse list
+			var item:XML;
+			var song:Song;
+			var num:int = 1;
+			var dur:int = 0;
+			var duration:String = '';
+			
+			for each(item in songsList){
+				if(item.duration != null){
+					dur = item.duration.text();
+				}else{
+					dur = 0;
+				}
+				
+				var secs:int = dur;
+				var mins:int = Math.floor(secs/60);
+				secs = secs - mins*60;
+				if( secs < 10 ){
+					duration = mins+":0"+secs;
+				}else{
+					duration = mins+":"+secs;
+				}
+				
+				song = new Song();
+				song.number = num++;
+				song.name = item.name.text();
+				song.duration = dur;
+				song.durationText = duration;
+				song.artist = new Artist();
+				song.artist.mbID = item.artist.mbid.text();
+				song.artist.name = item.artist.name.text();
+				
+				_results.push(song);
+			}
+			
+			// erase vars
+			data = null;
+			songsList = null;
+			
+			// Finished
+			endLoad();
+		}
+		
+		// -------------------------------------------------
 
-        /**
-         *
-         * @param query - search query
-         *
-         * Searches vkontakte.ru for mp3 for given query
-         */
-        public function getTopTracks(query:String):void{
+       public function getTopTracksByTag(query:String):void{
             // reset old stuff
             _results = [];
 
@@ -363,7 +465,7 @@ package com.codezen.mse.services{
             // Finished
             endLoad();
         }
-
+		
 
         public function getTopArtistsByTag(query:String):void{
             // reset old stuff
@@ -424,7 +526,7 @@ package com.codezen.mse.services{
 			_artist = artist;
 			
             // Generate Last.FM url
-            var sim_url:String = new String("http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&mbid=" + encodeURIComponent(_artist.mbID) );
+            var sim_url:String = new String("http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+encodeURIComponent(_artist.name)+"&mbid=" + encodeURIComponent(_artist.mbID) );
             sim_url += "&api_key="+api_key+"&lang=en";
 
             // from urlrequest and urlloader

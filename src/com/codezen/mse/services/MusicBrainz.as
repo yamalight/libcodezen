@@ -47,6 +47,7 @@
 		private static var albumsURL:String = 'http://musicbrainz.org/ws/2/release?artist=%artistid%&status=official&limit=500';
 		private static var tracksURL:String = 'http://musicbrainz.org/ws/2/release/%albumid%?inc=recordings';
 		private static var lastCoverURL:String = 'http://ws.audioscrobbler.com/1.0/album/%artistalbum%/info.xml';
+		private static var findAlbumByNameURL:String = 'http://musicbrainz.org/ws/2/release?query=release:%album%+artist:%artist%+type:album&limit='+searchLimit;
 		
 		// Namespace
 		private var xmlNs:Namespace = new Namespace("http://musicbrainz.org/ns/mmd-2.0#");
@@ -191,6 +192,97 @@
 		private function onAlbumsSearchLoad(evt:Event):void{
 			// remove event listener
 			myLoader.removeEventListener(Event.COMPLETE, onAlbumsSearchLoad);
+			
+			// create result XML
+			var data:XML = new XML(evt.target.data);
+			
+			// get albums list
+			var albumsList:XMLList = data.descendants("release-list").children();//.(@type == "Album Official" || @type == "EP Official");
+			
+			// create albums storage
+			albums = [];
+			
+			// counter
+			var num:int = 0;
+			
+			// album title
+			var title:String = '';
+			var date:String = '';
+			var alb:Album;
+			
+			// albums already saved
+			var saved_albums:Array = [];
+			
+			// parse list to storage
+			for each(var item:XML in albumsList){
+				// get date
+				date = item.date.text();
+				// get title
+				title = item.title.text();
+				title = item.title.text();
+				// check if title already saved
+				if(saved_albums.indexOf(title) < 0 && item.status.text() == "Official"){
+					saved_albums.push(title);
+					
+					// save album
+					alb = new Album();
+					alb.mbID = item.@id;
+					alb.number = num;
+					alb.name = title;
+					alb.date = date;
+					alb.image = '';
+					alb.artist = new Artist();
+					alb.artist.mbID = item.descendants("artist-credit").descendants("name-credit").artist.@id;
+					alb.artist.name = item.descendants("artist-credit").descendants("name-credit").artist.name.text();
+					
+					albums.push(alb);
+					num++;
+				}
+			}
+			
+			// reset vars
+			data = null;
+			albumsList = null;
+			title = null;
+			date = null;
+			
+			if(albums.length < 1){
+				// Report error
+				dispatchError("No albums found!", "Albums result error!", false, 1);
+				return;
+			}
+			
+			// Report status
+			setStatus('Found '+albums.length+' albums!');
+			
+			// end
+			endLoad();
+		}
+		
+		/**
+		 * Loads a list of albums of found artist
+		 */
+		public function findAlbumByName(album:String, artist:String):void{
+			albums = null;
+			
+			// Generate url
+			var search_url:String = findAlbumByNameURL.replace("%album%",album).replace("%artist%", artist);
+			
+			// from urlrequest and urlloader
+			urlRequest.url = search_url;
+			// add event listener and load request
+			myLoader.addEventListener(Event.COMPLETE, onAlbumsByNameSearchLoad);
+			myLoader.load(urlRequest);
+		}
+		
+		/**
+		 * Parses search result for albums search
+		 * @param evt
+		 *
+		 */
+		private function onAlbumsByNameSearchLoad(evt:Event):void{
+			// remove event listener
+			myLoader.removeEventListener(Event.COMPLETE, onAlbumsByNameSearchLoad);
 			
 			// create result XML
 			var data:XML = new XML(evt.target.data);
@@ -456,7 +548,7 @@
 			
 			songs = null;
 			
-			if(album == null || album.mbID.length < 1){
+			if(album == null || album.mbID == null || album.mbID.length < 1){
 				// Dispatch error event
 				dispatchError("No album ID specified!", "Tracks find error!");
 				return;
@@ -507,17 +599,22 @@
 			for each(var item:XML in songsList){
 				if(item.recording.length != null){
 					dur = item.recording.length.text();
+					
+					if( dur > 0 ){
+						var secs:int = dur/1000;
+						var mins:int = Math.floor(secs/60);
+						secs = secs - mins*60;
+						if( secs < 10 ){
+							duration = mins+":0"+secs;
+						}else{
+							duration = mins+":"+secs;
+						}
+					}else{
+						duration = "?:??";
+					}
 				}else{
 					dur = 0;
-				}
-				
-				var secs:int = dur/1000;
-				var mins:int = Math.floor(secs/60);
-				secs = secs - mins*60;
-				if( secs < 10 ){
-					duration = mins+":0"+secs;
-				}else{
-					duration = mins+":"+secs;
+					duration = "?:??";
 				}
 				
 				sng = new Song();
