@@ -322,7 +322,11 @@ package com.codezen.mse {
 		
 		// ---------------------- PLUGINS STUFF --------------------------------
 		private function initPluginManager():void{
-			pluginManager = new PluginManager( File.applicationDirectory.resolvePath("plugins/").nativePath );
+			pluginManager = new PluginManager( [File.applicationDirectory.resolvePath("plugins/").nativePath, File.documentsDirectory.resolvePath("plugins/").nativePath] );
+		}
+		
+		public function getActivePlugins():Array{
+			return pluginManager.listPlugins();
 		}
 		
 		public function findMP3(song:Song):void{
@@ -344,11 +348,14 @@ package com.codezen.mse {
 			
 			//trace( ObjectUtil.toString(pluginManager.results) )
 			
+			var docheck:Boolean = pluginManager.listPlugins().length > 1;
+			
 			_mp3s = [];
 			var track:PlayrTrack;
 			for each( track in pluginManager.results ){
-				if( _song2find != null ){
-					if( CUtils.compareStrings(track.title.toLowerCase(), _song2find.name.toLowerCase()) > 80 &&
+				if( docheck && _song2find != null ){
+					if( track.artist != null && track.title != null &&
+						CUtils.compareStrings(track.title.toLowerCase(), _song2find.name.toLowerCase()) > 80 &&
 						CUtils.compareStrings(track.artist.toLowerCase(), _song2find.artist.name.toLowerCase()) > 80 ){
 						_mp3s.push(track);
 					}

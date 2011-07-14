@@ -57,7 +57,7 @@ package com.codezen.util
 		 * @return (int) index of item or -1 
 		 * 
 		 */
-		public static function getItemIndexByProperty(array:ArrayCollection, property:String, value:String, startind:int = 0):int{
+		public static function getItemIndexByProperty(array:ArrayCollection, property:String, value:*, startind:int = 0):int{
 			var obj:Object;
 			var i:int;
 			var size:int = array.length;
@@ -81,6 +81,28 @@ package com.codezen.util
 			html = html.replace(/<.+?>/gs, "");
 			
 			return html;
+		}
+		
+		public static function secondsToString(time:Number):String{
+			var min:int = time/60;
+			var secs:String = String( int(time - min*60) );
+			var hour:int = int(time/(60*60));
+			
+			if(hour > 0){
+				min -= hour*60;		
+			}
+			
+			var mins:String = String( min );
+			var hours:String = String( hour );
+			
+			if(mins.length == 1) mins = "0"+mins;
+			if(secs.length == 1) secs = "0"+secs;
+			
+			if( hour == 0 ){
+				return (mins + ":" + secs);
+			}else{
+				return (hours + ":" + mins + ":" + secs);
+			}
 		}
 		
 		/**

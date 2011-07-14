@@ -9,6 +9,7 @@ package com.codezen.mse.plugins
 	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.FileListEvent;
+	import flash.events.IOErrorEvent;
 	import flash.filesystem.File;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
@@ -16,6 +17,7 @@ package com.codezen.mse.plugins
 	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
 	
+	import mx.controls.Alert;
 	import mx.utils.ObjectUtil;
 	import mx.utils.object_proxy;
 	
@@ -33,7 +35,7 @@ package com.codezen.mse.plugins
 		private var _loadQueue:Array;
 		
 		// plugins dir
-		private var _dir:String;
+		private var _dirs:Array;
 		// file class
 		private var _file:File;
 		
@@ -41,24 +43,26 @@ package com.codezen.mse.plugins
 		private var context:LoaderContext;
 		
 		// counter
+		private var dircounter:int;
 		private var counter:int;
 		// search query
 		private var query:String;
 		// result url
 		private var _results:Vector.<PlayrTrack>;
 		
-		public function PluginManager(dir:String)
+		public function PluginManager(dirs:Array)
 		{
 			// init results
 			_results = new Vector.<PlayrTrack>();
 			
 			// save dir
-			_dir = dir;
+			_dirs = dirs.concat();
 			
 			// init plugins array
 			_plugins = [];			
 			
 			// load plugins
+			dircounter = _dirs.length;
 			loadPlugins();
 		}
 		
@@ -70,8 +74,18 @@ package com.codezen.mse.plugins
 		}
 
 		private function loadPlugins():void{
-			_file = new File(_dir);
+			dircounter--;
+			if(dircounter < 0){
+				dispatchEvent(new Event(Event.INIT));
+				return;
+			}
+			_file = new File(_dirs[dircounter]);
+			if(!_file.exists){
+				loadPlugins();
+				return;
+			}
 			_file.addEventListener(FileListEvent.DIRECTORY_LISTING, onListing);
+			//_file.addEventListener(IOErrorEvent.IO_ERROR, onFolderError);
 			_file.getDirectoryListingAsync();
 		}
 		
@@ -128,13 +142,27 @@ package com.codezen.mse.plugins
 		private function checkInit():void{
 			counter--;
 			if(counter <= 0){
-				trace( 'done: '+ObjectUtil.toString(_plugins) );
+				if(dircounter <= 0){
+					trace( 'done: '+ObjectUtil.toString(_plugins) );
 				
-				dispatchEvent(new Event(Event.INIT));
+					dispatchEvent(new Event(Event.INIT));
+				}else{
+					loadPlugins();
+				}
 			}else{
 				loadPluginsFromPath();
 			}
 		}
+		
+		/*private function onFolderError(e:Event):void{
+			if(dircounter <= 0){
+				trace( 'done: '+ObjectUtil.toString(_plugins) );
+				
+				dispatchEvent(new Event(Event.INIT));
+			}else{
+				loadPlugins();
+			}
+		}*/
 		
 		// -------------------------------------------
 		public function findURLs(query:String, durMs:int):void{
@@ -186,6 +214,19 @@ package com.codezen.mse.plugins
 		private function onSearchError(e:ErrorEvent):void{
 			trace('error');
 			findNext();
+		}
+		
+		// ---------------------------------------------
+		public function listPlugins():Array{
+			var searcher:ISearchProvider;
+			var i:int;
+			var res:Array = [];
+			for(i = 0; i < _plugins.length; i++){
+				searcher = _plugins[i] as ISearchProvider;
+				res.push({index: i+1, name: searcher.PLUGIN_NAME, author: searcher.AUTHOR_NAME});
+			}
+			
+			return res;
 		}
 	}
 }
