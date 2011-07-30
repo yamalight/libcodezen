@@ -1,7 +1,7 @@
-import com.codezen.music.playr.PlaylistManager;
-import com.codezen.music.playr.Playr;
-import com.codezen.music.playr.PlayrEvent;
-import com.codezen.music.playr.PlayrTrack;
+import com.codezen.mse.playr.PlaylistManager;
+import com.codezen.mse.playr.Playr;
+import com.codezen.mse.playr.PlayrEvent;
+import com.codezen.mse.playr.PlayrTrack;
 import com.codezen.subs.Caption;
 import com.codezen.subs.Subtitle;
 
@@ -27,6 +27,7 @@ import flash.utils.Timer;
 import mx.collections.ArrayCollection;
 import mx.core.FlexGlobals;
 import mx.events.FlexEvent;
+import mx.utils.ObjectUtil;
 
 import spark.events.DropDownEvent;
 
@@ -65,6 +66,7 @@ private var subNames:Array;
 private var subArray:Array;
 private var subCurrent:Array;
 private var subIndex:Number;
+private var _autoloadSub:Boolean = false;
 // sounds
 [Bindable]
 private var isSnd:Boolean;
@@ -151,6 +153,10 @@ private var top_width:int = 22;
 private var _isMobile:Boolean; 
 
 // setters
+public function set autoloadSub(s:Boolean):void{
+	_autoloadSub = s;
+}
+
 public function set showLoop(show:Boolean):void{
 	_showLoop = show;
 	if(!_showLoop){
@@ -201,7 +207,9 @@ private function onCreationComplete():void{
 }
 
 // init functions
-public function initStagePlayer(e:Event = null):void{
+private function initStagePlayer(e:Event = null):void{
+	this.removeEventListener(Event.ADDED_TO_STAGE, initStagePlayer);
+	
 	// stagevideo check
 	this.stage.addEventListener(StageVideoAvailabilityEvent.STAGE_VIDEO_AVAILABILITY, onStageVideoState);
 	
@@ -209,7 +217,9 @@ public function initStagePlayer(e:Event = null):void{
 	//this.invalidateDisplayList();	
 }
 
-private function onStageVideoState(event:StageVideoAvailabilityEvent):void       {       
+private function onStageVideoState(event:StageVideoAvailabilityEvent):void       {
+	this.stage.removeEventListener(StageVideoAvailabilityEvent.STAGE_VIDEO_AVAILABILITY, onStageVideoState);
+	
 	svAvailable = (event.availability == StageVideoAvailability.AVAILABLE);       
 }
 
@@ -276,6 +286,7 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	// parse subs
 	if(subtitles != null && subtitles.length > 0){
 		isSub = true;
+		isSubSwitch = true;
 		parseSubtitiles(subtitles);
 	}else{
 		isSub = false;
@@ -285,6 +296,7 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	// parse subs
 	if(sounds != null && sounds.length > 0){
 		isSnd = true;
+		isSndSwitch = true;
 		isSoundPlaying = false;
 		soundPlayer = new Playr();
 		soundPlayer.buffer = 10000;
@@ -393,10 +405,10 @@ private function parseSounds(sounds:Array):void{
 	sndNames.push("jp");
 	var i:int = 0;
 	for(i = 0; i < sounds.length; i++){
-		if(String(sounds[i]).indexOf("_1.mp3") > 0){
+		if(String(sounds[i]).indexOf("_1.mp3") > 0 || String(sounds[i]).indexOf("_ru.mp3") > 0){
 			sndNames.push("ru");
 		}
-		if(String(sounds[i]).indexOf("_2.mp3") > 0){
+		if(String(sounds[i]).indexOf("_2.mp3") > 0 || String(sounds[i]).indexOf("_en.mp3") > 0){
 			sndNames.push("en");
 		}
 	}
@@ -449,17 +461,17 @@ private function parseSubtitiles(subtitiles:Array):void{
 	subNames.push("off");
 	var i:int = 0;
 	for(i = 0; i < subtitiles.length; i++){
-		if(String(subtitiles[i]).indexOf("_1.") > 0){
+		if(String(subtitiles[i]).indexOf("_1.") > 0 || String(subtitiles[i]).indexOf("_ru.") > 0){
 			subNames.push("ru");
 		}
-		if(String(subtitiles[i]).indexOf("_2.") > 0){
+		if(String(subtitiles[i]).indexOf("_2.") > 0 || String(subtitiles[i]).indexOf("_en.") > 0){
 			subNames.push("en");
 		}
 	}
 	
 	if(subNames.length > 1) isSubSwitch = true;
 	
-	loadSubtitles(subtitiles[0]);
+	if(_autoloadSub) loadSubtitles(subtitiles[0]);
 }
 
 private function loadSubtitles(subURL:String):void{
@@ -479,10 +491,13 @@ private function loadSubtitles(subURL:String):void{
 		return;
 	}
 	// load subs
+	trace(subURL);
 	var subLoad:Subtitle = new Subtitle(this, subURL);
 	subLoad.addEventListener("SubParsed", function():void{
 		subs = subLoad.captions;
 		subs.sortOn("begin", Array.NUMERIC);
+		
+		trace( ObjectUtil.toString(subs) )
 		
 		subIndex = 0;
 		isSub = true;
@@ -493,7 +508,8 @@ private function loadSubtitles(subURL:String):void{
 	
 }
 
-private function setSubtitles(time:Number):void{	
+private function setSubtitles(time:Number):void{
+	if( isNaN(subIndex) ) return;
 	// add subs to current
 	var sub:Caption;
 	//var del:Boolean = false;
@@ -625,11 +641,11 @@ private function onVideoState(e:NetStatusEvent):void{
 		}else{
 			this.dispatchEvent(new Event(ON_END));
 			// toggle next episode wnd
-			if(player_next_ep_txt.text != "null")
+			/*if(player_next_ep_txt.text != "null")
 				player_episodes_wnd_1.visible = true;
 			// toggle prev episode wnd
 			if(player_prev_ep_txt.text != "null")
-				player_episodes_wnd.visible = true;
+				player_episodes_wnd.visible = true;*/
 			// toggle video controls
 			hideTimer.stop();
 			player_controls.visible = true;
@@ -812,7 +828,7 @@ private function metaDataHandler(infoObject:Object):void {
 			onVideoResize();
 		}
 		
-		loading_wnd.visible = loading_spin.isLoading = preview_img.visible = false;
+		loading_wnd.visible = /*loading_spin.isLoading =*/ preview_img.visible = false;
 		//loading_text.visible = false;
 		
 		// seek if already watched
@@ -1145,14 +1161,14 @@ public function resetPlayer(nofullscreen:Boolean = true):void{
 	watchedReport = false;
 	
 	// show loader
-	loading_wnd.visible = loading_spin.isLoading = preview_img.visible = true;
+	loading_wnd.visible = /*loading_spin.isLoading =*/ preview_img.visible = true;
 	//loading_text.visible = true;
 	
 	// reset next and prev windows
-	player_episodes_wnd.visible = false;
+	/*player_episodes_wnd.visible = false;
 	player_episodes_wnd_1.visible = false;
 	player_next_ep_txt.text = "null";
-	player_prev_ep_txt.text = "null";
+	player_prev_ep_txt.text = "null";*/
 	
 	
 	// reset fullscreen

@@ -350,7 +350,7 @@ package com.codezen.subs{
 		}
 		
 		private function parseColor(str:String):Number{
-			var colorReg:RegExp = /^\&H?(?P<alpha>\w{2})?(?P<blue>\w{2})(?P<green>\w{2})(?P<red>\w{2})[\&H]?$/;
+			var colorReg:RegExp = /^\&[Hh]?(?P<alpha>\w{2})?(?P<blue>\w{2})(?P<green>\w{2})(?P<red>\w{2})[\&Hh]?$/;
 			var colorRes:Array = colorReg.exec(str);
 			return Number('0x'+colorRes.red+colorRes.green+colorRes.blue)
 		}

@@ -5,7 +5,7 @@
 		 xmlns:videoplayer="com.codezen.component.videoplayer.*" 
 		 xmlns:ui="com.codezen.component.videoplayer.ui.*"
 		 creationComplete="{onCreationComplete()}"
-		 width="710" height="490" xmlns:loader="com.codezen.component.loader.*">
+		 width="710" height="490" xmlns:loader="com.codezen.component.loader.*" xmlns:advancedprogress="com.codezen.component.advancedprogress.*">
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 		<s:Parallel id="showEff">
@@ -87,9 +87,11 @@
 			
 			<s:HGroup right="5" top="4" bottom="0" verticalAlign="middle" horizontalAlign="right" id="scale_vid">
 				<!-- scale list -->
-				<s:DropDownList id="ratio_list" width="165" color="#E9E9E9" selectedIndex="0"
+				<s:DropDownList id="ratio_list" selectedIndex="0" width="165" 
+								color="#E9E9E9" chromeColor="#353535" contentBackgroundColor="#111111"
+								selectionColor="#333333" rollOverColor="#666666"
 								change="{onVideoResize()}" open="ratio_list_openHandler(event)" close="ratio_list_closeHandler(event)" 
-								chromeColor="#353535" dropShadowVisible="false" visible="{_showScale}">
+								dropShadowVisible="false" visible="{_showScale}">
 					<s:dataProvider>
 						<s:ArrayCollection>
 							<fx:Object label="Сохранять пропорции" data="orig" />
@@ -124,7 +126,7 @@
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
 			
-			<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+			<!-- <s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
 					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
 					height="30" y="17" horizontalCenter="0" maxWidth="70"
 					useHandCursor="true" id="subBar" change="subBar_itemClickHandler(event)">
@@ -134,10 +136,10 @@
 				<s:dataProvider>
 					<s:ArrayCollection source="{subNames}" />
 				</s:dataProvider>
-			</s:List>
-			<!-- <mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+			</s:List> -->
+			<mx:LinkBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
 						id="subBar" itemClick="subBar_itemClickHandler(event)">
-			</mx:LinkBar> -->
+			</mx:LinkBar> 
 			<s:Label text="Сабы" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 		
@@ -146,7 +148,7 @@
 						   visible="{isSndSwitch}" id="player_sndselect"
 						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
-			<s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
+			<!-- <s:List color="#FFFFFF" contentBackgroundColor="#1B1B1B"
 					borderVisible="false" selectionColor="#1B1B1B" rollOverColor="#444444"
 					height="30" y="17" horizontalCenter="0" maxWidth="70"
 					useHandCursor="true" id="sndBar" change="sndBar_itemClickHandler(event)">
@@ -156,10 +158,10 @@
 				<s:dataProvider>
 					<s:ArrayCollection source="{sndNames}" />
 				</s:dataProvider>
-			</s:List>
-			<!-- <mx:LinkBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
+			</s:List> -->
+			<mx:LinkBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" contentBackgroundColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
 						id="sndBar" itemClick="sndBar_itemClickHandler(event)">
-			</mx:LinkBar> -->
+			</mx:LinkBar>
 			<s:Label text="Звук" color="#FFFFFF" horizontalCenter="0" y="2"/>
 		</s:BorderContainer>
 	</s:BorderContainer>
@@ -178,8 +180,8 @@
 						id="playpause" click="{togglePlayPause()}" width="32" height="32"/>
 		
 		<!-- PROGRESS -->
-		<ui:AdvancedProgressBar width="100%" id="video_progress" >
-		</ui:AdvancedProgressBar>
+		<advancedprogress:AdvancedProgressBar width="100%" id="video_progress" >
+		</advancedprogress:AdvancedProgressBar>
 		
 		<!-- TIME -->
 		<!-- <s:HGroup width="90" height="15" verticalCenter="0" right="180" verticalAlign="middle" gap="1"> -->
@@ -202,7 +204,7 @@
 	
 	
 	<!-- previous next episodes windows -->
-	<s:BorderContainer height="127" verticalCenter="0" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd" width="140" left="100" color="#FFFFFF"
+	<!-- <s:BorderContainer height="127" verticalCenter="0" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd" width="140" left="100" color="#FFFFFF"
 					   click="{prevEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
 		<s:Image y="20" width="120" height="66" id="player_prev_ep_img" x="10" source="{prev_ep_img}"/>
 		<s:Label y="94" width="120" fontFamily="Verdana" textAlign="center" id="player_prev_ep_txt" x="10" color="#FFFFFF"
@@ -214,7 +216,7 @@
 		<s:Image y="20" width="120" height="66" id="player_next_ep_img" x="10" source="{next_ep_img}"/>
 		<s:Label y="94" text="{next_ep_txt}" width="120" fontFamily="Verdana" id="player_next_ep_txt" textAlign="center" x="10" color="#FFFFFF"/>
 		<s:Label x="10" y="5" text="Следующий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
-	</s:BorderContainer>
+	</s:BorderContainer> -->
 	
 	<!-- sound loading indicator -->
 	<s:BorderContainer width="100%" height="100%" backgroundColor="#000000" backgroundAlpha="0.4" id="loading_status_wnd" visible="false">

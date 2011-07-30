@@ -40,9 +40,10 @@ package com.codezen.helper
 		 */
 		public function DatabaseAsync()
 		{
+			doInit();
 		}
 		
-		protected function doInit():void{
+		private function doInit():void{
 			// create connection
 			conn = new SQLConnection();
 			
