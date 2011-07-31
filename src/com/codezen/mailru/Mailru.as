@@ -1,4 +1,4 @@
-package com.codezen.mailru.service
+package com.codezen.mailru
 {
 	import com.codezen.util.MD5;
 	
@@ -6,6 +6,7 @@ package com.codezen.mailru.service
 	import flash.net.URLRequestMethod;
 	
 	import mx.utils.ObjectUtil;
+	import com.codezen.mailru.service.Base;
 
 	public final class Mailru extends Base
 	{

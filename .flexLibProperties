@@ -2,6 +2,8 @@
 <flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
   <includeClasses>
     <classEntry path="com.codezen.mse.services.BBCRadio"/>
+    <classEntry path="com.codezen.odnoklassniki.Odnoklassniki"/>
+    <classEntry path="com.codezen.odnoklassniki.service.Base"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
