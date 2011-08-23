@@ -59,7 +59,7 @@
 	
 	<!-- loading indicator -->
 	<s:HGroup horizontalCenter="0" verticalCenter="0" id="loading_wnd" verticalAlign="middle" horizontalAlign="center">
-		<loader:Loader isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
+		<loader:LoadingIndicator isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
 		<s:Label text="Загрузка..." 
 				 verticalAlign="middle" textAlign="center" color="#FFFFFF"
 				 fontFamily="Gothic" fontSize="20" fontWeight="bold" 

@@ -398,11 +398,13 @@ private function onSoundStream(e:PlayrEvent):void{
 	}
 }
 
+public var defaultSoundName:String = "jp";
+
 private function parseSounds(sounds:Array):void{
 	//trace(ObjectUtil.toString(subtitiles));
 	sndArray = sounds;
 	sndNames = new Array();
-	sndNames.push("jp");
+	sndNames.push(defaultSoundName);
 	var i:int = 0;
 	for(i = 0; i < sounds.length; i++){
 		if(String(sounds[i]).indexOf("_1.mp3") > 0 || String(sounds[i]).indexOf("_ru.mp3") > 0){
@@ -509,7 +511,7 @@ private function loadSubtitles(subURL:String):void{
 }
 
 private function setSubtitles(time:Number):void{
-	if( isNaN(subIndex) ) return;
+	if( isNaN(subIndex) || subs == null || subs.length < 1 ) return;
 	// add subs to current
 	var sub:Caption;
 	//var del:Boolean = false;
