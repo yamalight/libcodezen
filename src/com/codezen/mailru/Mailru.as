@@ -1,12 +1,12 @@
 package com.codezen.mailru
 {
+	import com.codezen.mailru.service.Base;
 	import com.codezen.util.MD5;
 	
 	import flash.events.Event;
 	import flash.net.URLRequestMethod;
 	
 	import mx.utils.ObjectUtil;
-	import com.codezen.mailru.service.Base;
 
 	public final class Mailru extends Base
 	{
@@ -67,6 +67,53 @@ package com.codezen.mailru
 				'token': access_token
 			}
 				
+			endLoad();
+		}
+		
+		public function publishPost(msg:String, title:String = "", image:String = null):void{
+			// generate hash
+			
+			var sig_txt:String = user_id+
+				"app_id="+appID+
+				"format=xml";
+			if(image != null) sig_txt += "img_url="+image;
+			sig_txt += "method=stream.post"+
+				"secure=0"+
+				"session_key="+access_token+
+				"text="+msg+
+				"title="+title+
+				"uid="+user_id+
+				appKey;
+			
+			var sig:String =  MD5.encrypt(sig_txt);
+			
+			var url:String = "http://www.appsmail.ru/platform/api?method=stream.post";
+			url += "&app_id="+appID;
+			url += "&session_key="+access_token;
+			url += "&uid="+user_id;
+			url += "&sig="+sig;
+			url += "&text="+encodeURIComponent(msg);
+			url += "&title="+encodeURIComponent(title);
+			if(image != null) url += "&img_url="+encodeURIComponent(image);
+			url += "&secure=0";
+			url += "&format=xml";
+			
+			// assign url
+			urlRequest.url =  url;
+			
+			trace('doing post');
+			
+			myLoader.addEventListener(Event.COMPLETE, onPost);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onPost(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onPost);
+			
+			var data:XML = new XML(myLoader.data);
+			
+			trace(data);
+			
 			endLoad();
 		}
 	}

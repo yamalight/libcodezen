@@ -66,7 +66,7 @@ package com.codezen.mailru.service
 			
 			window.open(true);
 			
-			html.location = "https://connect.mail.ru/oauth/authorize?client_id="+appID+"&response_type=token&scope=widget&redirect_uri=http%3A%2F%2Fconnect.mail.ru%2Foauth%2Fsuccess.html";
+			html.location = "https://connect.mail.ru/oauth/authorize?client_id="+appID+"&response_type=token&scope=widget&ext_perm=stream&redirect_uri=http%3A%2F%2Fconnect.mail.ru%2Foauth%2Fsuccess.html";
 		}
 		
 		/**

@@ -249,7 +249,7 @@ private function resizeStageVideo():void{
 		_y = 0;
 	}
 	
-	trace(_x, _y, _width, _height);
+	//trace(_x, _y, _width, _height);
 	
 	//if(_x < 1 || _y < 1 || _width < 1 || _height < 1) return;
 	
@@ -499,7 +499,7 @@ private function loadSubtitles(subURL:String):void{
 		subs = subLoad.captions;
 		subs.sortOn("begin", Array.NUMERIC);
 		
-		trace( ObjectUtil.toString(subs) )
+		//trace( ObjectUtil.toString(subs) )
 		
 		subIndex = 0;
 		isSub = true;
@@ -790,7 +790,7 @@ private function onPlayerEnterFrame(e:Event):void{
 	if( soundPlayer && isSoundPlaying ){
 		var delta:Number = (seekOffset+ns.time) - soundPlayer.currentMiliseconds/1000;
 		if( delta > 0.3 || delta < -0.3 ){
-			trace('delta: '+delta, ' vid: '+(seekOffset+ns.time), ' sound: '+soundPlayer.currentSeconds);
+			//trace('delta: '+delta, ' vid: '+(seekOffset+ns.time), ' sound: '+soundPlayer.currentSeconds);
 			soundPlayer.scrobbleTo( (seekOffset+ns.time)*1000 );
 		}
 		if(!firstSndPlay && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05 )  ){

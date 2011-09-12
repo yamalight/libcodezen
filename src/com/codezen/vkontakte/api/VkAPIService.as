@@ -45,6 +45,8 @@ package com.codezen.vkontakte.api
 		// user data
 		private var _userData:Object;
 		private var _usersData:Array;
+		// friends data
+		private var _friends:Array;
 		// string result
 		private var _stringResult:String;
 		
@@ -59,6 +61,11 @@ package com.codezen.vkontakte.api
 			_users = new ArrayCollection();
 		}
 		
+		public function get friendsList():Array
+		{
+			return _friends;
+		}
+
 		public function get wallData():Object
 		{
 			return _wallData;
@@ -860,23 +867,89 @@ package com.codezen.vkontakte.api
 		}
 		
 		/**
-		 * Make message post 
+		 * Get current user friends 
 		 * 
 		 */
-		public function postMessage(msg:String):void{
-			var activity:String = "wall.post";
+		public function getUserFriends():void{
+			var activity:String = "friends.get";
 			
 			// generate hash
 			var md5hash:String =  MD5.encrypt(
 				mid+
 				"api_id="+appID+
-				"message="+msg+
+				"fields=uid,first_name,last_name,photo"+
 				"method="+activity+
 				"v=3.0"+
 				secret);
 			
 			var vars:URLVariables = new URLVariables();
 			vars.api_id = appID;
+			vars.fields = "uid,first_name,last_name,photo";
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;
+			
+			// assign url
+			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			// load
+			myLoader.addEventListener(Event.COMPLETE, onUserFriends);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onUserFriends(e:Event):void{
+			myLoader.removeEventListener(Event.COMPLETE, onUserFriends);
+			
+			// get result
+			var xml:XML = new XML(myLoader.data);
+			
+			//trace(xml);
+			_friends = [];
+			
+			var users:XMLList = xml.children();
+			var user:XML;
+			var userdata:UserData;
+			
+			for each(user in users){
+				userdata = new UserData();
+				userdata.id = user.uid.text();
+				userdata.name = user.first_name.text() + " " + user.last_name.text();
+				userdata.photo = user.photo.text();
+				_friends.push(userdata);
+			}
+			
+			user = null;
+			
+			end();
+		}
+		
+		/**
+		 * Make message post 
+		 * 
+		 */
+		public function postMessage(msg:String, id:String = null, attachment:String = null):void{
+			var activity:String = "wall.post";
+			
+			// generate hash
+			var hashstr:String = mid+
+				"api_id="+appID;
+			if( attachment != null ) hashstr += "attachment="+attachment;
+			hashstr += "message="+msg+
+				"method="+activity;
+			if( id != null ) hashstr += "owner_id="+id;
+			hashstr += "v=3.0"+
+				secret;
+			
+			// generate md5 signature 
+			var md5hash:String =  MD5.encrypt(hashstr);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			if( attachment != null ) vars.attachment = attachment;
+			if( id != null ) vars.owner_id = id;
 			vars.method = activity;
 			vars.message = msg;
 			vars.sig = md5hash;
@@ -899,7 +972,7 @@ package com.codezen.vkontakte.api
 			// get result
 			var xml:XML = new XML(myLoader.data);
 			
-			//trace(xml);
+			trace(xml);
 			
 			_stringResult = xml.post_id;
 			
