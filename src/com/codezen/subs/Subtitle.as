@@ -12,6 +12,7 @@ package com.codezen.subs{
 	import flash.net.*;
 	
 	import mx.controls.Alert;
+	import mx.utils.ObjectUtil;
 	
 	public class Subtitle extends EventDispatcher
 	{
@@ -165,6 +166,8 @@ package com.codezen.subs{
 			var captionAnmationObject:Object = {};
 			var captionObject:Object = {};
 			
+			//trace(ObjectUtil.toString(dialog));
+			
 			captionObject['begin'] = Number(seconds( dialog.Start ));
 			captionObject['end'] = Number(seconds( dialog.End ));
 			
@@ -205,10 +208,10 @@ package com.codezen.subs{
 			var karaokeReplaceReg:RegExp = /\{\\k\w?\d+\}/g;
 			var cleanedText:String = dialog.Text.replace(karaokeReplaceReg, '');
 			
-			var paramsStringReg:RegExp = /(?:\{(?P<params>[^\}]+)\})(?P<text>.+)/;
+			var paramsStringReg:RegExp = /(?:(?P<textbefore>.+?)\{(?P<params>[^\}]+)\})(?P<text>.+)/;
 			var paramsStringRes:Array = paramsStringReg.exec(cleanedText);
 			if(paramsStringRes){
-				cleanedText = paramsStringRes.text;
+				cleanedText = paramsStringRes.textbefore+paramsStringRes.text;
 			}
 			
 			// INLINE TAG PARSING
@@ -328,6 +331,11 @@ package com.codezen.subs{
 								}else if(numberAlignMod == 3){
 									captionObject['align'] = 'right';
 								}
+								break;
+							case 'i':
+								var itre:RegExp = new RegExp(/\{\\i1\}(.+?)\{\\i0\}/);
+								var itres:Array = itre.exec(paramsStringRes.input);
+								captionObject['text'] = cleanedText.replace(itres[1], "<i>"+itres[1]+"</i>");
 								break;
 						}
 						paramsRes = paramsReg.exec(paramsStringRes.params);

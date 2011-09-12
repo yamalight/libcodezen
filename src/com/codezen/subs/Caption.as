@@ -105,7 +105,7 @@ package com.codezen.subs{
 			_field.multiline = true;
 			_field.wordWrap = true;
 			_field.antiAliasType = AntiAliasType.ADVANCED;
-			/*_field.border = true;*/
+			//_field.border = true;
 			_field.selectable = false;
 			_field.autoSize = TextFieldAutoSize.CENTER;
 			_field.htmlText = text;
@@ -119,16 +119,16 @@ package com.codezen.subs{
 					var minShift:int = activeSubsArray[0].shift;
 					var shifts:Array = [];
 					shift = 0;
-					trace('--------------------------------------------');
-					trace('shift for sub: '+text);
-					trace('init shift: '+shift+' maxShift: '+maxShift);
+					//trace('--------------------------------------------');
+					//trace('shift for sub: '+text);
+					//trace('init shift: '+shift+' maxShift: '+maxShift);
 					for each (item in activeSubsArray){
 						shifts.push(item.shift);
 						if( item.shift > maxShift ) maxShift = item.shift;
 						if( item.shift < minShift ) minShift = item.shift;
 					}
-					trace('maxShift detected: '+maxShift);
-					trace('minShift detected: '+minShift);
+					//trace('maxShift detected: '+maxShift);
+					//trace('minShift detected: '+minShift);
 					
 					
 					for each (item in activeSubsArray){						
@@ -141,7 +141,7 @@ package com.codezen.subs{
 						}
 					}
 
-					trace('set shift: '+shift);
+					//trace('set shift: '+shift);
 				}
 				if(valign == 'top'){
 					_field.y = countHeight(0.0) + collision_delta;
