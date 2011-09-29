@@ -21,6 +21,8 @@ package com.codezen.subs{
 		
 		private var ext:String = "ass";
 		
+		private var _state:String;
+		
 		// ASS parser vars
 		private var _mode:String;
 		private var _file:String;
@@ -35,6 +37,11 @@ package com.codezen.subs{
 			_file = subfile;
 		}
 		
+		public function get state():String
+		{
+			return _state;
+		}
+
 		public function get captions():Array{
 			return _captions;
 		}
@@ -55,12 +62,19 @@ package com.codezen.subs{
 			subLoader.load(new URLRequest(_file+ext));
 		}
 		
+		private function reportProgress(text:String, line:int):void{
+			_state = "Parsing: "+line+"> "+text;
+			dispatchEvent(new Event(Event.CHANGE));
+		}
+		
 		private function onASSError(e:Event):void{
+			trace('ass not found');
 			ext = "srt";
 			parse();
 		}
 		
 		private function onIOError(e:Event):void{
+			trace(ObjectUtil.toString(e));
 			Alert.show("Субтитры не найдены! Сообщите пожалуйста администрации!", "Ошибка");
 		}
 		
@@ -75,8 +89,12 @@ package com.codezen.subs{
 		private function parseASS(dat:String):void{
 			var stringsArr:Array = dat.split(/\r?\n/);
 			var str:String;
+			var counter:int = 1;
 			for each (str in stringsArr){
-				if( str.length > 0 ) parseASSString(str)
+				if( str.length > 0 ){
+					reportProgress(str, counter++);
+					parseASSString(str)
+				}
 			}
 			dispatchEvent(new Event("SubParsed"));
 		};
@@ -335,7 +353,9 @@ package com.codezen.subs{
 							case 'i':
 								var itre:RegExp = new RegExp(/\{\\i1\}(.+?)\{\\i0\}/);
 								var itres:Array = itre.exec(paramsStringRes.input);
-								captionObject['text'] = cleanedText.replace(itres[1], "<i>"+itres[1]+"</i>");
+								if(itres != null){
+									captionObject['text'] = cleanedText.replace(itres[1], "<i>"+itres[1]+"</i>");
+								}
 								break;
 						}
 						paramsRes = paramsReg.exec(paramsStringRes.params);
