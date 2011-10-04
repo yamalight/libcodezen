@@ -1,7 +1,5 @@
 package com.codezen.vkontakte.ajax
 {
-	import com.adobe.serialization.json.JSON;
-	import com.adobe.serialization.json.JSONDecoder;
 	import com.adobe.utils.XMLUtil;
 	import com.codezen.helper.Worker;
 	import com.codezen.vkontakte.ajax.service.VkBase;
@@ -122,7 +120,7 @@ package com.codezen.vkontakte.ajax
 			var ba:ByteArray = evt.target.data as ByteArray;
 			var data:String = new String(ba.readMultiByte(ba.length, 'windows-1251'));
 			
-			var res:Object = JSON.decode(data);
+			var res:Object = JSON.parse(data);
 			//var parser:HtmlParser = new HtmlParser();
 			// FIX HERE!!!!
 			// !!!!!!!!!!!!

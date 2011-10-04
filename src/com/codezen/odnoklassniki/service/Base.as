@@ -1,6 +1,5 @@
 package com.codezen.odnoklassniki.service
 {
-	import com.adobe.serialization.json.JSON;
 	import com.codezen.helper.WebWorker;
 	
 	import flash.events.Event;
@@ -138,7 +137,7 @@ package com.codezen.odnoklassniki.service
 		private function onToken(e:Event):void{
 			myLoader.removeEventListener(Event.COMPLETE, onToken);
 			
-			var data:Object = JSON.decode(myLoader.data);
+			var data:Object = JSON.parse(myLoader.data);
 			
 			access_token = data.access_token;
 			refresh_token = data.refresh_token;

@@ -1,12 +1,9 @@
 package com.codezen.mse.services {
-import flash.utils.describeType;
-
-import com.adobe.serialization.json.JSON;
 import com.codezen.helper.WebWorker;
-
 import com.codezen.mse.models.Artist;
 
 import flash.events.Event;
+import flash.utils.describeType;
 
 import mx.utils.ObjectUtil;
 
@@ -77,10 +74,10 @@ public class Freebase extends WebWorker {
         public function execQuery():void{
             queryWrap = {"query":[query]};
 
-            trace( JSON.encode(queryWrap) );
+            //trace( JSON.encode(queryWrap) );
 
             // request here
-            urlRequest.url = endpoint+encodeURIComponent(JSON.encode(queryWrap));
+            urlRequest.url = endpoint+encodeURIComponent(JSON.stringify(queryWrap));
             myLoader.addEventListener(Event.COMPLETE, onResult);
             myLoader.load(urlRequest);
         }
