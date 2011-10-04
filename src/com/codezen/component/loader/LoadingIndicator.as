@@ -10,16 +10,16 @@ package com.codezen.component.loader
 	
 import flash.display.Graphics;
 
-import mx.containers.Canvas;
-import mx.controls.Image;
 import mx.core.UIComponent;
 
+import spark.components.BorderContainer;
+import spark.components.Image;
 import spark.filters.GlowFilter;
 
 /**
  * 	Loader displays a loading indicator when isLoading is set to true
  */
-public class LoadingIndicator extends Canvas
+public class LoadingIndicator extends BorderContainer
 {
 	[Embed(source="assets/loadAnimation.swf")]
 	private var loadAnimation1:Class;
@@ -117,9 +117,9 @@ public class LoadingIndicator extends Canvas
 			img.filters = [gf];
 			
 			if( !this.contains( fade ) )
-				addChild( fade );
+				addElement( fade );
 			if( !this.contains( img ) )
-				addChild( img );
+				addElement( img );
 
 			/*var g:Graphics = fade.graphics;				
 			g.clear();
@@ -130,9 +130,9 @@ public class LoadingIndicator extends Canvas
 			img.source = null;
 			
 			if( this.contains( fade ) )
-				removeChild( fade );
+				removeElement( fade );
 			if( this.contains( img ) )
-				removeChild( img );				
+				removeElement( img );				
 		}
 	}
 	
