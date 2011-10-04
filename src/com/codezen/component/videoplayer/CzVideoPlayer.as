@@ -62,7 +62,7 @@ private var isSub:Boolean;
 private var isSubSwitch:Boolean;
 private var subs:Array;
 [Bindable]
-private var subNames:Array;
+private var subNames:ArrayCollection;
 private var subArray:Array;
 private var subCurrent:Array;
 private var subIndex:Number;
@@ -74,7 +74,7 @@ private var isSnd:Boolean;
 private var isSndSwitch:Boolean;
 private var snds:ArrayCollection;
 [Bindable]
-private var sndNames:Array;
+private var sndNames:ArrayCollection;
 private var sndArray:Array;
 private var soundPlayer:Playr;
 private var soundPercent:Number;
@@ -197,10 +197,14 @@ private function onCreationComplete():void{
 		player_controls.removeElement(fullscreen_btn);//.width = 0;
 		player_controls.removeElement(player_volume);//.width = 0;
 		player_controls.removeElement(mute_btn);//.width = 0;
+		loading_wnd.removeElement(loading_spin);
 		
-		// temp disable sub
-		player_data.removeElement(player_subselect);
-		player_data.removeElement(player_sndselect);
+		// resize sub and sound
+		player_sndselect.width = player_subselect.width = 150;
+		sndBar.maxWidth = subBar.maxWidth = 140;
+		
+		//player_data.removeElement(player_subselect);
+		//player_data.removeElement(player_sndselect);
 	}
 	
 	this.addEventListener(Event.ADDED_TO_STAGE, initStagePlayer);
@@ -382,7 +386,7 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	hideTimer.start();
 	
 	// set focus
-	video_player.setFocus();
+	//video_player.setFocus();
 }
 
 private function onSoundStream(e:PlayrEvent):void{
@@ -402,16 +406,18 @@ public var defaultSoundName:String = "jp";
 
 private function parseSounds(sounds:Array):void{
 	//trace(ObjectUtil.toString(subtitiles));
+	sndBar.selectedIndex = 0;
+	
 	sndArray = sounds;
-	sndNames = new Array();
-	sndNames.push(defaultSoundName);
+	sndNames = new ArrayCollection();
+	sndNames.addItem({label: defaultSoundName});
 	var i:int = 0;
 	for(i = 0; i < sounds.length; i++){
 		if(String(sounds[i]).indexOf("_1.mp3") > 0 || String(sounds[i]).indexOf("_ru.mp3") > 0){
-			sndNames.push("ru");
+			sndNames.addItem({label: "ru"});
 		}
 		if(String(sounds[i]).indexOf("_2.mp3") > 0 || String(sounds[i]).indexOf("_en.mp3") > 0){
-			sndNames.push("en");
+			sndNames.addItem({label: "en"});
 		}
 	}
 	
@@ -459,24 +465,29 @@ private function loadSound(sndURL:String):void{
 private function parseSubtitiles(subtitiles:Array):void{
 	//trace(ObjectUtil.toString(subtitiles));
 	subArray = subtitiles;
-	subNames = new Array();
-	subNames.push("off");
+	subNames = new ArrayCollection();
+	subNames.addItem({label: "off"});
 	var i:int = 0;
 	for(i = 0; i < subtitiles.length; i++){
 		if(String(subtitiles[i]).indexOf("_1.") > 0 || String(subtitiles[i]).indexOf("_ru.") > 0){
-			subNames.push("ru");
+			subNames.addItem({label: "ru"});
+			//subNames.push("ru");
 		}
 		if(String(subtitiles[i]).indexOf("_2.") > 0 || String(subtitiles[i]).indexOf("_en.") > 0){
-			subNames.push("en");
+			subNames.addItem({label: "en"});
+			//subNames.push("en");
 		}
 	}
 	
 	if(subNames.length > 1) isSubSwitch = true;
 	
-	if(_autoloadSub) loadSubtitles(subtitiles[0]);
+	if(_autoloadSub){
+		subBar.selectedIndex = 1;
+		loadSubtitles(subtitiles[0]);
+	}
 }
 
-private function loadSubtitles(subURL:String):void{
+private function loadSubtitles(subURL:String):void{	
 	// clean up stuff
 	if(isSub && subCurrent != null && subCurrent.length > 0){
 		// clear old from screen
@@ -628,7 +639,7 @@ private function onDoubleClick(e:Event):void{
 	if( player_controls.mouseY < 0 ){
 		toggleFullScreen();
 	}
-	video_player.setFocus();
+	//video_player.setFocus();
 }
 
 /**
@@ -891,7 +902,7 @@ private function onSeek(e:Event):void{
 	if(!playState){
 		playpause.select = playState;
 		playState = !playState;
-		video_player.setFocus();
+		//video_player.setFocus();
 		if(playState){
 			this.dispatchEvent(new Event(ON_PLAY));
 		}else{
@@ -916,7 +927,7 @@ private function onSeek(e:Event):void{
 	}
 	//
 	hideTimer.start();
-	video_player.setFocus();
+	//video_player.setFocus();
 }
 
 /**
@@ -940,7 +951,7 @@ private function togglePlayPause(ignoreBuffer:Boolean = false):void{
 	}
 	if(ns)
 		ns.togglePause();
-	video_player.setFocus();
+	//video_player.setFocus();
 	if(playState){
 		this.dispatchEvent(new Event(ON_PLAY));
 	}else{
@@ -969,7 +980,7 @@ private function toggleFullScreen():void{
 			break;
 	}
 	//subText = '';
-	video_player.setFocus();
+	//video_player.setFocus();
 	
 	if(svAvailable) resizeStageVideo();
 }
@@ -1105,7 +1116,7 @@ private function setVolume():void{
 		ns.soundTransform = new SoundTransform(player_volume.value/100);
 	}
 	volumeLevel = player_volume.value;
-	video_player.setFocus();
+	//video_player.setFocus();
 }
 
 /**
@@ -1340,7 +1351,7 @@ protected function ratio_list_openHandler(event:DropDownEvent):void{
 protected function ratio_list_closeHandler(event:DropDownEvent):void{
 	// TODO Auto-generated method stub
 	hideTimer.start();
-	video_player.setFocus();
+	//video_player.setFocus();
 }
 
 // advanced garbage collection
@@ -1380,6 +1391,7 @@ private function lastGC():void{
 
 
 protected function subBar_itemClickHandler(event:Event):void{
+	if( subBar.selectedIndex == -1 ) return;
 	var i:int = subBar.selectedIndex - 1;
 	if( i >= 0 && i < subArray.length ){
 		loadSubtitles(subArray[i]);
@@ -1389,6 +1401,7 @@ protected function subBar_itemClickHandler(event:Event):void{
 }
 
 protected function sndBar_itemClickHandler(event:Event):void{
+	if( sndBar.selectedIndex == -1 ) return;
 	var i:int = sndBar.selectedIndex - 1;
 	if( i >= 0 && i < sndArray.length ){
 		loadSound(sndArray[i]);
