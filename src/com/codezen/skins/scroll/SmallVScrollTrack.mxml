@@ -43,7 +43,7 @@
     </s:states>
 
     <!-- border/fill -->
-    <s:Rect top="0" bottom="0" left="0" right="0" minWidth="10" minHeight="10" radiusX="3" radiusY="3">
+    <s:Rect top="0" bottom="0" left="0" right="0" minWidth="8" minHeight="10" radiusX="3" radiusY="3">
         <s:stroke>
             <s:SolidColorStroke color="0x222222" weight="1"/>
         </s:stroke>
