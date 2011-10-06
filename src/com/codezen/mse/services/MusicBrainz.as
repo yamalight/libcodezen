@@ -39,12 +39,14 @@
 		private var _artist:Artist;
 		private var _album:Album;
 		
+		private var _offset:int;
+		
 		// Misc data
 		private static var searchLimit:int;
 		private static var artistSearchURL:String = 'http://musicbrainz.org/ws/2/artist?query=%query%&limit='+searchLimit;
 		private static var albumsSearchURL:String = 'http://musicbrainz.org/ws/2/release?query=%query%&limit='+searchLimit;
 		private static var trackSearchURL:String = 'http://musicbrainz.org/ws/2/recording?query=%query%&limit='+searchLimit;
-		private static var albumsURL:String = 'http://musicbrainz.org/ws/2/release?artist=%artistid%&status=official&limit=500';
+		private static var albumsURL:String = 'http://musicbrainz.org/ws/2/release?artist=%artistid%&type=album|ep|single&limit=100';//status=official&limit=500';
 		private static var tracksURL:String = 'http://musicbrainz.org/ws/2/release/%albumid%?inc=recordings';
 		private static var lastCoverURL:String = 'http://ws.audioscrobbler.com/1.0/album/%artistalbum%/info.xml';
 		private static var findAlbumByNameURL:String = 'http://musicbrainz.org/ws/2/release?query=release:%album%+artist:%artist%+type:album&limit='+searchLimit;
@@ -445,13 +447,20 @@
 		/**
 		 * Loads a list of albums of found artist
 		 */
-		public function getAlbums(artist:Artist):void{
-			albums = null;
+		public function getAlbums(artist:Artist, offset:int = 0):void{
+			if(offset == 0){
+				albums = null;
+			}
 			
 			_artist = artist;
+			_offset = offset;
 			
 			// Generate url
 			var search_url:String = albumsURL.replace("%artistid%",artist.mbID);
+			if(offset > 0){
+				search_url += "&offset="+offset;
+				trace('requesting one more time');
+			}
 			
 			// from urlrequest and urlloader
 			urlRequest.url = search_url;
@@ -475,10 +484,11 @@
 			// get albums list
 			var albumsList:XMLList = data.descendants("release-list").children();//.(@type == "Album Official" || @type == "EP Official" || @type == "Single Official");
 			
-			trace(albumsList)
+			// total results count
+			var total:int = data.descendants("release-list").@count;
 			
 			// create albums storage
-			albums = [];
+			if(_offset == 0) albums = [];
 			
 			// counter
 			var num:int = 0;
@@ -494,6 +504,13 @@
 			var title:String = '';
 			var date:String = '';
 			var alb:Album;
+			
+			// refill saved
+			if(_offset > 0){
+				for each(alb in albums){
+					saved_albums.push(alb.name);
+				}
+			}
 			
 			// parse list to storage
 			for each(var item:XML in albumsList){
@@ -525,17 +542,24 @@
 			date = null;
 			saved_albums = null;
 			
-			if(albums.length < 1){
-				// Report error
-				dispatchError("No albums found!", "Albums result error!", false, 1);
-				return;
+			if(_offset < total){
+				_offset += 100;
+				getAlbums(_artist, _offset);
+			}else{
+				if(albums.length < 1){
+					// Report error
+					dispatchError("No albums found!", "Albums result error!", false, 1);
+					return;
+				}
+				
+				albums.sortOn("date", Array.DESCENDING);
+				
+				// Report status
+				setStatus('Found '+albums.length+' albums!');
+				
+				// end
+				endLoad();
 			}
-			
-			// Report status
-			setStatus('Found '+albums.length+' albums!');
-			
-			// end
-			endLoad();
 		}
 		
 		/**
@@ -597,8 +621,9 @@
 			
 			// parse list
 			for each(var item:XML in songsList){
-				if(item.recording.length != null){
-					dur = item.recording.length.text();
+				trace(item);
+				if(item.length != null){
+					dur = item.length.text();
 					
 					if( dur > 0 ){
 						var secs:int = dur/1000;

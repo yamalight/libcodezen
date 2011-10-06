@@ -235,6 +235,18 @@ package com.codezen.mse {
 			
 			endLoad();
 		}
+		// --------------------------ARTIST ALBUMS ----------------------------------
+		public function getArtistAlbums(a:Artist):void{
+			albumSearch.addEventListener(Event.COMPLETE, onAlbumsFound);
+			albumSearch.getAlbums(a);
+		}
+		private function onAlbumsFound(e:Event):void{
+			albumSearch.removeEventListener(Event.COMPLETE, onAlbumsFound);
+			
+			_albums = albumSearch.albumsList;
+			
+			endLoad();
+		}
 		// ------------------------ FIND ARTIST ----------------------------------
 		public function findArtist(query:String):void{
 			artistSearch.addEventListener(Event.COMPLETE, onArtistSearch);
@@ -267,14 +279,40 @@ package com.codezen.mse {
 		public function getAlbumTracks(album:Album):void{
 			_album = album;
 			
+			if(album.mbID == null || album.mbID.length < 2){
+				albumSearch.addEventListener(Event.COMPLETE, onAlbumID);
+				albumSearch.findAlbumByName(album.name, album.artist.name);
+			}else{
+				getCurrentAlbumTracks();
+			}
+		}
+		
+		private function onAlbumID(e:Event):void{
+			albumSearch.removeEventListener(Event.COMPLETE, onAlbumID);
+			
+			var a:Album;
+			for each(a in albumSearch.albumsList){
+				//trace(ObjectUtil.toString(a));
+				if(a.name.toLowerCase() == _album.name.toLowerCase() && a.artist.name.toLowerCase() == _album.artist.name.toLowerCase()){
+					_album.mbID = a.mbID;
+					_album.date = a.date;
+					break;
+				}
+			}
+			
+			getCurrentAlbumTracks();
+		}
+		
+		private function getCurrentAlbumTracks():void{
 			albumSearch.addEventListener(Event.COMPLETE, onTracklist);
-			albumSearch.getTracks(album);
+			albumSearch.getTracks(_album);
 		}
 		
 		private function onTracklist(e:Event):void{
 			albumSearch.removeEventListener(Event.COMPLETE, onTracklist);
 			
 			_album.songs = albumSearch.songsList;
+			
 			endLoad();
 		}
 		
