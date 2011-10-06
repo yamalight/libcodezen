@@ -10,10 +10,10 @@ package com.codezen.component.loader
 	
 import flash.display.Graphics;
 
+import mx.controls.Image;
 import mx.core.UIComponent;
 
 import spark.components.BorderContainer;
-import spark.components.Image;
 import spark.filters.GlowFilter;
 
 /**
@@ -102,8 +102,9 @@ public class LoadingIndicator extends BorderContainer
 		
 		// center image
 		if( img ){
-			img.x = unscaledWidth/2 - img.width/2;
-			img.y = unscaledHeight/2 - img.height/2;
+			//img.x = (unscaledWidth - img.width)/2;
+			//img.y = (unscaledHeight - img.height)/2;
+			img.verticalCenter = img.horizontalCenter = 0;
 		}
 		
 		if( _isLoading ){
