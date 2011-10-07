@@ -14,6 +14,11 @@
 			private var _offset:Number = 0;
 			private var changing:Boolean = false;
 			
+			[Bindable]
+			public var gradientStartColor:uint = 0xFF0000;
+			[Bindable]
+			public var gradientEndColor:uint = 0x000000;
+			
 			public function reset():void{
 				_offset = 0;
 				progress_indicator.width = 0;
@@ -63,8 +68,8 @@
 			verticalCenter="0" height="9" radiusX="3" radiusY="3">
 		<s:fill>
 			<s:LinearGradient rotation="90">
-				<s:GradientEntry color="#FF0000" ratio="0.33" />
-				<s:GradientEntry color="#000000" />
+				<s:GradientEntry color="{gradientStartColor}" ratio="0.33" />
+				<s:GradientEntry color="{gradientEndColor}" />
 			</s:LinearGradient>
 		</s:fill>
 	</s:Rect>
