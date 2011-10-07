@@ -44,6 +44,10 @@
 			public function set maximum(max:Number):void{
 				slider.maximum = max;
 			}
+			
+			public function get maximum():Number{
+				return slider.maximum;
+			}
 
 			protected function slider_changeStartHandler(event:Event):void
 			{
