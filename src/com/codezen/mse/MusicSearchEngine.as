@@ -397,7 +397,7 @@ package com.codezen.mse {
 			
 			//trace( ObjectUtil.toString(pluginManager.results) )
 			
-			var docheck:Boolean = pluginManager.listPlugins().length > 1;
+			var docheck:Boolean = true;//pluginManager.listPlugins().length > 1;
 			
 			_mp3s = [];
 			var track:PlayrTrack;
