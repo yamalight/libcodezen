@@ -7,6 +7,7 @@
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.utils.escapeMultiByte;
 	
 	import mx.utils.ObjectUtil;
 	
@@ -49,7 +50,8 @@
 		private static var albumsURL:String = 'http://musicbrainz.org/ws/2/release?artist=%artistid%&type=album|ep|single&limit=100';//status=official&limit=500';
 		private static var tracksURL:String = 'http://musicbrainz.org/ws/2/release/%albumid%?inc=recordings';
 		private static var lastCoverURL:String = 'http://ws.audioscrobbler.com/1.0/album/%artistalbum%/info.xml';
-		private static var findAlbumByNameURL:String = 'http://musicbrainz.org/ws/2/release?query=release:%album%+artist:%artist%+type:album&limit='+searchLimit;
+		private static var findAlbumByNameURL:String = 'http://musicbrainz.org/ws/2/release?query=release:%album%+artist:%artist%&limit=100'; //type:album
+		private static var findAlbumByNameIdURL:String = 'http://musicbrainz.org/ws/2/release?query=release:%album%+arid:%id%&limit=100'; //type:album
 		
 		// Namespace
 		private var xmlNs:Namespace = new Namespace("http://musicbrainz.org/ns/mmd-2.0#");
@@ -264,11 +266,30 @@
 		/**
 		 * Loads a list of albums of found artist
 		 */
-		public function findAlbumByName(album:String, artist:String):void{
+		public function findAlbumByName(album:String, artist:String, artistId:String = ''):void{
 			albums = null;
 			
 			// Generate url
-			var search_url:String = findAlbumByNameURL.replace("%album%",album).replace("%artist%", artist);
+			var search_url:String;
+			if(artistId != null && artistId.length > 0){
+				search_url = encodeURI(
+					findAlbumByNameIdURL.replace(
+						"%album%", "'"+album.replace(/\s/g, "_").replace(/'/g, "")+"'"
+					).replace(
+						"%id%", artistId
+					)
+				);
+			}else{
+				search_url = encodeURI( 
+					findAlbumByNameURL.replace(
+						"%album%", "'"+album.replace(/\s/g, "_").replace(/'/g, "")+"'"
+					).replace(
+						"%artist%","'"+artist.replace(/\s/g, "_").replace(/'/g, "")+"'"
+					)
+				);
+			}
+			
+			trace(search_url);
 			
 			// from urlrequest and urlloader
 			urlRequest.url = search_url;
@@ -312,9 +333,8 @@
 				date = item.date.text();
 				// get title
 				title = item.title.text();
-				title = item.title.text();
 				// check if title already saved
-				if(saved_albums.indexOf(title) < 0 && item.status.text() == "Official"){
+				if(saved_albums.indexOf(title) < 0){// && item.status.text() == "Official"){
 					saved_albums.push(title);
 					
 					// save album

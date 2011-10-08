@@ -281,7 +281,7 @@ package com.codezen.mse {
 			
 			if(album.mbID == null || album.mbID.length < 2){
 				albumSearch.addEventListener(Event.COMPLETE, onAlbumID);
-				albumSearch.findAlbumByName(album.name, album.artist.name);
+				albumSearch.findAlbumByName(album.name, album.artist.name, album.artist.mbID);
 			}else{
 				getCurrentAlbumTracks();
 			}
@@ -289,18 +289,29 @@ package com.codezen.mse {
 		
 		private function onAlbumID(e:Event):void{
 			albumSearch.removeEventListener(Event.COMPLETE, onAlbumID);
-			
+						
 			var a:Album;
+			var anm:String, arnm:String;
+			var replace:RegExp = new RegExp(/['’"&!?.: ]/g);
+			var origanm:String = _album.name.toLowerCase().replace(replace, "");
+			var origarnm:String = _album.artist.name.toLowerCase().replace(replace, "");
 			for each(a in albumSearch.albumsList){
 				//trace(ObjectUtil.toString(a));
-				if(a.name.toLowerCase() == _album.name.toLowerCase() && a.artist.name.toLowerCase() == _album.artist.name.toLowerCase()){
+				anm = a.name.toLowerCase().replace(replace, ""); 
+				arnm = a.artist.name.toLowerCase().replace(replace, "");
+				//if(anm == origanm && arnm == origarnm){
+				if( CUtils.compareStrings(anm, origanm) > 90 && CUtils.compareStrings(arnm, origarnm) > 90 ){
 					_album.mbID = a.mbID;
 					_album.date = a.date;
 					break;
 				}
 			}
 			
-			getCurrentAlbumTracks();
+			if(_album.mbID == null){
+				dispatchError("Album not found!");
+			}else{
+				getCurrentAlbumTracks();
+			}
 		}
 		
 		private function getCurrentAlbumTracks():void{

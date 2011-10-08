@@ -42,7 +42,7 @@ package com.codezen.mse.services
 				album.name = item.@title;
 				album.artist = new Artist();
 				album.artist.name = item.@artist;
-				album.artist.mbID = item.@gid;
+				album.artist.mbID = item.@gid == "(none)" ? null : item.@gid;
 				_albumsChart.push(album);
 			}
 			
