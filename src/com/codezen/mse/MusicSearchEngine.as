@@ -372,6 +372,11 @@ package com.codezen.mse {
 		// ---------------------- PLUGINS STUFF --------------------------------
 		private function initPluginManager():void{
 			pluginManager = new PluginManager( [File.applicationDirectory.resolvePath("plugins/").nativePath, File.documentsDirectory.resolvePath("plugins/").nativePath] );
+			pluginManager.addEventListener(Event.INIT, onPmInit);
+		}
+		
+		private function onPmInit(e:Event):void{
+			this.dispatchEvent(new Event(Event.INIT));
 		}
 		
 		public function getActivePlugins():Array{
