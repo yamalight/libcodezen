@@ -3,6 +3,7 @@ package com.codezen.mse.plugins
 	import com.codezen.helper.Worker;
 	import com.codezen.mse.playr.PlayrTrack;
 	import com.codezen.mse.search.ISearchProvider;
+	import com.codezen.util.CUtils;
 	
 	import flash.display.Loader;
 	import flash.display.LoaderInfo;
@@ -165,15 +166,15 @@ package com.codezen.mse.plugins
 		}*/
 		
 		// -------------------------------------------
-		public function findURLs(query:String, durMs:int):void{
-			trace('starting search for: '+query);
+		public function findURLs(query:String, durMs:int):void{			
 			counter = 0;
-			this.query = query;
+			this.query = CUtils.cleanMusicQuery(query);
+			trace('starting search for: '+this.query);
 			_results = new Vector.<PlayrTrack>();
 			var searcher:ISearchProvider = _plugins[counter] as ISearchProvider;
 			searcher.addEventListener(Event.COMPLETE, onSearchComplete);
 			searcher.addEventListener(ErrorEvent.ERROR, onSearchError);
-			searcher.search(query, durMs);
+			searcher.search(this.query, durMs);
 		}
 		
 		/**
