@@ -690,10 +690,10 @@
 			_albumCover = null;
 			
 			// generate search string
-			var search_string:String = artist+"/";
-			search_string += CUtils.urlEncode( String(albumName).replace(/\(.*?\)/g, "") );
+			var search_string:String = encodeURIComponent( artist ).replace(/%26/g, "%2526")+"/";
+			search_string += encodeURIComponent( albumName ).replace(/%26/g, "%2526");
 			// Generate url
-			var search_url:String = lastCoverURL.replace("%artistalbum%",search_string);
+			var search_url:String = lastCoverURL.replace("%artistalbum%", search_string);
 			
 			// from urlrequest and urlloader
 			urlRequest.url = search_url;
