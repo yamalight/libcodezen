@@ -80,6 +80,7 @@
 	<s:HSlider verticalCenter="0" left="0" right="0" id="slider" 
 			   skinClass="com.codezen.component.advancedprogress.AdvancedProgressSlider" 
 			   minimum="0" maximum="100" value="0"
+			   mouseFocusEnabled="false"
 			   changeStart="slider_changeStartHandler(event)"
 			   changeEnd="slider_changeEndHandler(event)"
 			   />
