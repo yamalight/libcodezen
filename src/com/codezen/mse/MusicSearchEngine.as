@@ -11,7 +11,9 @@ package com.codezen.mse {
     import com.codezen.mse.services.Stereomood;
     import com.codezen.util.CUtils;
     
+    import flash.events.ErrorEvent;
     import flash.events.Event;
+    import flash.events.IOErrorEvent;
     import flash.filesystem.File;
     
     import flashx.textLayout.utils.CharacterUtil;
@@ -51,6 +53,9 @@ package com.codezen.mse {
 		// artist info
 		private var _artistInfo:Artist;
 		
+		// song info
+		private var _songInfo:Song;
+		
 		// counter 
 		private var _searchCounter:int;
 		
@@ -69,6 +74,11 @@ package com.codezen.mse {
 			
 			initPluginManager();
         }
+
+		public function get songInfo():Song
+		{
+			return _songInfo;
+		}
 
 		public function get mp3s():Array
 		{
@@ -133,25 +143,40 @@ package com.codezen.mse {
 
             // find matching artists
             artistSearch.addEventListener(Event.COMPLETE, onMBArtist);
+			artistSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             artistSearch.findArtist(query);
 
             // find matching albums
             albumSearch.addEventListener(Event.COMPLETE, onMBAlbums);
+			albumSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             albumSearch.findAlbums(query);
 
             // find matching songs
             songSearch.addEventListener(Event.COMPLETE, onMBSong);
+			songSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             songSearch.findSongs(query);
 
             // find matching tags
             lastfmSearch.addEventListener(Event.COMPLETE, onLFMTag);
+			lastfmSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             lastfmSearch.findTags(query);
 			
 			// find moods
 			//moodSearch.addEventListener(Event.COMPLETE, onMood);
 			//moodSearch.findMood(query);
         }
-
+		
+		// --------------------------------- QUERY ERRORS -------------------------------
+		
+		private function onQueryError(e:Event):void{
+			e.target.removeEventListener(ErrorEvent.ERROR, onQueryError);
+			
+			_searchCounter--;
+			if(_searchCounter == 0) endLoad();
+		}
+		
+		// --------------------------------- -------------------------------
+		
 		/**
 		 * LastFM Tags results 
 		 * @param e
@@ -339,6 +364,27 @@ package com.codezen.mse {
 			_songs = lastfmSearch.resultArray;
 			
 			endLoad();
+		}
+		
+		// ---------------------------- GET TRACK INFO -----------------------------------
+		public function getTrackInfo(artist:String, track:String):void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onTrackInfo);
+			lastfmSearch.addEventListener(ErrorEvent.ERROR, onTrackInfoError);
+			lastfmSearch.findSongInfo(artist, track);
+		}
+		
+		private function onTrackInfo(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onTrackInfo);
+			
+			_songInfo = lastfmSearch.song;
+			
+			endLoad();
+		}
+		
+		private function onTrackInfoError(e:Event):void{
+			trace('track info error');
+			_songInfo = null;
+			dispatchError("Song info search error");
 		}
 		
 		// -------------------------- GET TOP ARTISTS ------------------------------------

@@ -37,6 +37,11 @@ package com.codezen.mse.services{
 			_limit = limit;
 		}
 		
+		public function get song():Song
+		{
+			return _song;
+		}
+
 		public function get artist():Artist
 		{
 			return _artist;
