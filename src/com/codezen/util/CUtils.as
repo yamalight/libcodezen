@@ -85,6 +85,8 @@ package com.codezen.util
 		 * Strips all tags from string
 		 */
 		public static function stripTags(html:String):String{
+			if(html == null) return null;
+			
 			html = html.replace(/<.+?>/gs, "");
 			
 			return html;
