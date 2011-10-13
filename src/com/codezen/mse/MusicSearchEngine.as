@@ -433,14 +433,14 @@ package com.codezen.mse {
 			_song2find = song;
 			
 			pluginManager.addEventListener(Event.COMPLETE, onSong);
-			pluginManager.findURLs(song.artist.name + ' ' + song.name, song.duration);
+			pluginManager.findURLs(song);
 		}
 		
 		public function findMP3byText(query:String):void{
 			_song2find = null;
 			
 			pluginManager.addEventListener(Event.COMPLETE, onSong);
-			pluginManager.findURLs(query,0);
+			pluginManager.findURLsByText(query,0);
 		}
 		
 		private function onSong(e:Event):void{
@@ -453,15 +453,15 @@ package com.codezen.mse {
 			_mp3s = [];
 			var track:PlayrTrack;
 			for each( track in pluginManager.results ){
-				if( docheck && _song2find != null ){
+				/*if( docheck && _song2find != null ){
 					if( track.artist != null && track.title != null &&
 						CUtils.compareStrings(track.title.toLowerCase(), _song2find.name.toLowerCase()) > 80 &&
 						CUtils.compareStrings(track.artist.toLowerCase(), _song2find.artist.name.toLowerCase()) > 80 ){
 						_mp3s.push(track);
 					}
-				}else{
+				}else{*/
 					_mp3s.push(track);
-				}
+				//}
 			}
 			
 			trace( ObjectUtil.toString(_mp3s) );

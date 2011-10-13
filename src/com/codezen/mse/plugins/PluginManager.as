@@ -1,6 +1,7 @@
 package com.codezen.mse.plugins
 {
 	import com.codezen.helper.Worker;
+	import com.codezen.mse.models.Song;
 	import com.codezen.mse.playr.PlayrTrack;
 	import com.codezen.mse.search.ISearchProvider;
 	import com.codezen.util.CUtils;
@@ -46,8 +47,12 @@ package com.codezen.mse.plugins
 		// counter
 		private var dircounter:int;
 		private var counter:int;
+		// searched nums array
+		private var usedPlugins:Array;
 		// search query
 		private var query:String;
+		// search song
+		private var song:Song;
 		// result url
 		private var _results:Vector.<PlayrTrack>;
 		
@@ -165,8 +170,8 @@ package com.codezen.mse.plugins
 			}
 		}*/
 		
-		// -------------------------------------------
-		public function findURLs(query:String, durMs:int):void{			
+		// ---------------- SIMPLE TEXT SEARCH ---------------------------
+		public function findURLsByText(query:String, durMs:int):void{			
 			counter = 0;
 			this.query = CUtils.cleanMusicQuery(query);
 			trace('starting search for: '+this.query);
@@ -188,8 +193,8 @@ package com.codezen.mse.plugins
 				return;
 			}
 			var searcher:ISearchProvider = _plugins[counter] as ISearchProvider;
-			//searcher.registerResultEvent(onSearchComplete);
 			searcher.addEventListener(Event.COMPLETE, onSearchComplete);
+			searcher.addEventListener(ErrorEvent.ERROR, onSearchError);
 			searcher.search(query);
 		}
 		
@@ -203,6 +208,7 @@ package com.codezen.mse.plugins
 			
 			var searcher:ISearchProvider = e.target as ISearchProvider;
 			searcher.removeEventListener(Event.COMPLETE, onSearchComplete);
+			searcher.removeEventListener(ErrorEvent.ERROR, onSongSearchError);
 			
 			if(searcher.result == null || searcher.result.length < 1){
 				findNext();
@@ -213,8 +219,95 @@ package com.codezen.mse.plugins
 		}
 		
 		private function onSearchError(e:ErrorEvent):void{
+			var searcher:ISearchProvider = e.target as ISearchProvider;
+			searcher.removeEventListener(Event.COMPLETE, onSearchComplete);
+			searcher.removeEventListener(ErrorEvent.ERROR, onSongSearchError);
+			
 			trace('error');
 			findNext();
+		}
+		
+		// ---------------- SONG SEACH ---------------------------
+		public function findURLs(song:Song):void{
+			this.song = song;
+			trace('starting search for: '+this.song);
+			
+			usedPlugins = [];
+			_results = new Vector.<PlayrTrack>();
+			
+			var num:int = Math.floor(_plugins.length * Math.random());
+			usedPlugins.push(num);
+			
+			var searcher:ISearchProvider = _plugins[num] as ISearchProvider;
+			searcher.addEventListener(Event.COMPLETE, onSongSearchComplete);
+			searcher.addEventListener(ErrorEvent.ERROR, onSongSearchError);
+			searcher.search(  CUtils.cleanMusicQuery(song.artist.name+" "+song.name), song.duration);
+		}
+		
+		/**
+		 * Executes search with next searcher 
+		 */
+		private function findNextSong():void{
+			if( usedPlugins.length >= _plugins.length ){ 
+				trace('done');
+				endLoad();
+				return;
+			}
+			
+			// get new random plugin
+			var num:int; 
+			do{
+				num = Math.floor(_plugins.length * Math.random());
+			}while(usedPlugins.indexOf(num) != -1);
+			usedPlugins.push(num);
+			
+			var searcher:ISearchProvider = _plugins[num] as ISearchProvider;
+			searcher.addEventListener(Event.COMPLETE, onSongSearchComplete);
+			searcher.addEventListener(ErrorEvent.ERROR, onSongSearchError);
+			searcher.search(query);
+		}
+		
+		/**
+		 * On search results 
+		 * @param e
+		 * 
+		 */
+		private function onSongSearchComplete(e:Event):void{
+			trace('found song data!');
+			
+			// clear listeners
+			var searcher:ISearchProvider = e.target as ISearchProvider;
+			searcher.removeEventListener(Event.COMPLETE, onSongSearchComplete);
+			searcher.removeEventListener(ErrorEvent.ERROR, onSongSearchError);
+			
+			// if there's no result, just go next
+			if(searcher.result == null || searcher.result.length < 1){
+				findNextSong();
+			}else{ // if something was found, try to filter
+				var track:PlayrTrack;
+				for each( track in searcher.result ){
+					if( track.artist != null && track.title != null &&
+						CUtils.compareStrings(track.title.toLowerCase(), song.name.toLowerCase()) > 80 &&
+						CUtils.compareStrings(track.artist.toLowerCase(), song.artist.name.toLowerCase()) > 80 ){
+						_results.push(track);
+					}
+				}
+				
+				if(_results.length > 0){
+					endLoad();
+				}else{
+					findNextSong();
+				}
+			}
+		}
+		
+		private function onSongSearchError(e:ErrorEvent):void{
+			var searcher:ISearchProvider = e.target as ISearchProvider;
+			searcher.removeEventListener(Event.COMPLETE, onSongSearchComplete);
+			searcher.removeEventListener(ErrorEvent.ERROR, onSongSearchError);
+			
+			trace('error');
+			findNextSong();
 		}
 		
 		// ---------------------------------------------
