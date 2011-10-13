@@ -440,7 +440,7 @@ package com.codezen.mse {
 			_song2find = null;
 			
 			pluginManager.addEventListener(Event.COMPLETE, onSong);
-			pluginManager.findURLsByText(query,0);
+			pluginManager.findURLsByText(query);
 		}
 		
 		private function onSong(e:Event):void{

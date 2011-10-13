@@ -171,7 +171,7 @@ package com.codezen.mse.plugins
 		}*/
 		
 		// ---------------- SIMPLE TEXT SEARCH ---------------------------
-		public function findURLsByText(query:String, durMs:int):void{			
+		public function findURLsByText(query:String):void{			
 			counter = 0;
 			this.query = CUtils.cleanMusicQuery(query);
 			trace('starting search for: '+this.query);
@@ -179,7 +179,7 @@ package com.codezen.mse.plugins
 			var searcher:ISearchProvider = _plugins[counter] as ISearchProvider;
 			searcher.addEventListener(Event.COMPLETE, onSearchComplete);
 			searcher.addEventListener(ErrorEvent.ERROR, onSearchError);
-			searcher.search(this.query, durMs);
+			searcher.search(this.query);
 		}
 		
 		/**
@@ -230,7 +230,7 @@ package com.codezen.mse.plugins
 		// ---------------- SONG SEACH ---------------------------
 		public function findURLs(song:Song):void{
 			this.song = song;
-			trace('starting search for: '+this.song);
+			trace('starting search for song: '+this.song.name+" "+this.song.artist.name);
 			
 			usedPlugins = [];
 			_results = new Vector.<PlayrTrack>();
@@ -238,10 +238,12 @@ package com.codezen.mse.plugins
 			var num:int = Math.floor(_plugins.length * Math.random());
 			usedPlugins.push(num);
 			
+			query = CUtils.cleanMusicQuery(song.artist.name+" "+song.name);
+			
 			var searcher:ISearchProvider = _plugins[num] as ISearchProvider;
 			searcher.addEventListener(Event.COMPLETE, onSongSearchComplete);
 			searcher.addEventListener(ErrorEvent.ERROR, onSongSearchError);
-			searcher.search(  CUtils.cleanMusicQuery(song.artist.name+" "+song.name), song.duration);
+			searcher.search(query, song.duration);
 		}
 		
 		/**
@@ -264,7 +266,7 @@ package com.codezen.mse.plugins
 			var searcher:ISearchProvider = _plugins[num] as ISearchProvider;
 			searcher.addEventListener(Event.COMPLETE, onSongSearchComplete);
 			searcher.addEventListener(ErrorEvent.ERROR, onSongSearchError);
-			searcher.search(query);
+			searcher.search(query, song.duration);
 		}
 		
 		/**
@@ -286,6 +288,7 @@ package com.codezen.mse.plugins
 			}else{ // if something was found, try to filter
 				var track:PlayrTrack;
 				for each( track in searcher.result ){
+					if( track.artist != null && track.title != null ) trace(track.artist, track.title);
 					if( track.artist != null && track.title != null &&
 						CUtils.compareStrings(track.title.toLowerCase(), song.name.toLowerCase()) > 80 &&
 						CUtils.compareStrings(track.artist.toLowerCase(), song.artist.name.toLowerCase()) > 80 ){
