@@ -446,22 +446,10 @@ package com.codezen.mse {
 		private function onSong(e:Event):void{
 			pluginManager.removeEventListener(Event.COMPLETE, onSong);
 			
-			//trace( ObjectUtil.toString(pluginManager.results) )
-			
-			var docheck:Boolean = true;//pluginManager.listPlugins().length > 1;
-			
 			_mp3s = [];
 			var track:PlayrTrack;
 			for each( track in pluginManager.results ){
-				/*if( docheck && _song2find != null ){
-					if( track.artist != null && track.title != null &&
-						CUtils.compareStrings(track.title.toLowerCase(), _song2find.name.toLowerCase()) > 80 &&
-						CUtils.compareStrings(track.artist.toLowerCase(), _song2find.artist.name.toLowerCase()) > 80 ){
-						_mp3s.push(track);
-					}
-				}else{*/
-					_mp3s.push(track);
-				//}
+				_mp3s.push(track);
 			}
 			
 			trace( ObjectUtil.toString(_mp3s) );
