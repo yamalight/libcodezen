@@ -417,7 +417,7 @@ package com.codezen.mse {
 		
 		// ---------------------- PLUGINS STUFF --------------------------------
 		private function initPluginManager():void{
-			pluginManager = new PluginManager( [File.applicationDirectory.resolvePath("plugins/").nativePath, File.documentsDirectory.resolvePath("plugins/").nativePath] );
+			pluginManager = new PluginManager( [File.applicationDirectory.resolvePath("plugins/").nativePath, File.applicationStorageDirectory.resolvePath("plugins/").nativePath] );
 			pluginManager.addEventListener(Event.INIT, onPmInit);
 		}
 		
