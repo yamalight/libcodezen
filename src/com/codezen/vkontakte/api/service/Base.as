@@ -4,23 +4,25 @@ package com.codezen.vkontakte.api.service
 	
 	import flash.display.NativeWindow;
 	import flash.display.NativeWindowInitOptions;
+	import flash.display.NativeWindowSystemChrome;
 	import flash.display.NativeWindowType;
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.LocationChangeEvent;
+	import flash.events.TimerEvent;
+	import flash.geom.Rectangle;
+	import flash.media.StageWebView;
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
-	
-	import mx.controls.HTML;
-	import mx.core.Window;
-	import mx.utils.ObjectUtil;
+	import flash.utils.Timer;
 
 	public class Base extends Worker
 	{
 		// app data
 		protected var appID:String;
 		protected var appKey:String;
-		private var silentInit:Boolean;
+		protected var appPermissions:String;
 		
 		// auth data
 		protected var expire:String;
@@ -37,13 +39,16 @@ package com.codezen.vkontakte.api.service
 		protected var myLoader:URLLoader;
 		
 		// auth wnd
-		protected var html:HTML;
-		protected var window:Window;
+		protected var html:StageWebView;
+		protected var window:NativeWindow;
 		
-		public function Base(appID:String, appKey:String, silentInit:Boolean){
+		// timer
+		private var windowTimer:Timer;
+		
+		public function Base(appID:String, appKey:String, appPermissions:String){
 			this.appID = appID;
 			this.appKey = appKey;
-			this.silentInit = silentInit;
+			this.appPermissions = appPermissions;
 			createClass();
 		}
 		
@@ -60,7 +65,7 @@ package com.codezen.vkontakte.api.service
 			urlRequest = new URLRequest();
 			myLoader = new URLLoader();
 			// set params and add error event listener
-			//urlRequest.requestHeaders['Referer'] = "http://vkontakte.ru/";
+			//urlRequest.requestHeaders['Referer'] = "http://vk.com/";
 			//myLoader.dataFormat = URLLoaderDataFormat.TEXT;
 			myLoader.dataFormat = URLLoaderDataFormat.BINARY;
 			myLoader.addEventListener(IOErrorEvent.IO_ERROR, onError);
@@ -83,48 +88,62 @@ package com.codezen.vkontakte.api.service
 		 * Must be executed before search 
 		 */
 		public function init():void{
-			//trace('VkBase init start');			
-			// create window
-			window = new Window();
+			// create window options
+			var windowInitOptions:NativeWindowInitOptions = new NativeWindowInitOptions();
+			windowInitOptions.type = NativeWindowType.NORMAL;
+			windowInitOptions.minimizable = true;
+			windowInitOptions.resizable = true;
+			windowInitOptions.maximizable = false;
+			windowInitOptions.systemChrome = NativeWindowSystemChrome.STANDARD;
+			windowInitOptions.transparent = false;
+			// window
+			window = new NativeWindow(windowInitOptions);
 			window.width = 600;
 			window.height = 500;
-			window.title = "Vkontakte.ru Authorization";
+			window.title = "Vk.com Authorization";
 			window.alwaysInFront = true;
-			window.resizable = false;
-			window.showStatusBar = false;
+			window.addEventListener(Event.ACTIVATE, onWindowActivate);
 			
 			// init html
-			html = new HTML();
-			html.x = 0;
-			html.y = 0;
-			html.width = 600;
-			html.height = 500;
-			html.addEventListener(Event.LOCATION_CHANGE, onLocationChange);
-			window.addElement( html );
+			html = new StageWebView();
+			html.stage = window.stage;
+			html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
+			html.addEventListener(LocationChangeEvent.LOCATION_CHANGE, onLocationChange);
+			//window.addElement( html );
+			
+			// init timer
+			windowTimer = new Timer(2000,1);
+			windowTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimer);
 			
 			// show window
 			//if( silentInit ){
 				//window.visible = false;
 			//}
 			
-			window.open(true);
+			//window.activate();
+			//window.open(true);
 			
-			html.location = "http://vkontakte.ru/login.php?app="+appID+"&layout=popup&type=browser&settings=16383";
-			//html.htmlLoader.load( new URLRequest("http://vkontakte.ru/login.php?app="+appID+"&layout=popup&type=browser&settings=16363") );
+			html.loadURL( "http://vk.com/login.php?app="+appID+"&layout=popup&type=browser&settings="+appPermissions );
+			//html.htmlLoader.load( new URLRequest("http://vk.com/login.php?app="+appID+"&layout=popup&type=browser&settings=16363") );
+		}
+		
+		private function onWindowActivate(e:Event):void{
+			trace('window activate')
+			html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
 		}
 		
 		/**
 		 * 
 		 * @param e
 		 * 
-		 * On recieve index page of vkontakte.ru
+		 * On recieve index page of vk.com
 		 */
 		protected function onLocationChange(e:Event):void{
 			trace(html.location);
 			// check status 
 			if (html.location.indexOf("login_success") > 0 ){
 				// remove event litener
-				html.removeEventListener(Event.LOCATION_CHANGE, onLocationChange);
+				html.removeEventListener(LocationChangeEvent.LOCATION_CHANGE, onLocationChange);
 				
 				//{"mid":47636,"sid":"d292cbef2e5f9a32c15f840ea26c035e58a9d1d4a50b9d22b535f0bfa0bf83","secret":"7ad0d2063b","expire":0,"sig":"ecfc74e26c8350626ffebc6b81621acd"}
 				var re:RegExp = new RegExp(/{"mid":(.+?),"sid":"(.+?)","secret":"(.+?)","expire":(.+?),"sig":"(.+?)"}/gs);
@@ -152,22 +171,33 @@ package com.codezen.vkontakte.api.service
 				
 				initialized = true;
 				window.close();
+				windowTimer.stop();
 				
 				window = null;
 				html = null;
+				windowTimer = null;
 				
 				end();
 			}else if( html.location.indexOf("login_failure") > 0 ){
 				// remove event litener
 				html.removeEventListener(Event.LOCATION_CHANGE, onLocationChange);
 				
+				windowTimer.stop();
+				
 				window.close();
 				
 				window = null;
 				html = null;
+				windowTimer = null;
 				
 				dispatchError("Login error!");
+			}else if(html.location.indexOf("/login.php?app=") > 0){
+				windowTimer.start();
 			}
+		}
+		
+		private function onTimer(e:Event):void{
+			window.activate();
 		}
 		
 		/**

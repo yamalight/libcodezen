@@ -38,7 +38,7 @@ package com.codezen.vkontakte.api.data
 		/**
 		 * media arrays
 		 */
-		public var photos:ArrayCollection;
+		public var photos:Array;
 		
 		/**
 		 * Comments and likes count 

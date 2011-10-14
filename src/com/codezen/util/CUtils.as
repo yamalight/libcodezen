@@ -79,6 +79,27 @@ package com.codezen.util
 		
 		/**
 		 * 
+		 * @param array (ArrayCollection) - collection to search in
+		 * @param property (String) - property to search for
+		 * @param value (String) - value of property
+		 * @return (int) index of item or -1 
+		 * 
+		 */
+		public static function getArrayItemIndexByProperty(array:Array, property:String, value:*, startind:int = 0):int{
+			var obj:Object;
+			var i:int;
+			var size:int = array.length;
+			for (i = startind; i < size; i++)
+			{
+				obj = array[i] as Object;
+				if (obj != null && obj.hasOwnProperty(property) && obj[property] == value)
+					return i;
+			}
+			return -1;
+		}
+		
+		/**
+		 * 
 		 * @param html - input html text
 		 * @return html without tags
 		 * 

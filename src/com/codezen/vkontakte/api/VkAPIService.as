@@ -1,5 +1,7 @@
 package com.codezen.vkontakte.api
 {
+	import com.adobe.utils.StringUtil;
+	import com.codezen.mse.playr.PlayrTrack;
 	import com.codezen.util.CUtils;
 	import com.codezen.util.MD5;
 	import com.codezen.vkontakte.api.data.AudioItem;
@@ -11,29 +13,23 @@ package com.codezen.vkontakte.api
 	import com.codezen.vkontakte.api.service.Base;
 	
 	import flash.events.Event;
-	import flash.events.TimerEvent;
-	import flash.net.URLLoader;
-	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	import flash.utils.Dictionary;
-	import flash.utils.Timer;
-	
-	import mx.collections.ArrayCollection;
-	import mx.utils.ObjectUtil;
 	
 	public class VkAPIService extends Base
 	{
 		// users
-		private var _users:ArrayCollection;
+		private var _users:Array;
 		// statuses result
-		private var statuses:ArrayCollection;
+		private var statuses:Array;
 		// wall data
 		private var _wallData:Object;
 		// videos data
-		private var _videosData:ArrayCollection;
+		private var _videosData:Array;
 		// audio data
 		private var _audioData:Object;
+		private var _audio:Array;
 		// video data
 		private var _videoData:Object;
 		private var _videoURL:String;
@@ -55,12 +51,16 @@ package com.codezen.vkontakte.api
 		private var users_all:Array;
 		private var users_to_get:Array;
 		
-		public function VkAPIService(appID:String, appKey:String, silentInit:Boolean)
-		{
-			super(appID, appKey, silentInit);
-			_users = new ArrayCollection();
+		public function VkAPIService(appID:String, appKey:String, appPermissions:String){
+			super(appID, appKey, appPermissions);
+			_users = [];
 		}
 		
+		public function get audio():Array
+		{
+			return _audio;
+		}
+
 		public function get friendsList():Array
 		{
 			return _friends;
@@ -99,7 +99,7 @@ package com.codezen.vkontakte.api
 			return _stringResult;
 		}
 		
-		public function get statusList():ArrayCollection{
+		public function get statusList():Array{
 			return statuses;
 		}
 		
@@ -153,7 +153,7 @@ package com.codezen.vkontakte.api
 			}
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -166,8 +166,8 @@ package com.codezen.vkontakte.api
 			myLoader.removeEventListener(Event.COMPLETE, onStatusesRecieve);
 			
 			// create new collections
-			statuses = new ArrayCollection();
-			_videosData = new ArrayCollection();
+			statuses = [];
+			_videosData = [];
 			
 			// get data
 			var xml:XML = new XML(myLoader.data);
@@ -202,7 +202,7 @@ package com.codezen.vkontakte.api
 					newsItem.user.lastname = profiles.(uid == newsItem.user.id).last_name.text();
 					newsItem.user.photo = profiles.(uid == newsItem.user.id).photo.text();
 					
-					_users.addItem(newsItem.user);
+					_users.push(newsItem.user);
 				}else{
 					newsItem.group = new GroupData();
 					newsItem.group.id = Math.abs( int(item.source_id) ).toString();
@@ -243,7 +243,7 @@ package com.codezen.vkontakte.api
 									newsItem.video.title = item.attachment.video.title.text();
 									newsItem.video.dur = item.attachment.video.duration.text();
 									
-									_videosData.addItem({id: newsItem.video.id, owner: newsItem.video.owner});
+									_videosData.push({id: newsItem.video.id, owner: newsItem.video.owner});
 									break;
 								case "audio":
 									newsItem.audio = new AudioItem();
@@ -259,7 +259,7 @@ package com.codezen.vkontakte.api
 					// if photo
 					case "photo":
 						list = new XMLList( item.photos.photo );
-						newsItem.photos = new ArrayCollection();
+						newsItem.photos = [];
 						for each(subitem in list){
 							photo = new PhotoItem();
 							photo.id = subitem.pid.text();
@@ -267,7 +267,7 @@ package com.codezen.vkontakte.api
 							photo.album = subitem.aid.text();
 							photo.src = subitem.src.text();
 							photo.src_big = subitem.src_big.text();
-							newsItem.photos.addItem(photo);
+							newsItem.photos.push(photo);
 						}
 						break;
 					default:
@@ -276,7 +276,7 @@ package com.codezen.vkontakte.api
 						break;
 				}
 				
-				statuses.addItem(newsItem);
+				statuses.push(newsItem);
 			}
 			
 			//trace( ObjectUtil.toString(statuses) );
@@ -314,7 +314,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -371,7 +371,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -399,7 +399,7 @@ package com.codezen.vkontakte.api
 			<description/>
 			<duration>30</duration>
 			<link>video158411118</link>
-			<image>http://cs12622.vkontakte.ru/u117969393/video/m_b87e3c75.jpg</image>
+			<image>http://cs12622.vk.com/u117969393/video/m_b87e3c75.jpg</image>
 			<date>1293207454</date>
 			</video>
 			*/
@@ -436,7 +436,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -495,7 +495,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -552,7 +552,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -611,7 +611,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -672,7 +672,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;//+'&'+format;
 			
 			// assign url
-			urlRequest.url =  'http://api.vkontakte.ru/api.php';
+			urlRequest.url =  'http://api.vk.com/api.php';
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -756,6 +756,87 @@ package com.codezen.vkontakte.api
 		 * @param songid
 		 * 
 		 */
+		public function findSongs(query:String):void{
+			var activity:String = "audio.search";
+			
+			// generate hash
+			var md5hash:String =  MD5.encrypt(
+				mid+
+				"api_id="+appID+
+				"auto_complete=1"+
+				"count=200"+
+				"method="+activity+
+				"q="+query+
+				"v=3.0"+
+				secret);
+			
+			var vars:URLVariables = new URLVariables();
+			vars.api_id = appID;
+			vars.q = query;
+			vars.auto_complete = 1;
+			vars.count = 200;
+			vars.method = activity;
+			vars.sig = md5hash;
+			vars.v = "3.0";
+			vars.sid = sid;
+			
+			// assign url
+			urlRequest.url = "http://api.vk.com/api.php";
+			urlRequest.method = URLRequestMethod.POST;
+			urlRequest.data = vars;
+			
+			//trace( ObjectUtil.toString(urlRequest) );
+			
+			// load
+			myLoader.addEventListener(Event.COMPLETE, onAudioSearch);
+			myLoader.load(urlRequest);
+		}
+		
+		private function onAudioSearch(e:Event):void{
+			// remove
+			myLoader.removeEventListener(Event.COMPLETE, onAudioSearch);
+			
+			//trace(myLoader.data)
+			
+			// get result
+			var xml:XML = new XML(myLoader.data);
+			
+			/*
+			<aid>117814944</aid>
+			<owner_id>22124394</owner_id>
+			<artist>Muse</artist>
+			<title>Take A Bow</title>
+			<duration>275</duration>
+			<url>http://cs4915.vk.com/u22124394/audio/b577f94e9b27.mp3</url>
+			*/
+			
+			_audio = [];
+			
+			// create temp vars
+			var dur:int;
+			var entry:XML;
+			var track:PlayrTrack;			
+			
+			for each(entry in xml.children()){
+				dur = int(entry.duration)*1000;
+				
+				track = new PlayrTrack();
+				track.title = StringUtil.trim(entry.title);
+				track.artist = StringUtil.trim(entry.artist);
+				track.file = entry.url;
+				track.totalSeconds = dur/1000;
+				
+				_audio.push(track);
+			}
+			
+			end();
+		}
+		
+		/**
+		 * Gets song data 
+		 * @param songid
+		 * 
+		 */
 		public function getSongData(songid:String):void{
 			var activity:String = "audio.getById";
 			
@@ -777,7 +858,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;
 			
 			// assign url
-			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.url = "http://api.vk.com/api.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -829,7 +910,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;
 			
 			// assign url
-			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.url = "http://api.vk.com/api.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -859,7 +940,7 @@ package com.codezen.vkontakte.api
 			user.id = _userData.id;
 			user.name = _userData.name;
 			user.photo = _userData.photo;
-			_users.addItem(user);
+			_users.push(user);
 			
 			user = null;
 			
@@ -891,7 +972,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;
 			
 			// assign url
-			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.url = "http://api.vk.com/api.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -957,7 +1038,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;
 			
 			// assign url
-			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.url = "http://api.vk.com/api.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
@@ -1006,7 +1087,7 @@ package com.codezen.vkontakte.api
 			
 			var uid:String = users_all[user_counter];
 			if( uid != null ){
-				var index:int = CUtils.getItemIndexByProperty(_users, "id", uid);
+				var index:int = CUtils.getArrayItemIndexByProperty(_users, "id", uid);
 				if(index < 0){
 					// need get from vk
 					//trace(uid+' added for request');
@@ -1045,7 +1126,7 @@ package com.codezen.vkontakte.api
 			vars.sid = sid;
 			
 			// assign url
-			urlRequest.url = "http://api.vkontakte.ru/api.php";
+			urlRequest.url = "http://api.vk.com/api.php";
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			
