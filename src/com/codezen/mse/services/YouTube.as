@@ -2,7 +2,7 @@ package com.codezen.mse.services
 {
 	import com.adobe.serialization.json.JSONDecoder;
 	import com.codezen.helper.WebWorker;
-	import com.codezen.mse.models.Video;
+	import com.codezen.mse.models.VideoObject;
 	
 	import flash.events.Event;
 	
@@ -23,7 +23,7 @@ package com.codezen.mse.services
 		}
 		
 		public function getTopVideos():void{
-			var url:String = "https://gdata.youtube.com/feeds/api/standardfeeds/top_rated_Music?alt=json&v=2";
+			var url:String = "https://gdata.youtube.com/feeds/api/standardfeeds/top_rated_Music?alt=json&time=today&v=2";
 			
 			urlRequest.url = url;
 			myLoader.addEventListener(Event.COMPLETE, onResults);
@@ -50,10 +50,10 @@ package com.codezen.mse.services
 			
 			_videos = [];
 			
-			var vid:Video;
+			var vid:VideoObject;
 			var entry:Object;
 			for each(entry in res.feed.entry){
-				vid = new Video();
+				vid = new VideoObject();
 				vid.author = entry.author.name;
 				vid.title = entry.title["$t"];
 				vid.desctiption = entry["media$group"]["media$description"]["$t"];

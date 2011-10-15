@@ -1,6 +1,6 @@
 package com.codezen.mse.models
 {
-	public class Video
+	public class VideoObject
 	{
 		public var title:String;
 		public var author:String;

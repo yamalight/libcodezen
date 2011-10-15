@@ -428,12 +428,18 @@ package com.codezen.mse {
 		
 		// -------------------------- GET TOP VIDEOS ---------------------------------------
 		public function getTopVideos():void{
-			youtubeSearch.addEventListener(Event.COMPLETE, onTopVideos);
+			youtubeSearch.addEventListener(Event.COMPLETE, onVideos);
 			youtubeSearch.getTopVideos();
 		}
 		
-		private function onTopVideos(e:Event):void{
-			youtubeSearch.removeEventListener(Event.COMPLETE, onTopVideos);
+		// find video
+		public function findVideo(q:String):void{
+			youtubeSearch.addEventListener(Event.COMPLETE, onVideos);
+			youtubeSearch.findVideo(q);
+		}
+		
+		private function onVideos(e:Event):void{
+			youtubeSearch.removeEventListener(Event.COMPLETE, onVideos);
 			
 			_videos = youtubeSearch.videos;
 			

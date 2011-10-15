@@ -5,7 +5,7 @@
     <classEntry path="com.codezen.odnoklassniki.Odnoklassniki"/>
     <classEntry path="com.codezen.odnoklassniki.service.Base"/>
     <classEntry path="com.codezen.mse.services.YouTube"/>
-    <classEntry path="com.codezen.mse.models.Video"/>
+    <classEntry path="com.codezen.mse.models.VideoObject"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
