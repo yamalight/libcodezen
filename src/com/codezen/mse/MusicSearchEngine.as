@@ -271,6 +271,55 @@ package com.codezen.mse {
 			
 			endLoad();
 		}
+		
+		// --------------------------TOP TAGS ----------------------------------
+		public function getTopTags():void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onTopTags);
+			lastfmSearch.getTopTags();
+		}
+		private function onTopTags(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onTopTags);
+			
+			_tags = lastfmSearch.resultArray;
+			
+			var tag:Object;
+			var maxVal:int = 0;
+			for each(tag in _tags){
+				if( tag.count > maxVal ) maxVal = tag.count;
+			}
+			for each(tag in _tags){
+				tag.count = tag.count / maxVal;
+				if( tag.count < 0.25 ) tag.count = 0.25;
+			}
+			
+			_tags.sortOn("name");
+			
+			trace(ObjectUtil.toString(_tags));
+			
+			endLoad();
+		}
+		
+		// --------------------------FIND TAGS ----------------------------------
+		public function findTags(q:String):void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onTagsSearch);
+			lastfmSearch.findTags(q);
+		}
+		private function onTagsSearch(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onTagsSearch);
+			
+			_tags = lastfmSearch.resultArray;
+			
+			var tag:Object;
+			for each(tag in _tags){
+				tag.count = 0.5;
+			}
+			_tags.sortOn("name");
+			
+			endLoad();
+		}
+		
+		
+		
 		// --------------------------ARTIST ALBUMS ----------------------------------
 		public function getArtistAlbums(a:Artist):void{
 			albumSearch.addEventListener(Event.COMPLETE, onAlbumsFound);

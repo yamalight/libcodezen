@@ -244,33 +244,25 @@ package com.codezen.mse.services{
 		}
 		
 		
-		public function getTopTags(query:String):void{
+		public function getTopTags():void{
 			// reset old stuff
 			_results = [];
 			
-			// encode query
-			query = CUtils.urlEncode(query);
-			
 			//get top tags by artist
-			urlRequest.url = "http://ws.audioscrobbler.com/1.0/artist/"+query+"/toptags.xml";
+			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=tag.getTopTags&api_key="+api_key;
 			
 			// add event listener and load url
-			myLoader.addEventListener(Event.COMPLETE, onTagsSearchLoad);
+			myLoader.addEventListener(Event.COMPLETE, onTopTags);
 			myLoader.load(urlRequest);
 		}
 		
-		private function onTagsSearchLoad(evt:Event):void{
+		private function onTopTags(evt:Event):void{
 			// add event listener and load url
-			myLoader.removeEventListener(Event.COMPLETE, onTagsSearchLoad);
+			myLoader.removeEventListener(Event.COMPLETE, onTopTags);
 			
 			// create result XML
-			var data:XML = new XML(evt.target.data);
-			var songsList:XMLList = data.tag;
-			
-			// counter
-			var num:int = 0;
-			var artist:String = '';
-			var track:String = '';
+			var data:XML = new XML(myLoader.data);
+			var tagList:XMLList = data.toptags.children();
 			
 			// init array
 			_results = [];
@@ -278,23 +270,18 @@ package com.codezen.mse.services{
 			// Report status
 			setStatus('Parsing tags list..');
 			
-			var tag:String = '';
-			num = 0;
-			
 			// parse list
-			for each(var itemtags:XML in songsList){
-				tag = itemtags.name;
-				if (tag != ''){
-					_results.push(tag);
-				}
-				tag = '';
+			var num:int = 0;
+			var tag:XML;
+			for each(tag in tagList){
+				_results.push({name: tag.name.text(), count: int(tag.count.text())});
 				num++;
-				if (num == _limit) break;
+				if (num == 50) break;
 			}
 			
 			// erase vars
 			data = null;
-			songsList = null;
+			tagList = null;
 			
 			// Finished
 			endLoad();
@@ -688,14 +675,14 @@ package com.codezen.mse.services{
 			
 			// create result XML
 			var data:XML = new XML(evt.target.data);
+			var tagList:XMLList = data.results.tagmatches.tag;
+			
+			_results = [];
 			
 			// get tags
-			var i:int;
-			_results = [];
-			for(i = 0; i < _limit; i++){
-				if(data.results.tagmatches.tag[i]){
-					_results.push( data.results.tagmatches.tag[i].name.text() );
-				}
+			var tag:XML;
+			for each(tag in tagList){
+				_results.push({name: tag.name.text(), count: int(tag.tagcount.text())});
 			}
 			
 			// dispatch complete event
