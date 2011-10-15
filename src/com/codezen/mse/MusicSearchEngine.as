@@ -9,6 +9,7 @@ package com.codezen.mse {
     import com.codezen.mse.services.LastFM;
     import com.codezen.mse.services.MusicBrainz;
     import com.codezen.mse.services.Stereomood;
+    import com.codezen.mse.services.YouTube;
     import com.codezen.util.CUtils;
     
     import flash.events.ErrorEvent;
@@ -39,6 +40,9 @@ package com.codezen.mse {
         private var albumSearch:MusicBrainz;
         private var songSearch:MusicBrainz;
 		
+		// youtube
+		private var youtubeSearch:YouTube;
+		
 		// results
 		private var _artists:Array;
 		private var _albums:Array;
@@ -46,6 +50,7 @@ package com.codezen.mse {
 		private var _tags:Array;
 		private var _moods:Array;
 		private var _mp3s:Array;
+		private var _videos:Array;
 		
 		// album info
 		private var _album:Album;
@@ -71,9 +76,15 @@ package com.codezen.mse {
 			songSearch = new MusicBrainz(_limit);
 			//moodSearch = new Stereomood();
 			bbcSearch = new BBCRadio();
+			youtubeSearch = new YouTube();
 			
 			initPluginManager();
         }
+
+		public function get videos():Array
+		{
+			return _videos;
+		}
 
 		public function get songInfo():Song
 		{
@@ -411,6 +422,20 @@ package com.codezen.mse {
 			bbcSearch.removeEventListener(Event.COMPLETE, onChart);
 			
 			_albums = bbcSearch.albumsChart;
+			
+			endLoad();
+		}
+		
+		// -------------------------- GET TOP VIDEOS ---------------------------------------
+		public function getTopVideos():void{
+			youtubeSearch.addEventListener(Event.COMPLETE, onTopVideos);
+			youtubeSearch.getTopVideos();
+		}
+		
+		private function onTopVideos(e:Event):void{
+			youtubeSearch.removeEventListener(Event.COMPLETE, onTopVideos);
+			
+			_videos = youtubeSearch.videos;
 			
 			endLoad();
 		}
