@@ -459,15 +459,12 @@ package com.codezen.mse.services{
 		}
 		
 		
-		public function getTopArtistsByTag(query:String):void{
+		public function getTopArtistsByTag(tag:String):void{
 			// reset old stuff
 			_results = [];
 			
-			// encode query
-			query = CUtils.urlEncode(query);
-			
 			//get topartists by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/1.0/tag/"+query+"/topartists.xml";
+			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag="+encodeURIComponent(tag)+"&api_key="+api_key;
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopArtistByTagLoad);
@@ -480,29 +477,26 @@ package com.codezen.mse.services{
 			
 			// create result XML
 			var data:XML = new XML(evt.target.data);
-			var songsList:XMLList = data.artist;
+			var artistList:XMLList = data.topartists.children();
 			
 			// counter
-			var num:int = 0;
-			var artist:String = '';
-			var track:String = '';
+			var artist:Artist;
 			
 			// init array
 			_results = [];
 			
-			for each(var itemArtist:XML in songsList){
-				artist = itemArtist.@name;
-				if (artist != ''){
-					_results.push({
-						artist:artist
-					});
-				}
-				artist = '';
+			var item:XML;
+			for each(item in artistList){
+				artist = new Artist();
+				artist.name = item.name.text();
+				artist.mbID = item.mbid.text();
+				artist.image = item.image[2].text();
+				_results.push(artist);
 			}
 			
 			// erase vars
 			data = null;
-			songsList = null;
+			artistList = null;
 			
 			// Finished
 			endLoad();

@@ -346,6 +346,20 @@ package com.codezen.mse {
 			endLoad();
 		}
 		
+		// ------------------------ FIND ARTIST ----------------------------------
+		public function getArtistByTag(tag:String):void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onTagArtist);
+			lastfmSearch.getTopArtistsByTag(tag);
+		}
+		
+		private function onTagArtist(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onTagArtist);
+			
+			_artists = lastfmSearch.resultArray;
+			
+			endLoad();
+		}
+		
 		// ------------------------ FIND ALBUMS ----------------------------------
 		public function findAlbum(query:String):void{
 			albumSearch.addEventListener(Event.COMPLETE, onAlbumSearch);
