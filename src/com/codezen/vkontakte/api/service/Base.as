@@ -102,13 +102,14 @@ package com.codezen.vkontakte.api.service
 			window.height = 500;
 			window.title = "Vk.com Authorization";
 			window.alwaysInFront = true;
-			window.addEventListener(Event.ACTIVATE, onWindowActivate);
+			//window.addEventListener(Event.ACTIVATE, onWindowActivate);
 			
 			// init html
 			html = new StageWebView();
 			html.stage = window.stage;
 			html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
 			html.addEventListener(LocationChangeEvent.LOCATION_CHANGE, onLocationChange);
+			html.addEventListener(Event.COMPLETE, onWindowActivate);
 			//window.addElement( html );
 			
 			// init timer
@@ -128,8 +129,9 @@ package com.codezen.vkontakte.api.service
 		}
 		
 		private function onWindowActivate(e:Event):void{
-			trace('window activate')
-			html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
+			trace('redraw viewport')
+			if(html)
+				html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
 		}
 		
 		/**
