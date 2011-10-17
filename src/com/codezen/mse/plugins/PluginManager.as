@@ -288,10 +288,11 @@ package com.codezen.mse.plugins
 			}else{ // if something was found, try to filter
 				var track:PlayrTrack;
 				for each( track in searcher.result ){
-					if( track.artist != null && track.title != null ) trace(track.artist, track.title);
+					if( track.artist != null && track.title != null ) trace(track.artist, track.title, track.totalSeconds, song.duration);
 					if( track.artist != null && track.title != null &&
 						CUtils.compareStrings(track.title.toLowerCase(), song.name.toLowerCase()) > 80 &&
-						CUtils.compareStrings(track.artist.toLowerCase(), song.artist.name.toLowerCase()) > 80 ){
+						CUtils.compareStrings(track.artist.toLowerCase(), song.artist.name.toLowerCase()) > 80 && 
+						Math.abs(track.totalSeconds - song.duration) <= 5 ){
 						_results.push(track);
 					}
 				}

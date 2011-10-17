@@ -41,6 +41,10 @@
 				}
 			}
 			
+			public function get position():Number{
+				return slider.value;
+			}
+			
 			public function set maximum(max:Number):void{
 				slider.maximum = max;
 			}
