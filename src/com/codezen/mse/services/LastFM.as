@@ -154,7 +154,7 @@ package com.codezen.mse.services{
 				song = new Song();
 				song.number = num++;
 				song.name = item.name.text();
-				song.duration = dur;
+				song.duration = dur * 1000;
 				song.durationText = duration;
 				song.artist = new Artist();
 				song.artist.mbID = item.artist.mbid.text();
