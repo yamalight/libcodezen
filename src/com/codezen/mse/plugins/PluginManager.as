@@ -104,7 +104,8 @@ package com.codezen.mse.plugins
 			var cFile:File;
 			for (var i:int = 0; i < contents.length; i++) {
 				cFile = contents[i] as File;
-				_loadQueue.push(cFile.url);
+				// check extension
+				if(cFile.extension == "swf") _loadQueue.push(cFile.url);
 				//loadPluginFromPath(cFile.url);
 			}
 			
