@@ -318,7 +318,18 @@ package com.codezen.mse {
 			endLoad();
 		}
 		
-		
+		// --------------------------FIND SONGS BY TAG ----------------------------------
+		public function findSongsByTag(t:String):void{
+			lastfmSearch.addEventListener(Event.COMPLETE, onSongTagSearch);
+			lastfmSearch.getTopTracksByTag(t);
+		}
+		private function onSongTagSearch(e:Event):void{
+			lastfmSearch.removeEventListener(Event.COMPLETE, onSongTagSearch);
+			
+			_songs = lastfmSearch.resultArray;
+			
+			endLoad();
+		}
 		
 		// --------------------------ARTIST ALBUMS ----------------------------------
 		public function getArtistAlbums(a:Artist):void{

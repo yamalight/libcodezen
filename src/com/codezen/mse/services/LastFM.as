@@ -10,6 +10,8 @@ package com.codezen.mse.services{
 	import flash.events.IOErrorEvent;
 	import flash.net.URLLoaderDataFormat;
 	
+	import mx.utils.ObjectUtil;
+	
 	public final class LastFM extends WebWorker
 	{
 		/**
@@ -173,15 +175,12 @@ package com.codezen.mse.services{
 		
 		// -------------------------------------------------
 		
-		public function getTopTracksByTag(query:String):void{
+		public function getTopTracksByTag(tag:String):void{
 			// reset old stuff
 			_results = [];
 			
-			// encode query
-			query = CUtils.urlEncode(query);
-			
 			//get toptracks by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/1.0/tag/"+query+"/toptracks.xml";
+			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=tag.gettoptracks&limit=100&tag="+encodeURIComponent(tag)+"&api_key="+api_key;
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTracksSearchLoad);
@@ -193,13 +192,8 @@ package com.codezen.mse.services{
 			myLoader.removeEventListener(Event.COMPLETE, onTracksSearchLoad);
 			
 			// create result XML
-			var data:XML = new XML(evt.target.data);
-			var songsList:XMLList = data.track;
-			
-			// counter
-			var num:int = 0;
-			var artist:String = '';
-			var track:String = '';
+			var data:XML = new XML(myLoader.data);
+			var songsList:XMLList = data.toptracks.track;
 			
 			// init array
 			_results = [];
@@ -208,31 +202,17 @@ package com.codezen.mse.services{
 			setStatus('Parsing search results..');
 			
 			// counter
-			num = 0;
-			var mbid:String = '';
+			var s:Song;
 			
 			// parse list
 			for each(var item:XML in songsList){
-				track = item.@name;
-				artist = item.children()[0] != null ? item.children()[0].@name : '';
-				mbid = item.children()[0].mbid != null ? item.children()[0].mbid : '';
+				s = new Song();
+				s.name = item.name;
+				s.artist = new Artist();
+				s.artist.name = item.artist.name;
+				s.artist.mbID = item.artist.mbid;
 				
-				if (artist != '' && track != ''){
-					_results.push({id:num,
-						num:num,
-						mbid:mbid,
-						artist:artist,
-						album:'',
-						title:track,
-						name:artist+" - "+track,
-						dur:0,
-						dur_link:0,
-						url:'findme'});
-				}
-				artist = '';
-				track = '';
-				mbid = '';
-				num++;
+				_results.push(s);
 			}
 			
 			// erase vars
@@ -511,9 +491,6 @@ package com.codezen.mse.services{
 		public function getArtistInfo(artist:Artist):void{
 			_artist = artist;
 			
-			trace( _artist.name );
-			trace( _artist.mbID );
-			
 			// Generate Last.FM url
 			var sim_url:String = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo";
 			if(_artist.mbID == null || _artist.mbID.length < 1){
@@ -537,7 +514,7 @@ package com.codezen.mse.services{
 		 * On recieve info search data from last.fm
 		 **/
 		private function onArtistInfoLoad(evt:Event):void{
-			evt.target.removeEventListener(Event.COMPLETE, onArtistInfoLoad);
+			myLoader.removeEventListener(Event.COMPLETE, onArtistInfoLoad);
 			
 			// create result XML
 			var data:XML = new XML(evt.target.data);
@@ -546,6 +523,11 @@ package com.codezen.mse.services{
 			// save name
 			_artist.name = data.artist.name;
 			
+			// save mbid
+			if(_artist.mbID == null || _artist.mbID.length < 1)
+				_artist.mbID = data.artist.mbid.text();
+			trace(_artist.mbID);
+			
 			// save image url
 			_artist.image = data.artist.image[2];
 			
@@ -553,15 +535,18 @@ package com.codezen.mse.services{
 			_artist.tags = [];
 			for(i = 0; i < _limit; i++){
 				if(data.artist.tags.tag[i]){
-					_artist.tags[i] = data.artist.tags.tag.name.children()[i];//tag[i].name.;
+					_artist.tags.push({name: data.artist.tags.tag.name.children()[i], count: 0.4});
 				}
 			}
 			
 			// get similar
 			_artist.similar = [];
+			var sart:Artist;
 			for(i = 0; i < _limit; i++){
 				if(data.artist.similar.artist[i]){
-					_artist.similar[i] = data.artist.similar.artist.name.children()[i];//tag[i].name.;
+					sart = new Artist();
+					sart.name = data.artist.similar.artist.name.children()[i];
+					_artist.similar.push(sart);//tag[i].name.;
 				}
 			}
 			
