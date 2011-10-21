@@ -59,7 +59,6 @@
 	
 	<!-- loading indicator -->
 	<s:HGroup horizontalCenter="0" verticalCenter="0" id="loading_wnd" verticalAlign="middle" horizontalAlign="center">
-		<loader:LoadingIndicator isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
 		<s:Label text="Загрузка..." 
 				 verticalAlign="middle" textAlign="center" color="#FFFFFF"
 				 fontFamily="Gothic" fontSize="20" fontWeight="bold" 
@@ -135,7 +134,7 @@
 		<!-- sound tracks -->
 		<s:BorderContainer verticalCenter="80" left="0" backgroundColor="#151515" 
 						   visible="{isSndSwitch}" id="player_sndselect"
-						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="90" height="50"
+						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="110" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
 			<s:ButtonBar dataProvider="{sndNames}" labelField="label" color="#FFFFFF" chromeColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
 						 maxWidth="100" id="sndBar" change="sndBar_itemClickHandler(event)"

@@ -1,3 +1,4 @@
+import com.codezen.component.loader.LoadingIndicator;
 import com.codezen.mse.playr.PlaylistManager;
 import com.codezen.mse.playr.Playr;
 import com.codezen.mse.playr.PlayrEvent;
@@ -197,7 +198,7 @@ private function onCreationComplete():void{
 		player_controls.removeElement(fullscreen_btn);//.width = 0;
 		player_controls.removeElement(player_volume);//.width = 0;
 		player_controls.removeElement(mute_btn);//.width = 0;
-		loading_wnd.removeElement(loading_spin);
+		//loading_wnd.removeElement(loading_spin);
 		
 		// resize sub and sound
 		player_sndselect.width = player_subselect.width = 150;
@@ -205,6 +206,14 @@ private function onCreationComplete():void{
 		
 		//player_data.removeElement(player_subselect);
 		//player_data.removeElement(player_sndselect);
+	}else{
+		var ind:LoadingIndicator = new LoadingIndicator();
+		ind.setStyle("backgroundAlpha", 0);
+		ind.setStyle("borderAlpha", 0);
+		ind.colorOverlay = 0xFFFFFF;
+		ind.isLoading = true;
+		loading_wnd.addElementAt(ind, 0);
+		//<loader:LoadingIndicator isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
 	}
 	
 	this.addEventListener(Event.ADDED_TO_STAGE, initStagePlayer);
