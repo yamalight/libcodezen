@@ -195,8 +195,16 @@ package com.codezen.mse {
 		 */
         private function onLFMTag(e:Event):void{
 			lastfmSearch.removeEventListener(Event.COMPLETE, onLFMTag);
+			lastfmSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_tags = lastfmSearch.resultArray;
+			
+			var tag:Object;
+			for each(tag in _tags){
+				tag.count = 0.4;
+			}
+			
+			_tags.sortOn("name");
 			
 			_searchCounter--;
 			if(_searchCounter == 0) endLoad();
@@ -209,6 +217,7 @@ package com.codezen.mse {
 		 */
         private function onMBArtist(e:Event):void{
 			artistSearch.removeEventListener(Event.COMPLETE, onMBArtist);
+			artistSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_artists = artistSearch.artistsList;
 			
@@ -223,6 +232,7 @@ package com.codezen.mse {
 		 */
         private function onMBSong(e:Event):void{
 			songSearch.removeEventListener(Event.COMPLETE, onMBSong);
+			songSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_songs = songSearch.tracksList;
 			
@@ -237,6 +247,7 @@ package com.codezen.mse {
 		 */
         private function onMBAlbums(e:Event):void{
 			albumSearch.removeEventListener(Event.COMPLETE, onMBAlbums);
+			albumSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_albums = albumSearch.albumsList;
 			
@@ -251,6 +262,7 @@ package com.codezen.mse {
 		 */
 		private function onMood(e:Event):void{
 			moodSearch.removeEventListener(Event.COMPLETE, onMood);
+			moodSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_moods = moodSearch.moodsList;
 			
