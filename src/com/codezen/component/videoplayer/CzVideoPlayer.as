@@ -579,6 +579,7 @@ private function setSubtitles(time:Number):void{
  */
 private function setupListeners():void{
 	// assign event listeners
+	trace('assing events');
 	
 	// sv
 	if(svAvailable){
@@ -595,7 +596,11 @@ private function setupListeners():void{
 	this.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 	
 	// keyboard stuff
-	video_player.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
+	if(FlexGlobals.topLevelApplication.nativeApplication){
+		FlexGlobals.topLevelApplication.nativeApplication.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
+	}else{
+		this.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
+	}
 	
 	// statuses
 	ns.addEventListener(NetStatusEvent.NET_STATUS, onVideoState);
