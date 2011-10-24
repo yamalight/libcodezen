@@ -293,7 +293,7 @@ package com.codezen.mse.plugins
 					if( track.artist != null && track.title != null &&
 						CUtils.compareStrings(track.title.toLowerCase(), song.name.toLowerCase()) > 80 &&
 						CUtils.compareStrings(track.artist.toLowerCase(), song.artist.name.toLowerCase()) > 80 && 
-						Math.abs(track.totalSeconds - (song.duration/1000)) <= 10 ){
+						( song.duration < 10 || Math.abs(track.totalSeconds - (song.duration/1000)) <= 10 ) ){
 						_results.push(track);
 					}
 				}
