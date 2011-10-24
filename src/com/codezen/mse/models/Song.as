@@ -1,4 +1,6 @@
 package com.codezen.mse.models {
+	import com.codezen.mse.playr.PlayrTrack;
+
     public class Song {
         public var mbID:String;
 		[Bindable]
@@ -12,5 +14,8 @@ package com.codezen.mse.models {
 		public var album:Album;
 		
 		public var tags:Array;
+		
+		// linked track
+		public var track:PlayrTrack;
     }
 }
