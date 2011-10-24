@@ -52,6 +52,7 @@ package com.codezen.util
 		public static function cleanMusicQuery(s:String):String{
 			s = s.replace(/\(.*?\)/g, "");
 			s = s.replace(/&/g, "");
+			s = s.replace(/'/g, " ");
 			return s;
 		}
 		

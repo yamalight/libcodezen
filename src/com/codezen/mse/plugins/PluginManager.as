@@ -240,6 +240,7 @@ package com.codezen.mse.plugins
 			usedPlugins.push(num);
 			
 			query = CUtils.cleanMusicQuery(song.artist.name+" "+song.name);
+			trace('query: '+query);
 			
 			var searcher:ISearchProvider = _plugins[num] as ISearchProvider;
 			searcher.addEventListener(Event.COMPLETE, onSongSearchComplete);
@@ -289,10 +290,31 @@ package com.codezen.mse.plugins
 			}else{ // if something was found, try to filter
 				var track:PlayrTrack;
 				for each( track in searcher.result ){
-					if( track.artist != null && track.title != null ) trace(track.artist, track.title, track.totalSeconds, song.duration);
+					if( track.artist != null && track.title != null ){
+						trace(track.artist, 
+							track.title, 
+							track.totalSeconds, 
+							(song.duration/1000), 
+							Math.abs(track.totalSeconds - (song.duration/1000)),
+							CUtils.compareStrings(
+								CUtils.convertHTMLEntities(track.title.toLowerCase()), 
+								song.name.toLowerCase()
+							),
+							CUtils.compareStrings(
+								CUtils.convertHTMLEntities(track.artist.toLowerCase()), 
+								song.artist.name.toLowerCase()
+							)
+						);
+					}
 					if( track.artist != null && track.title != null &&
-						CUtils.compareStrings(track.title.toLowerCase(), song.name.toLowerCase()) > 80 &&
-						CUtils.compareStrings(track.artist.toLowerCase(), song.artist.name.toLowerCase()) > 80 && 
+						CUtils.compareStrings(
+							CUtils.convertHTMLEntities(track.title.toLowerCase()), 
+							song.name.toLowerCase()
+						) > 80 &&
+						CUtils.compareStrings(
+							CUtils.convertHTMLEntities(track.artist.toLowerCase()), 
+							song.artist.name.toLowerCase()
+						) > 80 && 
 						( song.duration < 10 || Math.abs(track.totalSeconds - (song.duration/1000)) <= 10 ) ){
 						_results.push(track);
 					}
