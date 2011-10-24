@@ -63,6 +63,7 @@ package com.codezen.mse {
 		
 		// counter 
 		private var _searchCounter:int;
+		private var _globalSearch:Boolean;
 		
 		// limit
 		private var _limit:int = 10;
@@ -70,6 +71,8 @@ package com.codezen.mse {
 		private var _song2find:Song;
 
         public function MusicSearchEngine() {
+			_globalSearch = false;
+			
 			artistSearch = new MusicBrainz(_limit);
 			albumSearch = new MusicBrainz(_limit);
 			lastfmSearch = new LastFM(_limit);
@@ -77,6 +80,13 @@ package com.codezen.mse {
 			//moodSearch = new Stereomood();
 			bbcSearch = new BBCRadio();
 			youtubeSearch = new YouTube();
+			
+			artistSearch.addEventListener(ErrorEvent.ERROR, onError);
+			albumSearch.addEventListener(ErrorEvent.ERROR, onError);
+			lastfmSearch.addEventListener(ErrorEvent.ERROR, onError);
+			songSearch.addEventListener(ErrorEvent.ERROR, onError);
+			bbcSearch.addEventListener(ErrorEvent.ERROR, onError);
+			youtubeSearch.addEventListener(ErrorEvent.ERROR, onError);
 			
 			initPluginManager();
         }
@@ -142,6 +152,8 @@ package com.codezen.mse {
             // test if it's complex query
             // --
 			
+			_globalSearch = true;
+			
 			// cleanup old stuff
 			_artists = [];
 			_albums = [];
@@ -154,22 +166,18 @@ package com.codezen.mse {
 
             // find matching artists
             artistSearch.addEventListener(Event.COMPLETE, onMBArtist);
-			artistSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             artistSearch.findArtist(query);
 
             // find matching albums
             albumSearch.addEventListener(Event.COMPLETE, onMBAlbums);
-			albumSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             albumSearch.findAlbums(query);
 
             // find matching songs
             songSearch.addEventListener(Event.COMPLETE, onMBSong);
-			songSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             songSearch.findSongs(query);
 
             // find matching tags
             lastfmSearch.addEventListener(Event.COMPLETE, onLFMTag);
-			lastfmSearch.addEventListener(ErrorEvent.ERROR, onQueryError);
             lastfmSearch.findTags(query);
 			
 			// find moods
@@ -177,16 +185,19 @@ package com.codezen.mse {
 			//moodSearch.findMood(query);
         }
 		
-		// --------------------------------- QUERY ERRORS -------------------------------
+		// --------------------------------- GENERIC ERRORS -------------------------------
 		
-		private function onQueryError(e:Event):void{
-			e.target.removeEventListener(ErrorEvent.ERROR, onQueryError);
-			
-			_searchCounter--;
-			if(_searchCounter == 0) endLoad();
+		private function onError(e:ErrorEvent):void{
+			if(_globalSearch){
+				_searchCounter--;
+				if(_searchCounter == 0){
+					_globalSearch = false;
+					endLoad();
+				}
+			}else{
+				dispatchError(e.text);
+			}
 		}
-		
-		// --------------------------------- -------------------------------
 		
 		/**
 		 * LastFM Tags results 
@@ -195,7 +206,6 @@ package com.codezen.mse {
 		 */
         private function onLFMTag(e:Event):void{
 			lastfmSearch.removeEventListener(Event.COMPLETE, onLFMTag);
-			lastfmSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_tags = lastfmSearch.resultArray;
 			
@@ -207,7 +217,10 @@ package com.codezen.mse {
 			_tags.sortOn("name");
 			
 			_searchCounter--;
-			if(_searchCounter == 0) endLoad();
+			if(_searchCounter == 0){
+				_globalSearch = false;
+				endLoad();
+			}
         }
 
 		/**
@@ -217,12 +230,14 @@ package com.codezen.mse {
 		 */
         private function onMBArtist(e:Event):void{
 			artistSearch.removeEventListener(Event.COMPLETE, onMBArtist);
-			artistSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_artists = artistSearch.artistsList;
 			
 			_searchCounter--;
-			if(_searchCounter == 0) endLoad();
+			if(_searchCounter == 0){
+				_globalSearch = false;
+				endLoad();
+			}
         }
 
 		/**
@@ -232,12 +247,14 @@ package com.codezen.mse {
 		 */
         private function onMBSong(e:Event):void{
 			songSearch.removeEventListener(Event.COMPLETE, onMBSong);
-			songSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_songs = songSearch.tracksList;
 			
 			_searchCounter--;
-			if(_searchCounter == 0) endLoad();
+			if(_searchCounter == 0){
+				_globalSearch = false;
+				endLoad();
+			}
         }
 
 		/**
@@ -247,12 +264,14 @@ package com.codezen.mse {
 		 */
         private function onMBAlbums(e:Event):void{
 			albumSearch.removeEventListener(Event.COMPLETE, onMBAlbums);
-			albumSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_albums = albumSearch.albumsList;
 			
 			_searchCounter--;
-			if(_searchCounter == 0) endLoad();
+			if(_searchCounter == 0){
+				_globalSearch = false;
+				endLoad();
+			}
         }
 		
 		/**
@@ -262,12 +281,14 @@ package com.codezen.mse {
 		 */
 		private function onMood(e:Event):void{
 			moodSearch.removeEventListener(Event.COMPLETE, onMood);
-			moodSearch.removeEventListener(ErrorEvent.ERROR, onQueryError);
 			
 			_moods = moodSearch.moodsList;
 			
 			_searchCounter--;
-			if(_searchCounter == 0) endLoad();
+			if(_searchCounter == 0){
+				_globalSearch = false;
+				endLoad();
+			}
 		}
 		
 		// --------------------------------- ARTIST INFO -------------------------------
