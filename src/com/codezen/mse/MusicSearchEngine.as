@@ -556,11 +556,23 @@ package com.codezen.mse {
 		
 		// -------------------------- GET TOP MOODS ---------------------------------------
 		public function getTopMoods():void{
+			moodSearch.addEventListener(Event.COMPLETE, onMoods);
+			moodSearch.fetchMoods();
+		}
+		
+		private function onMoods(e:Event):void{
+			moodSearch.removeEventListener(Event.COMPLETE, onMoods);
+			
 			_moods = moodSearch.moodsList;
+			
 			endLoad();
 		}
 		
-		public function getMoodPlaylist(m:Mood):void{
+		public function findMood(q:String):Array{
+			return moodSearch.findMood(q);
+		}
+		
+		public function findSongsByMood(m:Mood):void{
 			moodSearch.addEventListener(Event.COMPLETE, onMoodPlaylist);
 			moodSearch.getMoodSongs(m);
 		}

@@ -18,7 +18,6 @@ package com.codezen.mse.services
 	public final class Stereomood extends WebWorker
 	{
 		private var _moodsList:Array;
-		private var _moodsFiltered:Array;
 		private var _songs:Array;
 		
 		private const CYCLE_LIMIT:int = 5;
@@ -34,11 +33,6 @@ package com.codezen.mse.services
 		public function get songs():Array
 		{
 			return _songs;
-		}
-
-		public function get moodsFiltered():Array
-		{
-			return _moodsFiltered;
 		}
 
 		public function get moodsList():Array
@@ -101,17 +95,17 @@ package com.codezen.mse.services
 			}
 		}
 		
-		public function findMood(query:String):void{
-			_moodsFiltered = [];
+		public function findMood(query:String):Array{
+			var moodsFiltered:Array = [];
 			
 			var m:Mood;
 			for each(m in _moodsList){
 				if(m.name.toLowerCase().indexOf(query.toLowerCase()) != -1){
-					_moodsFiltered.push(m);
+					moodsFiltered.push(m);
 				}
 			}
 			
-			endLoad();
+			return moodsFiltered; 
 		}
 		
 		public function getMoodSongs(m:Mood):void{
