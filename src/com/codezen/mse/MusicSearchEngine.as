@@ -2,6 +2,7 @@ package com.codezen.mse {
     import com.codezen.helper.Worker;
     import com.codezen.mse.models.Album;
     import com.codezen.mse.models.Artist;
+    import com.codezen.mse.models.Mood;
     import com.codezen.mse.models.Song;
     import com.codezen.mse.playr.PlayrTrack;
     import com.codezen.mse.plugins.PluginManager;
@@ -77,7 +78,7 @@ package com.codezen.mse {
 			albumSearch = new MusicBrainz(_limit);
 			lastfmSearch = new LastFM(_limit);
 			songSearch = new MusicBrainz(_limit);
-			//moodSearch = new Stereomood();
+			moodSearch = new Stereomood();
 			bbcSearch = new BBCRadio();
 			youtubeSearch = new YouTube();
 			
@@ -549,6 +550,27 @@ package com.codezen.mse {
 			youtubeSearch.removeEventListener(Event.COMPLETE, onVideos);
 			
 			_videos = youtubeSearch.videos;
+			
+			endLoad();
+		}
+		
+		// -------------------------- GET TOP MOODS ---------------------------------------
+		public function getTopMoods():void{
+			_moods = moodSearch.moodsList;
+			endLoad();
+		}
+		
+		public function getMoodPlaylist(m:Mood):void{
+			moodSearch.addEventListener(Event.COMPLETE, onMoodPlaylist);
+			moodSearch.getMoodSongs(m);
+		}
+		
+		private function onMoodPlaylist(e:Event):void{
+			moodSearch.removeEventListener(Event.COMPLETE, onMoodPlaylist);
+			
+			_songs = moodSearch.songs;
+			
+			trace(ObjectUtil.toString(_songs));
 			
 			endLoad();
 		}
