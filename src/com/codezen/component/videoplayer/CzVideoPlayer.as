@@ -1,4 +1,3 @@
-import com.codezen.component.loader.LoadingIndicator;
 import com.codezen.mse.playr.PlaylistManager;
 import com.codezen.mse.playr.Playr;
 import com.codezen.mse.playr.PlayrEvent;
@@ -28,7 +27,6 @@ import flash.utils.Timer;
 import mx.collections.ArrayCollection;
 import mx.core.FlexGlobals;
 import mx.events.FlexEvent;
-import mx.utils.ObjectUtil;
 
 import spark.events.DropDownEvent;
 
@@ -207,12 +205,12 @@ private function onCreationComplete():void{
 		//player_data.removeElement(player_subselect);
 		//player_data.removeElement(player_sndselect);
 	}else{
-		var ind:LoadingIndicator = new LoadingIndicator();
-		ind.setStyle("backgroundAlpha", 0);
-		ind.setStyle("borderAlpha", 0);
-		ind.colorOverlay = 0xFFFFFF;
-		ind.isLoading = true;
-		loading_wnd.addElementAt(ind, 0);
+		//var ind:LoadingIndicator = new LoadingIndicator();
+		//ind.setStyle("backgroundAlpha", 0);
+		//ind.setStyle("borderAlpha", 0);
+		//ind.colorOverlay = 0xFFFFFF;
+		//ind.isLoading = true;
+		//loading_wnd.addElementAt(ind, 0);
 		//<loader:LoadingIndicator isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
 	}
 	
@@ -401,13 +399,15 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 private function onSoundStream(e:PlayrEvent):void{
 	soundPercent = e.progress;
 	sound_loading_status.text = "Загрузка звуковой дорожки.. " + int( soundPercent/((seekOffset+ns.time)/totalDuration + 0.1) * 100 ) + "%";
-	if( firstSndPlay && soundPercent >= ( (seekOffset+ns.time)/totalDuration + 0.1) ){
+	if( firstSndPlay && soundPercent >= ( (seekOffset+ns.time)/totalDuration + 0.1)  ){
 		firstSndPlay = false;
 		loading_status_wnd.visible = false;
 		togglePlayPause();
 	}
 	if(soundPercent == 1){
 		soundPlayer.removeEventListener(PlayrEvent.STREAM_PROGRESS, onSoundStream);
+		firstSndPlay = false;
+		loading_status_wnd.visible = false;
 	}
 }
 
@@ -590,13 +590,16 @@ private function setupListeners():void{
 	this.addEventListener(Event.ENTER_FRAME, onPlayerEnterFrame);
 	// mouse stuff
 	this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseClick);
-	this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-	this.doubleClickEnabled = true;
-	this.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
-	this.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+	// add mouse events if it's not mobile
+	if( !_isMobile ){
+		this.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+		this.doubleClickEnabled = true;
+		this.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+		this.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+	}
 	
 	// keyboard stuff
-	if(FlexGlobals.topLevelApplication.nativeApplication){
+	if(FlexGlobals.topLevelApplication.hasOwnProperty("nativeApplication")){
 		FlexGlobals.topLevelApplication.nativeApplication.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
 	}else{
 		this.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
@@ -757,6 +760,11 @@ private function onMouseMove(e:Event):void{
  * 
  */
 private function onMouseClick(e:Event):void{
+	if(_isMobile && !player_controls.visible){
+		onMouseMove(e);
+		return;
+	}
+	
 	if( !(this.mouseY > (this.parent.height - 36) || 
 		(player_subselect.contentMouseX >= 0 && player_subselect.contentMouseY >= 0 && 
 			player_subselect.contentMouseX <= player_subselect.width &&
@@ -818,7 +826,7 @@ private function onPlayerEnterFrame(e:Event):void{
 			//trace('delta: '+delta, ' vid: '+(seekOffset+ns.time), ' sound: '+soundPlayer.currentSeconds);
 			soundPlayer.scrobbleTo( (seekOffset+ns.time)*1000 );
 		}
-		if(!firstSndPlay && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05 )  ){
+		if(!firstSndPlay && soundPercent != 1 && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05 )  ){
 			togglePlayPause(true);
 			firstSndPlay = true;
 			loading_status_wnd.visible = true;
@@ -860,6 +868,7 @@ private function metaDataHandler(infoObject:Object):void {
 		
 		// seek if already watched
 		if( startPos > -1 ){
+			if( Math.abs(totalDuration-startPos) < 60 ) startPos -= 60;
 			video_progress.slider.value = startPos;
 			onSeek(null);
 		}
@@ -886,7 +895,7 @@ private function metaDataHandler(infoObject:Object):void {
 			soundPlayer.play();
 			soundPlayer.scrobbleTo(seekOffset*1000);
 			//soundChannel = soundTrack.play(seekOffset*1000);
-			if(soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05)  ){
+			if(soundPercent != 1 && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05)  ){
 				togglePlayPause(true);
 				firstSndPlay = true;
 				loading_status_wnd.visible = true;
@@ -949,7 +958,7 @@ private function onSeek(e:Event):void{
  * 
  */
 private function togglePlayPause(ignoreBuffer:Boolean = false):void{
-	if( !ignoreBuffer && soundPlayer != null && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05)  ) return; 
+	if( !ignoreBuffer && soundPlayer != null && soundPercent != 1 && soundPercent < ( (seekOffset+ns.time)/totalDuration + 0.05)  ) return; 
 	playpause.select = playState;
 	playState = !playState;
 	if( soundPlayer != null && soundPlayer.playlist.length > 0 ) {

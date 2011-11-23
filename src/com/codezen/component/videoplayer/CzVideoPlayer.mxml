@@ -122,10 +122,10 @@
 		<!-- subtitles -->
 		<s:BorderContainer verticalCenter="80" right="0" backgroundColor="#151515" 
 						   visible="{isSubSwitch}" id="player_subselect"
-						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="110" height="50"
+						   cornerRadius="4" borderColor="#494949" alpha="0.8" width="130" height="50"
 						   showEffect="{showEff}" hideEffect="{hideEff}">
 			<s:ButtonBar dataProvider="{subNames}" labelField="label" color="#FFFFFF" chromeColor="#1B1B1B" height="30" y="17" horizontalCenter="0"
-						 maxWidth="100" id="subBar" change="subBar_itemClickHandler(event)"
+						 maxWidth="120" id="subBar" change="subBar_itemClickHandler(event)"
 						 fontSize="13">
 			</s:ButtonBar>
 			<s:Label text="Сабы" fontSize="14" color="#FFFFFF" horizontalCenter="0" y="2"/>
@@ -199,6 +199,7 @@
 	<!-- sound loading indicator -->
 	<s:BorderContainer width="100%" height="100%" backgroundColor="#000000" backgroundAlpha="0.4" id="loading_status_wnd" visible="false">
 		<s:BorderContainer width="350" height="100" backgroundColor="#151515" cornerRadius="4" borderColor="#494949" verticalCenter="0" horizontalCenter="0">
+			<s:Label color="#FFFFFF" fontWeight="bold" text="[x]" click="{loading_status_wnd.visible = false;}" top="2" right="2" buttonMode="true" useHandCursor="true" />
 			<s:RichText color="#FFFFFF" fontWeight="bold" fontFamily="Gothic" id="sound_loading_status" verticalAlign="middle" horizontalCenter="0" verticalCenter="0" />
 		</s:BorderContainer>
 	</s:BorderContainer>
