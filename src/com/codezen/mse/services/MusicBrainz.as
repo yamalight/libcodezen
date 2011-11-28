@@ -7,6 +7,8 @@
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
+	import flash.events.TimerEvent;
+	import flash.utils.Timer;
 	import flash.utils.escapeMultiByte;
 	
 	import mx.utils.ObjectUtil;
@@ -29,6 +31,9 @@
 	 */
 	public final class MusicBrainz extends WebWorker
 	{
+		// delay timer
+		private var delayTimer:Timer;
+		
 		// result data
 		private var artists:Array;
 		private var tracks:Array;
@@ -59,6 +64,10 @@
 		public function MusicBrainz(limit:int = 5)
 		{
 			super();
+			
+			urlRequest.requestHeaders['User-Agent'] = "MielophoneApp";
+			
+			delayTimer = new Timer(1000, 1);
 			
 			searchLimit = limit;
 		}
@@ -116,11 +125,16 @@
 			// Report status
 			setStatus('Begining artist search..');
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onArtistLoad);
-			myLoader.load(urlRequest);
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onArtistLoad);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**
@@ -181,11 +195,16 @@
 			// Generate url
 			var search_url:String = albumsSearchURL.replace("%query%",album);
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onAlbumsSearchLoad);
-			myLoader.load(urlRequest);
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onAlbumsSearchLoad);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**
@@ -291,11 +310,16 @@
 			
 			trace(search_url);
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onAlbumsByNameSearchLoad);
-			myLoader.load(urlRequest);
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onAlbumsByNameSearchLoad);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**
@@ -387,11 +411,16 @@
 			// Report status
 			setStatus('Begining tracks search..');
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onSongsLoad);
-			myLoader.load(urlRequest);
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onSongsLoad);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**
@@ -482,11 +511,16 @@
 				trace('requesting one more time');
 			}
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onAlbumsLoad);
-			myLoader.load(urlRequest);
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onAlbumsLoad);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**
@@ -603,11 +637,16 @@
 			// Report status
 			setStatus('Begining tracks search..');
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onTracksLoad);
-			myLoader.load(urlRequest);
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onTracksLoad);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**
@@ -697,15 +736,21 @@
 			
 			//trace(search_url);
 			
-			// from urlrequest and urlloader
-			urlRequest.url = search_url;
-			// add event listener and load request
-			myLoader.addEventListener(Event.COMPLETE, onCoverLoad);
-			// remove generic event catcher
-			myLoader.removeEventListener(IOErrorEvent.IO_ERROR, onError);
-			// add special event catcher
-			myLoader.addEventListener(IOErrorEvent.IO_ERROR, onAlbumsIOError);
-			myLoader.load(urlRequest);
+			
+			// delay execution
+			delayTimer.addEventListener(TimerEvent.TIMER_COMPLETE, function fa():void{
+				delayTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, fa);
+				// from urlrequest and urlloader
+				urlRequest.url = search_url;
+				// add event listener and load request
+				myLoader.addEventListener(Event.COMPLETE, onCoverLoad);
+				// remove generic event catcher
+				myLoader.removeEventListener(IOErrorEvent.IO_ERROR, onError);
+				// add special event catcher
+				myLoader.addEventListener(IOErrorEvent.IO_ERROR, onAlbumsIOError);
+				myLoader.load(urlRequest);
+			}, false, 0, true);
+			delayTimer.start();
 		}
 		
 		/**

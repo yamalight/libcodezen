@@ -40,7 +40,7 @@ package com.codezen.mse {
         private var artistSearch:MusicBrainz;
         private var albumSearch:MusicBrainz;
         private var songSearch:MusicBrainz;
-		
+
 		// youtube
 		private var youtubeSearch:YouTube;
 		
@@ -166,24 +166,24 @@ package com.codezen.mse {
 			_searchCounter = 4;
 
             // find matching artists
-            artistSearch.addEventListener(Event.COMPLETE, onMBArtist);
+			artistSearch.addEventListener(Event.COMPLETE, onMBArtist);
             artistSearch.findArtist(query);
 
             // find matching albums
-            albumSearch.addEventListener(Event.COMPLETE, onMBAlbums);
+			albumSearch.addEventListener(Event.COMPLETE, onMBAlbums);
             albumSearch.findAlbums(query);
 
             // find matching songs
-            songSearch.addEventListener(Event.COMPLETE, onMBSong);
+			songSearch.addEventListener(Event.COMPLETE, onMBSong);
             songSearch.findSongs(query);
 
             // find matching tags
-            lastfmSearch.addEventListener(Event.COMPLETE, onLFMTag);
+			lastfmSearch.addEventListener(Event.COMPLETE, onLFMTag);
             lastfmSearch.findTags(query);
 			
 			// find moods
-			//moodSearch.addEventListener(Event.COMPLETE, onMood);
-			//moodSearch.findMood(query);
+			moodSearch.addEventListener(Event.COMPLETE, onMood);
+			moodSearch.findMood(query);
         }
 		
 		// --------------------------------- GENERIC ERRORS -------------------------------
@@ -196,6 +196,8 @@ package com.codezen.mse {
 					endLoad();
 				}
 			}else{
+				//cleanEventListeners(e.target as Worker,
+				trace(e.target.toString());
 				dispatchError(e.text);
 			}
 		}
@@ -586,6 +588,7 @@ package com.codezen.mse {
 			
 			endLoad();
 		}
+		
 		
 		// ---------------------- PLUGINS STUFF --------------------------------
 		private function initPluginManager():void{
