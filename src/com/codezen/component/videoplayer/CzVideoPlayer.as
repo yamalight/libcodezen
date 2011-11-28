@@ -1,3 +1,4 @@
+import com.codezen.component.loader.LoadingIndicator;
 import com.codezen.mse.playr.PlaylistManager;
 import com.codezen.mse.playr.Playr;
 import com.codezen.mse.playr.PlayrEvent;
@@ -205,12 +206,13 @@ private function onCreationComplete():void{
 		//player_data.removeElement(player_subselect);
 		//player_data.removeElement(player_sndselect);
 	}else{
-		//var ind:LoadingIndicator = new LoadingIndicator();
-		//ind.setStyle("backgroundAlpha", 0);
-		//ind.setStyle("borderAlpha", 0);
-		//ind.colorOverlay = 0xFFFFFF;
-		//ind.isLoading = true;
-		//loading_wnd.addElementAt(ind, 0);
+		var ind:LoadingIndicator = new LoadingIndicator();
+		ind.setStyle("backgroundAlpha", 0);
+		ind.setStyle("borderAlpha", 0);
+		ind.colorOverlay = 0xFFFFFF;
+		ind.isLoading = true;
+		ind.width = ind.height = 24;
+		loading_wnd.addElementAt(ind, 0);
 		//<loader:LoadingIndicator isLoading="true" id="loading_spin" colorOverlay="#FFFFFF" />
 	}
 	
@@ -602,7 +604,7 @@ private function setupListeners():void{
 	if(FlexGlobals.topLevelApplication.hasOwnProperty("nativeApplication")){
 		FlexGlobals.topLevelApplication.nativeApplication.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
 	}else{
-		this.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
+		stage.addEventListener(KeyboardEvent.KEY_UP, onPlayerKey);
 	}
 	
 	// statuses
