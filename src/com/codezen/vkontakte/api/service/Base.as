@@ -102,6 +102,7 @@ package com.codezen.vkontakte.api.service
 			window.height = 500;
 			window.title = "Vk.com Authorization";
 			window.alwaysInFront = true;
+			window.addEventListener(Event.CLOSE, onWindowClose);
 			//window.addEventListener(Event.ACTIVATE, onWindowActivate);
 			
 			// init html
@@ -132,6 +133,10 @@ package com.codezen.vkontakte.api.service
 			trace('redraw viewport')
 			if(html)
 				html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
+		}
+		
+		private function onWindowClose(e:Event):void{
+			if(!initialized) dispatchError("Auth error");
 		}
 		
 		/**
@@ -192,7 +197,7 @@ package com.codezen.vkontakte.api.service
 				html = null;
 				windowTimer = null;
 				
-				dispatchError("Login error!");
+				//dispatchError("Login error!");
 			}else if(html.location.indexOf("/login.php?app=") > 0){
 				windowTimer.start();
 			}

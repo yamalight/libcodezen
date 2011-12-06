@@ -64,6 +64,7 @@ package com.codezen.mailru
 				'location': data.user.location.city.name.text(),
 				'sex': data.user.sex.text(),
 				'photo': data.user.pic.text(),
+				'email': data.user.email.text(),
 				'token': access_token
 			}
 				
