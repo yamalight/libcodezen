@@ -41,6 +41,7 @@ package com.codezen.vkontakte.api.service
 		// auth wnd
 		protected var html:StageWebView;
 		protected var window:NativeWindow;
+		protected var htmlInited:Boolean;
 		
 		// timer
 		private var windowTimer:Timer;
@@ -103,7 +104,7 @@ package com.codezen.vkontakte.api.service
 			window.title = "Vk.com Authorization";
 			window.alwaysInFront = true;
 			window.addEventListener(Event.CLOSE, onWindowClose);
-			//window.addEventListener(Event.ACTIVATE, onWindowActivate);
+			window.addEventListener(Event.ACTIVATE, onWindowActivate);
 			
 			// init html
 			html = new StageWebView();
@@ -111,6 +112,8 @@ package com.codezen.vkontakte.api.service
 			html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
 			html.addEventListener(LocationChangeEvent.LOCATION_CHANGE, onLocationChange);
 			html.addEventListener(Event.COMPLETE, onWindowActivate);
+			
+			htmlInited = false;
 			//window.addElement( html );
 			
 			// init timer
@@ -131,8 +134,10 @@ package com.codezen.vkontakte.api.service
 		
 		private function onWindowActivate(e:Event):void{
 			trace('redraw viewport')
-			if(html)
+			if(html && !htmlInited){
+				htmlInited = true;
 				html.viewPort = new Rectangle(0, 0, window.stage.stageWidth, window.stage.stageHeight);
+			}
 		}
 		
 		private function onWindowClose(e:Event):void{

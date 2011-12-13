@@ -54,6 +54,7 @@ package com.codezen.mailru.service
 			window.alwaysInFront = true;
 			window.resizable = false;
 			window.showStatusBar = false;
+			window.addEventListener(Event.CLOSE, onWindowClose);
 			
 			// init html
 			html = new HTML();
@@ -67,6 +68,10 @@ package com.codezen.mailru.service
 			window.open(true);
 			
 			html.location = "https://connect.mail.ru/oauth/authorize?client_id="+appID+"&response_type=token&scope=widget&ext_perm=stream&redirect_uri=http%3A%2F%2Fconnect.mail.ru%2Foauth%2Fsuccess.html";
+		}
+		
+		private function onWindowClose(e:Event):void{
+			if(!initialized) dispatchError("Auth error");
 		}
 		
 		/**
