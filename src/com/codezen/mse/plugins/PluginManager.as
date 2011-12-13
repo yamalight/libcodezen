@@ -23,6 +23,8 @@ package com.codezen.mse.plugins
 	import mx.utils.ObjectUtil;
 	import mx.utils.object_proxy;
 	
+	import spark.primitives.Path;
+	
 	public final class PluginManager extends Worker
 	{
 		// plugins array
@@ -116,6 +118,10 @@ package com.codezen.mse.plugins
 		// load plugin from path
 		private function loadPluginsFromPath():void{
 			var path:String = _loadQueue[ _loadQueue.length - counter ];
+			if(path == null){
+				checkInit(); 
+				return;
+			}
 			urlReq = new URLRequest(path);			
 			urlLoad = new URLLoader();
 			urlLoad.dataFormat = URLLoaderDataFormat.BINARY;
