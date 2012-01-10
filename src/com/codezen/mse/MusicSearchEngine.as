@@ -624,6 +624,11 @@ package com.codezen.mse {
 			_mp3s = [];
 			var track:PlayrTrack;
 			for each( track in pluginManager.results ){
+				// cleanup names from html chars
+				track.artist = CUtils.convertHTMLEntities(track.artist);
+				track.album = CUtils.convertHTMLEntities(track.album);
+				track.title = CUtils.convertHTMLEntities(track.title);
+				// push
 				_mp3s.push(track);
 			}
 			
