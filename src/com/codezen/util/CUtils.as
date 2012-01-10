@@ -259,8 +259,8 @@ package com.codezen.util
 		public static function convertHTMLEntities(str:String):String {
 			if( str == null || str.length < 1) return '';
 			
-			var xe:String = new XMLDocument(str).firstChild.nodeValue;
-			if( xe != null ) str = xe;
+			//var xe:String = new XMLDocument(str).firstChild.nodeValue;
+			//if( xe != null ) str = xe;
 			
 			str = str.replace(/&quot;/gs, "\"");
 			str = str.replace(/&apos;/gs, "'");
