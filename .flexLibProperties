@@ -7,6 +7,9 @@
     <classEntry path="com.codezen.mse.services.YouTube"/>
     <classEntry path="com.codezen.mse.models.VideoObject"/>
     <classEntry path="com.codezen.mse.models.Mood"/>
+    <classEntry path="com.codezen.skins.scroll.SmallHScroll"/>
+    <classEntry path="com.codezen.skins.scroll.SmallHScrollBarTrack"/>
+    <classEntry path="com.codezen.skins.scroll.SmallHScrollBarThumb"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
