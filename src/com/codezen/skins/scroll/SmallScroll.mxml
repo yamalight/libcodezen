@@ -86,6 +86,6 @@ viewport property to link them together.
     <!---  A horizontal scrollbar that lets you control the portion of data that is displayed 
             when there is too much data to fit horizontally in a display area.
             The Scroller determines whether the horizontal ScrollBar is visible. -->
-    <s:HScrollBar id="horizontalScrollBar" visible="false" />
+    <s:HScrollBar id="horizontalScrollBar" visible="false" skinClass="com.codezen.skins.scroll.SmallHScroll" />
 
 </s:SparkSkin>
