@@ -50,6 +50,8 @@
 		[Event(name="onPlay", type="flash.events.Event")]
 		[Event(name="onPause", type="flash.events.Event")]
 		[Event(name="onEnd", type="flash.events.Event")]
+		[Event(name="onEnterFullscreen", type="flash.events.Event")]
+		[Event(name="onExitFullscreen", type="flash.events.Event")]
 	</fx:Metadata>
 	
 	<fx:Script source="CzVideoPlayer.as" />
