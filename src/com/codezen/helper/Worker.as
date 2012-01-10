@@ -53,6 +53,16 @@ package com.codezen.helper
 		}
 		
 		/**
+		 * Dispatches initialization reporting event 
+		 * @param status
+		 * 
+		 */
+		protected function dispatchInit():void{
+			// Dispatch error event
+			this.dispatchEvent(new Event(Event.INIT));
+		}
+		
+		/**
 		 * 
 		 * @returns search status 
 		 * 
