@@ -11,6 +11,7 @@ package com.codezen.mse.services
 	import com.codezen.mse.models.Song;
 	
 	import flash.events.Event;
+	import flash.net.URLRequest;
 	
 	import mx.controls.Alert;
 	import mx.utils.ObjectUtil;
@@ -42,9 +43,8 @@ package com.codezen.mse.services
 		
 		public function fetchMoods():void{
 			// load moods lists
-			urlRequest.url = "http://www.stereomood.com/";
 			myLoader.addEventListener(Event.COMPLETE, onMoods);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest("http://www.stereomood.com/"));
 		}
 		
 		private function onMoods(e:Event):void{
@@ -57,9 +57,8 @@ package com.codezen.mse.services
 			parseMoods(html);
 			
 			// load more
-			urlRequest.url = "http://www.stereomood.com/tools/ajax_more_tags.php";
 			myLoader.addEventListener(Event.COMPLETE, onMoreMoods);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest("http://www.stereomood.com/tools/ajax_more_tags.php"));
 		}
 		
 		private function onMoreMoods(e:Event):void{
@@ -123,11 +122,8 @@ package com.codezen.mse.services
 				return;
 			}
 			
-			urlRequest.url = requestURL+"index="+cycleCounter;
-			trace(urlRequest.url);
-			
 			myLoader.addEventListener(Event.COMPLETE, onSongs);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(requestURL+"index="+cycleCounter));
 		}
 		
 		private function onSongs(e:Event):void{

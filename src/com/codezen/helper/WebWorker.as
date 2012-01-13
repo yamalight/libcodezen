@@ -8,12 +8,10 @@ package com.codezen.helper {
 
     public class WebWorker extends Worker {
         // loader and request
-        protected var urlRequest:URLRequest;
         protected var myLoader:URLLoader;
 
         public function WebWorker() {
             // init request and loader
-            urlRequest = new URLRequest();
             myLoader = new URLLoader();
             // set params and add error event listener
             //myLoader.dataFormat = URLLoaderDataFormat.TEXT;

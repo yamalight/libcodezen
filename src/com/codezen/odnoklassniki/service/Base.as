@@ -3,6 +3,7 @@ package com.codezen.odnoklassniki.service
 	import com.codezen.helper.WebWorker;
 	
 	import flash.events.Event;
+	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	import flash.net.URLVariables;
 	
@@ -126,7 +127,8 @@ package com.codezen.odnoklassniki.service
 			vars.client_id = appID;
 			vars.client_secret = appKey;
 			
-			urlRequest.url = "http://api.odnoklassniki.ru/oauth/token.do";
+			
+			var urlRequest:URLRequest = new URLRequest("http://api.odnoklassniki.ru/oauth/token.do");
 			urlRequest.method = URLRequestMethod.POST;
 			urlRequest.data = vars;
 			

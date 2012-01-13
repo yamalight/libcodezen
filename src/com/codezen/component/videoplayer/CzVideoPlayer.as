@@ -7,6 +7,7 @@ import com.codezen.subs.Caption;
 import com.codezen.subs.Subtitle;
 
 import flash.display.StageDisplayState;
+import flash.events.ErrorEvent;
 import flash.events.Event;
 import flash.events.KeyboardEvent;
 import flash.events.MouseEvent;
@@ -26,8 +27,10 @@ import flash.ui.Mouse;
 import flash.utils.Timer;
 
 import mx.collections.ArrayCollection;
+import mx.controls.Alert;
 import mx.core.FlexGlobals;
 import mx.events.FlexEvent;
+import mx.utils.ObjectUtil;
 
 import spark.events.DropDownEvent;
 
@@ -66,6 +69,7 @@ private var subNames:ArrayCollection;
 private var subArray:Array;
 private var subCurrent:Array;
 private var subIndex:Number;
+private var forcedSubtitles:Object; // {'lang': 'url'}
 private var _autoloadSub:Boolean = false;
 // sounds
 [Bindable]
@@ -292,11 +296,12 @@ public function getActiveSubs(valign:String):Array{
 }
 
 // load video to play
-public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Array = null, startPos:int = 0):void{
+public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Array = null, startPos:int = 0, forcedSubs:Object = null):void{
 	// save link for seeking
 	videoURL = link;
 	
 	this.startPos = startPos;
+	this.forcedSubtitles = forcedSubs;
 	
 	// parse subs
 	if(subtitles != null && subtitles.length > 0){
@@ -443,6 +448,10 @@ private function loadSound(sndURL:String):void{
 		soundPlayer.playlist = new PlaylistManager();
 		isSoundPlaying = false;
 		ns.soundTransform = new SoundTransform(1);
+		
+		if(forcedSubtitles != null && forcedSubtitles.hasOwnProperty(defaultSoundName) && subBar.selectedIndex == 0){
+			loadSubtitles(forcedSubtitles[defaultSoundName]);
+		}
 	}else{
 		if(playState) togglePlayPause();
 		soundPlayer.stop();
@@ -469,6 +478,11 @@ private function loadSound(sndURL:String):void{
 		
 		// show loader
 		loading_status_wnd.visible = true;
+		
+		// unload forced subs
+		if(forcedSubtitles != null && forcedSubtitles.hasOwnProperty(defaultSoundName) && subBar.selectedIndex == 0){
+			loadSubtitles("unload", true);
+		}
 	}
 }
 
@@ -495,12 +509,18 @@ private function parseSubtitiles(subtitiles:Array):void{
 	if(subNames.length > 1) isSubSwitch = true;
 	
 	if(_autoloadSub){
-		subBar.selectedIndex = 1;
-		loadSubtitles(subtitiles[0]);
+		trace(ObjectUtil.toString(forcedSubtitles))
+		if(forcedSubtitles != null && forcedSubtitles.hasOwnProperty(defaultSoundName)){
+			subBar.selectedIndex = 0;
+			loadSubtitles(forcedSubtitles[defaultSoundName]);
+		}else{
+			subBar.selectedIndex = 1;
+			loadSubtitles(subtitiles[0]);
+		}
 	}
 }
 
-private function loadSubtitles(subURL:String):void{	
+private function loadSubtitles(subURL:String, forceUnload:Boolean = false):void{	
 	// clean up stuff
 	if(isSub && subCurrent != null && subCurrent.length > 0){
 		// clear old from screen
@@ -512,12 +532,18 @@ private function loadSubtitles(subURL:String):void{
 	isSub = false;
 	subs = [];
 	subCurrent = [];
+	var forced:Boolean = false;
 	if(subURL == "unload"){
-		isSubSwitch = true;
-		return;
+		if(!forceUnload && forcedSubtitles != null && forcedSubtitles.hasOwnProperty(defaultSoundName)){
+			forced = true;
+			subURL = forcedSubtitles[defaultSoundName];
+		}else{
+			isSubSwitch = true;
+			return;
+		}
 	}
 	// load subs
-	trace(subURL);
+	trace('load sub: '+subURL);
 	var subLoad:Subtitle = new Subtitle(this, subURL);
 	subLoad.addEventListener("SubParsed", function():void{
 		subs = subLoad.captions;
@@ -529,7 +555,10 @@ private function loadSubtitles(subURL:String):void{
 		isSub = true;
 		
 		subLoad = null;
-	});
+	}, false, 0, false);
+	subLoad.addEventListener(ErrorEvent.ERROR, function():void{
+		if(!forced) Alert.show("Субтитры не найдены! Сообщите пожалуйста администрации!", "Ошибка");
+	}, false, 0, false);
 	subLoad.parse();
 	
 }

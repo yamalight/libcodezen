@@ -59,7 +59,8 @@ package com.codezen.mse.services
 			variables["api_sig"] = signature;
 			variables["method"] = "track.scrobble";
 			
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/";
+			
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/2.0/");
 			urlRequest.data = variables;
 			urlRequest.method = URLRequestMethod.POST;
 			
@@ -74,12 +75,12 @@ package com.codezen.mse.services
 		private function init():void{
 			var authToken:String = MD5.encrypt(username + MD5.encrypt(pass));
 			var signature:String = MD5.encrypt("api_key"+apiKey+"authToken"+authToken+"methodauth.getMobileSessionusername"+username+secretKey);
-			//get topartists by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=auth.getMobileSession&username="+username+"&authToken="+authToken+"&api_key="+apiKey+"&api_sig="+signature;
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onInit);
-			myLoader.load(urlRequest);
+			myLoader.load(
+				new URLRequest("http://ws.audioscrobbler.com/2.0/?method=auth.getMobileSession&username="+username+"&authToken="+authToken+"&api_key="+apiKey+"&api_sig="+signature)
+			);
 		}
 		
 		private function onInit(e:Event):void{

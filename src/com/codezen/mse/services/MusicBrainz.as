@@ -8,6 +8,7 @@
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.TimerEvent;
+	import flash.net.URLRequest;
 	import flash.utils.Timer;
 	import flash.utils.escapeMultiByte;
 	
@@ -61,10 +62,13 @@
 		// Namespace
 		private var xmlNs:Namespace = new Namespace("http://musicbrainz.org/ns/mmd-2.0#");
 		
+		private var urlRequest:URLRequest;
+		
 		public function MusicBrainz(limit:int = 5)
 		{
 			super();
 			
+			urlRequest = new URLRequest();
 			urlRequest.requestHeaders['User-Agent'] = "MielophoneApp";
 			
 			delayTimer = new Timer(1000, 1);

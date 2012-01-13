@@ -5,6 +5,7 @@ package com.codezen.mse.services
 	import com.codezen.mse.models.Artist;
 	
 	import flash.events.Event;
+	import flash.net.URLRequest;
 	
 	public final class BBCRadio extends WebWorker
 	{
@@ -23,9 +24,8 @@ package com.codezen.mse.services
 		}
 
 		public function getCharts():void{
-			urlRequest.url = chartsURL;
 			myLoader.addEventListener(Event.COMPLETE, onChartData);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(chartsURL));
 		}
 		
 		private function onChartData(e:Event):void{

@@ -4,8 +4,9 @@
  * This is a changed version that parses srt AND ass with small optimizations
  */
 
-package com.codezen.subs{  
+package com.codezen.subs{  	
 	import flash.display.MovieClip;
+	import flash.events.ErrorEvent;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -75,7 +76,8 @@ package com.codezen.subs{
 		
 		private function onIOError(e:Event):void{
 			trace(ObjectUtil.toString(e));
-			Alert.show("Субтитры не найдены! Сообщите пожалуйста администрации!", "Ошибка");
+			//Alert.show("Субтитры не найдены! Сообщите пожалуйста администрации!", "Ошибка");
+			dispatchEvent(new ErrorEvent(ErrorEvent.ERROR));
 		}
 		
 		private function parseSubFile(evt:Event):void{

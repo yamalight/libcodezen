@@ -5,6 +5,7 @@ package com.codezen.mse.services
 	import com.codezen.mse.models.VideoObject;
 	
 	import flash.events.Event;
+	import flash.net.URLRequest;
 	
 	import mx.utils.ObjectUtil;
 	
@@ -25,9 +26,8 @@ package com.codezen.mse.services
 		public function getTopVideos():void{
 			var url:String = "https://gdata.youtube.com/feeds/api/standardfeeds/top_rated_Music?alt=json&time=today&v=2";
 			
-			urlRequest.url = url;
 			myLoader.addEventListener(Event.COMPLETE, onResults);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 
 		public function findVideo(q:String):void{
@@ -38,9 +38,8 @@ package com.codezen.mse.services
 		    	url += "&max-results=50";
     			url += "&v=2";
 			
-			urlRequest.url = url;
 			myLoader.addEventListener(Event.COMPLETE, onResults);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onResults(e:Event):void{

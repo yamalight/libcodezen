@@ -9,6 +9,7 @@ package com.codezen.mse.services{
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.net.URLLoaderDataFormat;
+	import flash.net.URLRequest;
 	
 	import mx.utils.ObjectUtil;
 	
@@ -72,7 +73,7 @@ package com.codezen.mse.services{
 			_results = [];
 			
 			//get topartists by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=chart.gettopartists&api_key="+api_key;
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/2.0/?method=chart.gettopartists&api_key="+api_key);
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopArtistLoad);
@@ -115,7 +116,7 @@ package com.codezen.mse.services{
 			_results = [];
 			
 			//get toptracks by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key="+api_key;
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/2.0/?method=chart.gettoptracks&api_key="+api_key);
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopTracksLoad);
@@ -180,7 +181,7 @@ package com.codezen.mse.services{
 			_results = [];
 			
 			//get toptracks by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=tag.gettoptracks&limit=100&tag="+encodeURIComponent(tag)+"&api_key="+api_key;
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettoptracks&limit=100&tag="+encodeURIComponent(tag)+"&api_key="+api_key);
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTracksSearchLoad);
@@ -229,7 +230,7 @@ package com.codezen.mse.services{
 			_results = [];
 			
 			//get top tags by artist
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=tag.getTopTags&api_key="+api_key;
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/2.0/?method=tag.getTopTags&api_key="+api_key);
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopTags);
@@ -275,7 +276,7 @@ package com.codezen.mse.services{
 			query = CUtils.urlEncode(query);
 			
 			//get similar artists
-			urlRequest.url = "http://ws.audioscrobbler.com/1.0/artist/"+query+"/similar.xml";
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/1.0/artist/"+query+"/similar.xml");
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onSimilarLoad);
@@ -328,7 +329,7 @@ package com.codezen.mse.services{
 			query = CUtils.urlEncode(query);
 			
 			//get toptracks of artist
-			urlRequest.url = "http://ws.audioscrobbler.com/1.0/artist/"+query+"/toptracks.xml";
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/1.0/artist/"+query+"/toptracks.xml");
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopArtistTracksLoad);
@@ -388,7 +389,7 @@ package com.codezen.mse.services{
 			query = CUtils.urlEncode(query);
 			
 			//get toptracks of lastfm username
-			urlRequest.url = "http://ws.audioscrobbler.com/1.0/user/"+query+"/toptracks.xml";
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/1.0/user/"+query+"/toptracks.xml");
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopUserTracksLoad);
@@ -444,7 +445,7 @@ package com.codezen.mse.services{
 			_results = [];
 			
 			//get topartists by tag
-			urlRequest.url = "http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag="+encodeURIComponent(tag)+"&api_key="+api_key;
+			var urlRequest:URLRequest = new URLRequest("http://ws.audioscrobbler.com/2.0/?method=tag.gettopartists&tag="+encodeURIComponent(tag)+"&api_key="+api_key);
 			
 			// add event listener and load url
 			myLoader.addEventListener(Event.COMPLETE, onTopArtistByTagLoad);
@@ -500,12 +501,10 @@ package com.codezen.mse.services{
 			}
 			sim_url += "&api_key="+api_key+"&lang=en";
 			
-			// from urlrequest and urlloader
-			urlRequest.url = sim_url;
 			// set prefs, add event listener and load request
 			myLoader.addEventListener(Event.COMPLETE, onArtistInfoLoad);
 			// load
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(sim_url));
 		}
 		
 		/**
@@ -585,12 +584,10 @@ package com.codezen.mse.services{
 			sim_url += "&track=" + track;
 			sim_url += "&api_key="+api_key;
 			
-			// from urlrequest and urlloader
-			urlRequest.url = sim_url;
 			// set prefs, add event listener and load request
 			myLoader.addEventListener(Event.COMPLETE, onInfoLoad);
 			// load
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(sim_url));
 		}
 		
 		/**
@@ -636,12 +633,10 @@ package com.codezen.mse.services{
 			var sim_url:String = new String("http://ws.audioscrobbler.com/2.0/?method=tag.search&tag=" + query);
 			sim_url += "&api_key="+api_key+"&lang=en";
 			
-			// from urlrequest and urlloader
-			urlRequest.url = sim_url;
 			// set prefs, add event listener and load request
 			myLoader.addEventListener(Event.COMPLETE, onTagLoad);
 			// load
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(sim_url));
 		}
 		
 		/**

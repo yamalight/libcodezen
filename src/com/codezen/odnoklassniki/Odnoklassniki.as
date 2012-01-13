@@ -4,6 +4,7 @@ package com.codezen.odnoklassniki
 	import com.codezen.odnoklassniki.service.Base;
 	
 	import flash.events.Event;
+	import flash.net.URLRequest;
 
 	public class Odnoklassniki extends Base
 	{
@@ -58,10 +59,8 @@ package com.codezen.odnoklassniki
 			
 			url += "&sig="+getSignature("auth.expireSession");
 			
-			urlRequest.url = url;
-			
 			myLoader.addEventListener(Event.COMPLETE, onLogout);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onLogout(e:Event):void{
@@ -78,10 +77,8 @@ package com.codezen.odnoklassniki
 			
 			url += "&sig="+getSignature("users.getLoggedInUser");
 			
-			urlRequest.url = url;
-			
 			myLoader.addEventListener(Event.COMPLETE, onUserId);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onUserId(e:Event):void{
@@ -107,10 +104,8 @@ package com.codezen.odnoklassniki
 			
 			url += "&sig="+getSignature("users.getInfo", fields, _userData.id);
 			
-			urlRequest.url = url;
-			
 			myLoader.addEventListener(Event.COMPLETE, onUserInfo);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onUserInfo(e:Event):void{

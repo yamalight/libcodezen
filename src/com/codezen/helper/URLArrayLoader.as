@@ -37,8 +37,7 @@ package com.codezen.helper
 		private function loadNextURL():void{
 			var url:String = _urls[index];
 //			trace('loading '+url);
-			urlRequest.url = url;
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onDataLoad(e:Event):void{

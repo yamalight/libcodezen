@@ -4,6 +4,7 @@ package com.codezen.mailru
 	import com.codezen.util.MD5;
 	
 	import flash.events.Event;
+	import flash.net.URLRequest;
 	import flash.net.URLRequestMethod;
 	
 	import mx.utils.ObjectUtil;
@@ -42,13 +43,10 @@ package com.codezen.mailru
 			url += "&secure=0";
 			url += "&format=xml";
 			
-			// assign url
-			urlRequest.url =  url;
-			
 			trace('doing req');
 			
 			myLoader.addEventListener(Event.COMPLETE, onUserInfo);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onUserInfo(e:Event):void{
@@ -99,13 +97,10 @@ package com.codezen.mailru
 			url += "&secure=0";
 			url += "&format=xml";
 			
-			// assign url
-			urlRequest.url =  url;
-			
 			trace('doing post');
 			
 			myLoader.addEventListener(Event.COMPLETE, onPost);
-			myLoader.load(urlRequest);
+			myLoader.load(new URLRequest(url));
 		}
 		
 		private function onPost(e:Event):void{

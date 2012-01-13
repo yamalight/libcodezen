@@ -3,6 +3,7 @@ import com.codezen.helper.WebWorker;
 import com.codezen.mse.models.Artist;
 
 import flash.events.Event;
+import flash.net.URLRequest;
 import flash.utils.describeType;
 
 import mx.utils.ObjectUtil;
@@ -77,7 +78,7 @@ public class Freebase extends WebWorker {
             //trace( JSON.encode(queryWrap) );
 
             // request here
-            urlRequest.url = endpoint+encodeURIComponent(JSON.stringify(queryWrap));
+            var urlRequest:URLRequest = new URLRequest(endpoint+encodeURIComponent(JSON.stringify(queryWrap)));
             myLoader.addEventListener(Event.COMPLETE, onResult);
             myLoader.load(urlRequest);
         }
