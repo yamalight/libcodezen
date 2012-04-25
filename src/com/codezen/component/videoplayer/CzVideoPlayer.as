@@ -1027,6 +1027,12 @@ private function toggleFullScreen():void{
 			/* If already in full screen mode, switch to normal mode. */
 			this.stage.displayState = StageDisplayState.NORMAL;
 			
+			if(svAvailable){
+				resizeStageVideo();
+			}else{
+				onVideoResize();
+			}
+			
 			// dispatch notifying event
 			this.dispatchEvent(new Event(ON_EXIT_FULLSCREEN));
 			
@@ -1036,6 +1042,12 @@ private function toggleFullScreen():void{
 			/* If not in full screen mode, switch to full screen mode. */
 			//stage.fullScreenSourceRect = new Rectangle(0,0,stage.width,stage.height);
 			this.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+			
+			if(svAvailable){
+				resizeStageVideo();
+			}else{
+				onVideoResize();
+			}
 			
 			// dispatch notifying event
 			this.dispatchEvent(new Event(ON_ENTER_FULLSCREEN));
