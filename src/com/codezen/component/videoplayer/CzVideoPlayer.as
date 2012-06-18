@@ -73,6 +73,7 @@ private var subIndex:Number;
 private var forcedSubtitles:Object; // {'lang': 'url'}
 private var _autoloadSub:Boolean = false;
 // sounds
+private var maxVolumeOverride:Number = 1.0;
 [Bindable]
 private var isSnd:Boolean;
 [Bindable]
@@ -162,6 +163,15 @@ private var _isMobile:Boolean;
 // setters
 public function set autoloadSub(s:Boolean):void{
 	_autoloadSub = s;
+}
+
+public function set overrideVolume(v:Number):void{
+	maxVolumeOverride = v;
+	
+	if(ns){
+		ns.soundTransform = new SoundTransform(maxVolumeOverride * (volumeLevel/100) );
+		trace(maxVolumeOverride * (volumeLevel/100) );
+	}
 }
 
 public function set showLoop(show:Boolean):void{
@@ -448,7 +458,7 @@ private function loadSound(sndURL:String):void{
 		soundPlayer.stop();
 		soundPlayer.playlist = new PlaylistManager();
 		isSoundPlaying = false;
-		ns.soundTransform = new SoundTransform(1);
+		ns.soundTransform = new SoundTransform(maxVolumeOverride * (volumeLevel/100));
 		
 		if(forcedSubtitles != null && forcedSubtitles.hasOwnProperty(defaultSoundName) && subBar.selectedIndex == 0){
 			loadSubtitles(forcedSubtitles[defaultSoundName]);
@@ -461,6 +471,7 @@ private function loadSound(sndURL:String):void{
 		ns.soundTransform = new SoundTransform(0);
 		firstSndPlay = true;
 		soundPlayer.autoPlay = false;
+		soundPlayer.volume = maxVolumeOverride * (volumeLevel/100);
 		
 		// add loading event
 		soundPlayer.addEventListener(PlayrEvent.STREAM_PROGRESS, onSoundStream);
@@ -665,9 +676,9 @@ private function volumeUp():void{
 	volumeLevel = player_volume.value;
 	
 	if(isSoundPlaying){
-		soundPlayer.volume = player_volume.value/100;
+		soundPlayer.volume = maxVolumeOverride * (player_volume.value/100);
 	}else{	
-		ns.soundTransform = new SoundTransform(player_volume.value/100);
+		ns.soundTransform = new SoundTransform( maxVolumeOverride * (player_volume.value/100) );
 	}
 }
 
@@ -678,9 +689,9 @@ private function volumeDown():void{
 	volumeLevel = player_volume.value;
 	
 	if(isSoundPlaying){
-		soundPlayer.volume = player_volume.value/100;
+		soundPlayer.volume = maxVolumeOverride * (player_volume.value/100);
 	}else{	
-		ns.soundTransform = new SoundTransform(player_volume.value/100);
+		ns.soundTransform = new SoundTransform( maxVolumeOverride * (player_volume.value/100) );
 	}
 }
 
@@ -1201,11 +1212,14 @@ private function setProgress(progress:Number):void{
  */
 private function setVolume():void{
 	if(isSoundPlaying){
-		soundPlayer.volume = player_volume.value/100;
+		if(soundPlayer)
+			soundPlayer.volume = maxVolumeOverride * (player_volume.value/100);
 	}else{
-		ns.soundTransform = new SoundTransform(player_volume.value/100);
+		if(ns)
+			ns.soundTransform = new SoundTransform( maxVolumeOverride * (player_volume.value/100) );
 	}
 	volumeLevel = player_volume.value;
+	trace( maxVolumeOverride * (volumeLevel/100) );
 	//video_player.setFocus();
 }
 
