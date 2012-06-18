@@ -22,6 +22,7 @@ import flash.media.StageVideoAvailability;
 import flash.media.Video;
 import flash.net.NetConnection;
 import flash.net.NetStream;
+import flash.system.Capabilities;
 import flash.ui.Keyboard;
 import flash.ui.Mouse;
 import flash.utils.Timer;
@@ -399,7 +400,7 @@ public function loadVideoAndPlay(link:String, subtitles:Array = null, sounds:Arr
 	// init gui timer
 	hideTimer = new Timer(4000, 1);
 	hideTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onHideTimer);
-	hideTimer.start();
+	//hideTimer.start();
 	
 	// set focus
 	//video_player.setFocus();
@@ -613,6 +614,9 @@ private function setSubtitles(time:Number):void{
 private function setupListeners():void{
 	// assign event listeners
 	trace('assing events');
+	
+	// start gui timer
+	hideTimer.start();
 	
 	// sv
 	if(svAvailable){
@@ -1041,7 +1045,17 @@ private function toggleFullScreen():void{
 		default:
 			/* If not in full screen mode, switch to full screen mode. */
 			//stage.fullScreenSourceRect = new Rectangle(0,0,stage.width,stage.height);
-			this.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+			switch (Capabilities.playerType) {
+				case 'Desktop':
+					//air runtime
+					this.stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+					break;
+				case 'PlugIn':
+				case 'ActiveX':
+					//browser
+					this.stage.displayState = StageDisplayState.FULL_SCREEN;
+					break;
+			}
 			
 			if(svAvailable){
 				resizeStageVideo();
