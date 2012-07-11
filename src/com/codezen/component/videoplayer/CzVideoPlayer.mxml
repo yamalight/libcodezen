@@ -184,19 +184,14 @@
 	
 	
 	<!-- previous next episodes windows -->
-	<!-- <s:BorderContainer height="127" verticalCenter="0" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd" width="140" left="100" color="#FFFFFF"
+	<s:BorderContainer height="30" top="50" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd" width="160" left="5" color="#FFFFFF"
 					   click="{prevEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
-		<s:Image y="20" width="120" height="66" id="player_prev_ep_img" x="10" source="{prev_ep_img}"/>
-		<s:Label y="94" width="120" fontFamily="Verdana" textAlign="center" id="player_prev_ep_txt" x="10" color="#FFFFFF"
-				 text="{prev_ep_txt}"/>
-		<s:Label x="10" y="5" text="Предыдущий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
+		<s:Label left="5" right="5" top="5" bottom="5" text="Предыдущий эпизод" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
 	</s:BorderContainer>
-	<s:BorderContainer height="127" verticalCenter="0" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd_1" width="140" right="100"
+	<s:BorderContainer height="30" top="50" backgroundColor="#151515" cornerRadius="12" id="player_episodes_wnd_1" width="160" right="5"
 					   click="{nextEpisode()}" useHandCursor="true" buttonMode="true" visible="false">
-		<s:Image y="20" width="120" height="66" id="player_next_ep_img" x="10" source="{next_ep_img}"/>
-		<s:Label y="94" text="{next_ep_txt}" width="120" fontFamily="Verdana" id="player_next_ep_txt" textAlign="center" x="10" color="#FFFFFF"/>
-		<s:Label x="10" y="5" text="Следующий" width="120" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
-	</s:BorderContainer> -->
+		<s:Label left="5" right="5" top="5" bottom="5" text="Следующий эпизод" fontFamily="Verdana" verticalAlign="middle" textAlign="center" color="#FFFFFF"/>
+	</s:BorderContainer>
 	
 	<!-- sound loading indicator -->
 	<s:BorderContainer width="100%" height="100%" backgroundColor="#000000" backgroundAlpha="0.4" id="loading_status_wnd" visible="false">

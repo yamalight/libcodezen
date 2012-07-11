@@ -155,6 +155,9 @@ private var _showTop:Boolean = true;
 [Bindable]
 private var top_width:int = 22;
 
+private var _showPrev:Boolean = false;
+private var _showNext:Boolean = false;
+
 
 // mobile
 [Bindable]
@@ -203,6 +206,12 @@ public function set showTop(show:Boolean):void{
 }
 public function set autoplay(ap:Boolean):void{
 	_autoplay = ap;
+}
+public function set showNext(s:Boolean):void{
+	_showNext = s;
+}
+public function set showPrev(s:Boolean):void{
+	_showPrev = s;
 }
 public function set isMobile(m:Boolean):void{
 	_isMobile = m;
@@ -719,11 +728,11 @@ private function onVideoState(e:NetStatusEvent):void{
 		}else{
 			this.dispatchEvent(new Event(ON_END));
 			// toggle next episode wnd
-			/*if(player_next_ep_txt.text != "null")
+			if(_showNext)
 				player_episodes_wnd_1.visible = true;
 			// toggle prev episode wnd
-			if(player_prev_ep_txt.text != "null")
-				player_episodes_wnd.visible = true;*/
+			if(_showPrev)
+				player_episodes_wnd.visible = true;
 			// toggle video controls
 			hideTimer.stop();
 			player_controls.visible = true;
@@ -765,6 +774,9 @@ private function onHideTimer(e:Event):void{
 	player_sndselect.mouseY > player_sndselect.height){*/
 	player_sndselect.visible = false;
 	//}
+	
+	player_episodes_wnd_1.visible = false;
+	player_episodes_wnd.visible = false;
 }
 
 /**
@@ -1282,10 +1294,9 @@ public function resetPlayer(nofullscreen:Boolean = true):void{
 	//loading_text.visible = true;
 	
 	// reset next and prev windows
-	/*player_episodes_wnd.visible = false;
+	player_episodes_wnd.visible = false;
 	player_episodes_wnd_1.visible = false;
-	player_next_ep_txt.text = "null";
-	player_prev_ep_txt.text = "null";*/
+	_showPrev = _showNext = false;
 	
 	
 	// reset fullscreen
