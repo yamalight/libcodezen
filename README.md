@@ -1,5 +1,7 @@
 # Flex and AS3 classes and components library
 
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 ## List of components
 
 **Advanced Progress Bar** - progress bar with integrated hslider. usefull for players (to indicate loading and play progress)  
